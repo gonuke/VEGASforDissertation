@@ -40,19 +40,6 @@ NOAKCapitalCost					4100		4000		4000
 Members							X			X			2,1,0
 IfCausesTiltReplaceWithType		0			1		 	@SFRreplace
 IfCausesTiltYear				2015		2015		2030,2040,2050
-%%% BATHKE FOM %%%																		
-UMiningAndMillingBathkeFOM		D			D			D			
-UF6ConversionBathkeFOM			D			D			D		
-EnrichmentBathkeFOM				D			D			D	
-FuelFabricationBathkeFOM		D			D			D	
-TransportationToRXBathkeFOM		D			D			D	
-SFStorageBathkeFOM				D			D			D		
-SFTransportationBathkeFOM		D			D			D		
-ReprocessingBathkeFOM			D			D			D		
-SFDisposalBathkeFOM				D			D			D		
-HLWVitrificationBathkeFOM		D			D			D			
-HLWStorageBathkeFOM				D			D			D			
-HLWDisposalBathkeFOM			D			D			D		
 			
 %%%%%% COMMENTS & SAMPLE INPUTS %%%%%%  
 Name="PWR"  				# Keep this short as it appears on the plots; no spaces allowed

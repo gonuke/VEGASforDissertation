@@ -58,8 +58,8 @@ public class VEGAS {
 	static double yearlySimulationValues[][][][][][][][][][];
 	
 	static double[][] decay_heat = DMInputs.getDecayHeat();
-	static double[][] front_end_proliferation = DMInputs.getFEProliferationMetric();
-	static double[][] back_end_proliferation = DMInputs.getBEProliferationMetric();
+	static double[][] front_end_proliferation_resistance = DMInputs.getFEProliferationMetric();
+	static double[][] back_end_proliferation_resistance = DMInputs.getBEProliferationMetric();
 
 	static boolean[] RX_PROTOTYPE;
 	
@@ -141,8 +141,6 @@ public class VEGAS {
 	static int[] RES_TIMES;
 	static int[] BATCHES_PER_CORE;
 	static double[] NOAKCapitalCost;
-	static double[][] FEBathkeFOM;
-	static double[][] BEBathkeFOM;
 
 	static double TRUSTORCOST;
 	static double TRUVITDISPCOST;
@@ -1257,37 +1255,7 @@ public class VEGAS {
 					YearReplaceWithTypeSpecified[i]=parseCommaDelineatedString(dummy_string);
 				}
 			}
-			
-			/* adding here TODO */
-			current_line=buf.readLine();
-			FEBathkeFOM = new double[n_rx][FRONTENDTECH.length];
-			for(j=0; j<FRONTENDTECH.length; j++) {
-				current_line = buf.readLine();
-				st = new StringTokenizer(current_line);
-				dummy_string=st.nextToken();
-				for(i=0; i<n_rx; i++) {
-					dummy_string=st.nextToken();
-					if(dummy_string.compareToIgnoreCase("D")==0) {
-						FEBathkeFOM[i][j]=DEFAULTFECOST[j];
-					} else {
-						FEBathkeFOM[i][j]=Double.valueOf(dummy_string).doubleValue();
-					}
-				}				
-			}
-			BEBathkeFOM = new double[n_rx][BACKENDTECH.length]; // don't need this..
-			for(j=0; j<BACKENDTECH.length; j++) {
-				current_line = buf.readLine();
-				st = new StringTokenizer(current_line);
-				dummy_string=st.nextToken();
-				for(i=0; i<n_rx; i++) {
-					dummy_string=st.nextToken();
-					if(dummy_string.compareToIgnoreCase("D")==0) {
-						BEBathkeFOM[i][j]=DEFAULTBECOST[j];
-					} else {
-						BEBathkeFOM[i][j]=Double.valueOf(dummy_string).doubleValue();
-					}
-				}				
-			}
+
 		}
 		catch(IOException IOE) {
 			System.err.println("VEGAS Error 01: Error reading reactor input file "+ReactorParameterFile);
@@ -1700,16 +1668,21 @@ public class VEGAS {
 	
 	/* added by Birdy for proliferation metric calculation */
 	public double getFrontEndProliferation(double capacity, int reactor_type) {
-		
 		double metric=0.;
 
-		for(int i=0; i<FRONTENDTECH.length; i++) {
-			metric+=FRONTENDMASS[reactor_type][i]*FEBathkeFOM[reactor_type][i];
-		}
-		
+		for(int i=0; i<FRONTENDTECH.length; i++) metric+=FRONTENDMASS[reactor_type][i]*front_end_proliferation_resistance[reactor_type][i];
 		metric=metric*capacity*capacityToMass(reactor_type);
-		return(metric);
 		
+		return(metric);
+	}
+	
+	public double getFrontEndMass(double capacity, int reactor_type) {
+		double mass=0.;
+
+		for(int i=0; i<FRONTENDTECH.length; i++) mass+=FRONTENDMASS[reactor_type][i];
+		mass=mass*capacity*capacityToMass(reactor_type);
+		
+		return(mass);
 	}
 
 	/* OVERLOAD FUNCTION FROM ESTONIANS */
@@ -2322,17 +2295,22 @@ public class VEGAS {
 	}
 	
 	/* added by Birdy for proliferation metric calculation */
-	public double getBackEndDDProliferation(int reactor_type, double capacity, int year_count) {
-		
+	public double getBackEndDDProliferation(int reactor_type, double capacity) {
 		double metric=0.;
 
-		for(int i=0; i<BACKENDTECH.length; i++) {
-			metric+=BACKENDMASS_DD[i]*back_end_proliferation[reactor_type][i];
-		}
-		
+		for(int i=0; i<BACKENDTECH.length; i++) metric+=BACKENDMASS_DD[i]*back_end_proliferation_resistance[reactor_type][i];	
 		metric=metric*capacity*capacityToMass(reactor_type);
-		return(metric);
 		
+		return(metric);
+	}
+	
+	public double getBackEndDDMass(int reactor_type, double capacity) {
+		double mass=0.;
+		
+		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS_DD[i];
+		mass=mass*capacity*capacityToMass(reactor_type);
+		
+		return(mass);
 	}
 
 	public int countSameTier(int reactor_type, int year) {
@@ -2449,16 +2427,12 @@ public class VEGAS {
 	
 	/* added by Birdy for proliferation metric calculation */
 	public double getBackEndRepProliferation(int reactor_type, double capacity) {
-		
 		double metric=0.;
 
-		for(int i=0; i<BACKENDTECH.length; i++) {
-			metric+=BACKENDMASS[reactor_type][i]*back_end_proliferation[reactor_type][i];
-		}
-		
+		for(int i=0; i<BACKENDTECH.length; i++) metric+=BACKENDMASS[reactor_type][i]*back_end_proliferation_resistance[reactor_type][i];		
 		metric=metric*capacity*capacityToMass(reactor_type);
-		return(metric);
 		
+		return(metric);
 	}
 
 	public void assessBackEndCosts() { /* Estonians */
@@ -2836,8 +2810,8 @@ public class VEGAS {
 				sfr_capital_cost = robustInts[6];
 				htgr_capital_cost = robustInts[7];
 
-				printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
-				printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+				printNFCParamComboFile(first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision);
+				printReactorParamFile(first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision);
 				System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + ", final reactor build decision " + final_reactor_build_decision + "\n");
 				VEGAS mySim = new VEGAS();
 				mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
@@ -3136,6 +3110,7 @@ public class VEGAS {
 		/* for DecisionMaking */
 		/* Proliferation metric for G */
 		double[] proliferation_resistance=new double[END_YEAR-START_YEAR+1];
+		double[] mass_throughput=new double[END_YEAR-START_YEAR+1];
 		/* COE metric for G and U */
 		double[] backend_costs=new double[END_YEAR-START_YEAR+1];
 		double[] frontend_and_reactor_costs=new double[END_YEAR-START_YEAR+1];
@@ -3304,6 +3279,7 @@ public class VEGAS {
 					yearly_fe+=augmentFrontEndCharges(genCap[j][i],j,i);          // frontend costs
 
 					proliferation_resistance[i]+=getFrontEndProliferation(genCap[j][i],j);
+					mass_throughput[i]+=getFrontEndMass(genCap[j][i],j);
 
 					sf_dd=SFGenerated[j][i]-SFReprocessed[j][i];
 					
