@@ -1,0 +1,97 @@
+%%%%%% REACTOR TYPES %%%%%% SEE COMMENTS BELOW %%%%%%             
+FacilityNumber			0        	1		2       	3		4 		5                 6                7                   
+Name				LegacySNF	PWR-UOX		BWR-UOX		APWR-UOX        APWR-MOX        FR-CR0.25-LOMA    FR-CR0.25-HIMA   FR-CR1.2  	
+BelongsToTier			0		0               0       	0               1               2                 2                2               
+AllowedToUseSeparatedActinides	false		false           false           false           false           true              true             true            
+PlantSize			1000.		900.		900.            1450.           1450.           320.              320.             600.            
+DischargeBurnup			30.		50.             40.             60.             60.             180.              180.             123.            
+ThermalEfficiency		33.		35.             35.             35.             35.             42.               42.              42.             
+RecirculatingPower		2.0		2.              2.              2.              2.              2.                2.               2.              
+Availability			80.		90.             90.             90.             90.             85.               85.              85.             
+CapitalCost			1700.		1700.           1700.           1700.           1700.           2100.             2100.            2100.           
+AnnualFixedOM			68.		68.             68.             68.             68.             84.               84.              84.             
+InputUEnrichment		3.0		4.2	        3.7	        4.9	        0.25	        0.25	          0.25	           0.25	        
+InputUMass			1.0		1.0             1.0             1.0             0.90655         0.4250            0.2570           4.0000           
+InputPuMass			0.0		0.0             0.0             0.0             0.09249         0.5190            0.5190           0.2287          
+InputMAMass			0.0		0.0             0.0             0.0             0.00096         0.0560            0.2240           0.0262          
+OutputUMass			0.958		0.93595         0.94576         0.92466         0.87146         0.3860            0.2180           3.9150        
+OutputPuMass			0.008		0.01110         0.01085         0.01194         0.06148         0.3670            0.3921           0.2744          
+OutputMAMass			0.001		0.00129         0.00114         0.00160         0.00619         0.0437            0.1866           0.0305          
+MinimumCoolingTime		4		4               4               4               4               3                 3                3               
+ResidenceTime			3		5               5               5               5               4                 4                4             
+BatchesPerCore			3		4               4               4               4               6                 6                4               
+%%% UNIT COSTS %%%                                                                                                                                                 
+UMiningAndMillingCost		D		D               D               D               D               D                 D                D               
+UF6ConversionCost		D	        D               D               D               D               D                 D                D               
+EnrichmentCost			D               D               D               D               D               D                 D                D               
+FuelFabricationCost		D               D               D               D               D               2600              2600             3400            
+TransportationToRXCost		D               D               D               D               D               D                 D                D               
+SFStorageCost			D               D               D               D               D               D                 D                D               
+SFTransportationCost		D               D               D               D               D               D                 D                D               
+ReprocessingCost		D               D               D               D               D               2700              2700             5700            
+SFDisposalCost			D               D               D               D               D               D                 D                D               
+HLWVitrificationCost		D               D               D               D               D               D                 D                D               
+HLWStorageCost			D               D               D               D               D               D                 D                D               
+HLWDisposalCost			D               D               D               D               D               D                 D                D               
+%%% REPROCESSING HIERARCHY %%% SEE COMMENTS BELOW %%%                                                                                                                                  
+Members				X		X               X               X               0,1,2,3         5,6,4             6,5,4            7,0,1,2,3           
+IfCausesTiltReplaceWithType	0		1		2		3		3		4		  4		   3                    
+                        
+                        
+                        
+%%%%%% COMMENTS & SAMPLE INPUTS %%%%%%  
+Name="PWR"  				# Keep this short as it appears on the plots; no spaces allowed
+BelongsToTier=0				# 0=Uses virgin feed only, 1=thermal-spectrum, at least some feed comes from Tier-0 or 1 discharges, 2=fast-spectrum, at least some feed comes from Tier-0 or 1 discharges		
+AllowedToUseSeparatedActinides	false	# can this facility draw upon separated, stored Pu and/or MA? (Will be irrelevant if feed is exclusively uranium)
+PlantSize=1000.				# MW(e): all new facilities of this type have this capacity
+DischargeBurnup=45.			# Equilibrium average discharge burnup [MWd/kgIHM]
+ThermalEfficiency=35.			# percentage of thermal energy (MW(t)) converted to electricity (MW(e))(gross)
+RecirculatingPower=2.0			# percentage of gross electric power recirculated to plant systems
+Availability=85.			# load factor, probability that reactor is operating and producing power
+CapitalCost=1700.			# overnight construction cost, $/kW(e)
+AnnualFixedOM=68.			# yearly fixed (non fuel cycle) operations and maintenance, $/kW(e)/yr
+InputUEnrichment=3.8			# percent U-235 in U.  If this is > NaturalUEnrichment, separative work will be used and the NU consumption will be appropriately incremented.
+					# If this is <= NaturalUEnrichment but > TailsUEnrichment, no SW will be used but the NU consumption will be incremented.
+					# If this is <= TailsUEnrichment, no SW will be applied and the NU consumption will not be incremented (DU not currently tracked)
+InputUMass=1.0				# fractional composition of fresh fuel, kg/kgIHM: [0] = U, [1]=Pu, [2]=MA
+InputPuMass=0.0				# [0]+[1]+[2] usually, but not always, sums to 1.0.  Example: breeder with 2 kgIHM blanket per 1kgIHM in active core 
+InputMAMass=0.0				# Then the sum would be 3.0, of which most would be uranium
+OutputUMass=0.956			# Again [0]=U, [1]=Pu, [2]=MA.
+OutputPuMass=0.00942			# FP fraction in output is obtained from (InputMass)-(OutputMass)
+OutputMAMass=0.00140            	
+MinimumCoolingTime=5			# (integer) minimum number of years that must elapse before this SNF can be reprocessed
+ResidenceTime=4.0			# years fuel is resident in reactor (including down- as well as up-time)
+BatchesPerCore=4			# Generic fuel management strategy
+%%%% COMMENTS ON COST DATA %%%%
+# Costs below are one-time costs, $/kg of input feed stream, unless noted otherwise	
+# Costs are assessed at 'DefaultLeadTime' or 'DefaultLagTime' as given in NFC_parameters.txt
+# *Exception* Closed-cycle back-end processes (transportation, reprocessing, HLW vitrification, storage and disposal) are applied when the Pu or MA content of the SNF is demanded
+# Entries of 'D' indicate that the default cost from NFC_parameters.txt is to be used.  Numerical entries will override those values.
+# Units are $/kgIHM with these exceptions: mining&milling and conversion: $/kg U as U308, enrichment: $/SWU, HLW vitrification, storage, disp: $/kg HLW (fission products, actinide losses, unused separated Pu and MA) 
+
+UMiningAndMillingCost
+UF6ConversionCost		
+EnrichmentCost			
+FuelFabricationCost		
+TransportationToRXCost		
+SFStorageCost			
+SFStorageAnnualCost		
+SFTransportationCost		
+ReprocessingCost		
+SFDisposalCost			
+HLWVitrificationCost		
+HLWStorageCost			
+HLWStorageAnnualCost		
+HLWDisposalCost	
+%%%% COMMENTS ON REPROCESSING HIERARCHY %%%%
+ReprocessHierarchy=0,1,2,3	# when looking for Pu and MA feed, the facility will first use separated Pu and/or MA if it's AllowedToUseSeparatedActinides
+				# if it's not, or if not enough separated actinides are available, this list dictates the order in which SNF stockpiles will
+				# be searched to find the necessary Pu and MA.  In this example, the reactors will search first for SNF from reactors of type 0 to be reprocessed.
+				# if not enough of this SNF is available, SNF discharged from reactors of type 1 will be interrogated, and so on.
+				# No SPACES between entries, please!  If reactors of this type do not demand any recovered Pu or MA feed, enter 'X'.	
+
+IfCausesTiltReplaceWithType=3	# VEGAS attempts to build reactors according to the ScenarioRules in NFC_parameters.txt.  
+				# if VEGAS tries to build a reactor of this type and 'Tilts' (finds that not enough Pu and/or feed is available to provide its lifetime supply),
+				# the facility build will be cancelled.  This integer specifies which facility type VEGAS should build in its place.
+				# note that IfCausesTiltReplaceWithType may specify a reactor type that might *also* 'Tilt'.
+				# therefore, the chain of 'backup' facility types should eventually lead back to one that will definitely not 'Tilt' (i.e., only demands uranium feed).

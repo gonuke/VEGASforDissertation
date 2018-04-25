@@ -1,0 +1,168 @@
+##### GENERAL ECONOMIC INPUTS #####
+SocialDiscountRate=2.0         		# percent
+FinancialDiscountRate=7.0      		# percent
+RequiredReturnOnEquity=10.0    		# percent
+EquityFractionForNewCapacity=50.	# percent
+RiskFreeRateOfReturn=2.0		# percent
+
+##### FUEL CYCLE INPUTS #####
+NewReactorLifetime=50.0			# years
+ReactorConstructionTime=3.5		# years
+NaturalUEnrichment=0.72			# percent U-235 in U
+TailsUEnrichment=0.25			# percent U-235 in U
+SeparatedActinideStorageCost=500	# $ / kg / yr : charge for storing separated but unused Pu & MA
+SeparatedActinideVitDisposalCost=6000	# $ / kg : charge for disposing of separated but unused Pu & MA
+SeparatedActinideRepositorySpace=10.0	# kg repository space used / kg actinides (not used by VEGAS yet!)
+StartYear=1990				# integer
+EndYear=2130				# integer
+AssessEquilibriumCostsAtYear=2100	# integer: equilibrium cost data will not be written if this is not in [StartYear,EndYear]
+					# choose a date late in the simulation when near-equilibrium behavior is expected
+					# however, choosing a date too close to EndYear will reflect undesirable 'end effects':
+					# e.g., SNF going unreprocessed since no reactor demands it prior to EndYear
+LegacySNF=25000.			# metric tons IHM already existing at StartYear
+LegacySNFIsOfType=0			# reactor type (in Reactor_parameters.txt) from which SNF composition obtained
+
+##### EXOGENOUS DEMAND FOR NUCLEAR ENERGY #####
+InitialGenerationCapacity=97.		# GW(e): existing at StartYear
+YearInitialFleetBeginsRetiring=2010	
+YearInitialFleetFinishesRetiring=2040	# initial fleet retires at constant rate during this interval
+InitialCapacityData[0]={
+	Type=1
+	Percentage=68.		# sum of percentages for initial capacity by type must add to 100.
+	}
+InitialCapacityData[1]={
+	Type=2
+	Percentage=32.		# sum of percentages for initial capacity by type must add to 100.
+	}
+GrowthSpecified[0]={		# Use GrowthSpecified to define the demand for nuclear energy.  
+	Year=2010		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
+	GrowthRate=0.0		# zero growth through 2010, then...
+	}	
+GrowthSpecified[1]={
+	Year=2050		# integer Year for GrowthSpecified[i] should be > StartYear and < Year of GrowthSpecified[i+1] 
+	Capacity=200.		# capacity reaches this level (GW(e)) by Year 2050, starting from InitialGenerationCapacity=97 GWe in 2010 
+	# Linear growth from previous Year of GrowthSpecified (or from StartYear if this is the first GrowthSpecified) is assumed.	
+	}
+GrowthSpecified[2]={
+	Year=2051
+	GrowthRate=1.0		# percent/year demand growth rate applied to this and subsequent years 
+	}
+	
+##### SCENARIO RULES #####
+ScenarioRules[0]={
+	Year=1900 		  # first set of rules should always be imposed at Year <= StartYear
+	TryToBuild[0]={		  # VEGAS will meet nuclear energy demand by building the facility types given below
+		FacilityNumber=1  # This is referenced to the FacilityNumber in Reactor_parameters.txt
+		Percentage=68.	  # target percentage of new plant builds by net electric generation capacity 
+		}
+	TryToBuild[1]={
+		FacilityNumber=2
+		Percentage=32.
+		}
+	}
+ScenarioRules[1]={
+	Year=2010		# year this ScenarioRule takes effect, superceding the previous Rule
+	TryToBuild[0]={
+		FacilityNumber=3
+		Percentage=100.
+		}
+	}
+ScenarioRules[2]={
+	Year=2030
+	TryToBuild[0]={
+		FacilityNumber=3
+		Percentage=75.
+		}
+	TryToBuild[1]={
+		FacilityNumber=4
+		Percentage=25.	# sets target of 25% PWR-MOX, 75% PWR-UOX for new builds between 2020 and 2045
+		}		# VEGAS will only build this much MOX-burning capacity, though, if enough Pu is available
+	}
+ScenarioRules[3]={
+	Year=2055
+	TryToBuild[0]={
+		FacilityNumber=3
+		Percentage=65.
+		}
+	TryToBuild[1]={
+		FacilityNumber=4
+		Percentage=10.
+		}
+	TryToBuild[2]={
+		FacilityNumber=5  # FacilityNumbers 5 and 6 are fast-spectrum burners in low- and high-MA loadings, respectively
+		Percentage=3.
+		}
+	TryToBuild[3]={			
+		FacilityNumber=6
+		Percentage=22.	  # again, VEGAS will try to deploy this percentage of FR capacity, 
+		}		  # but will default to lower-tier facilities if feed is unavailable.
+	}	
+	
+##### FRONT END FUEL CYCLE PROCESSES #####
+# The number and function of the technologies is hard-coded into VEGAS.
+# One may use these commands to set scheduling and default cost data  
+FrontEndTech[0]={
+	Name="U Mining & Milling"
+	DefaultLeadTime=2.0	# years prior to fuel charge
+	DefaultCost=30.0	# Dollars / kg U as U3O8
+	}
+FrontEndTech[1]={
+	Name="Conversion to UF6 "
+	DefaultLeadTime=2.0	# years prior to fuel charge
+	DefaultCost=5.0		# Dollars / kg U as U3O8     
+	}
+FrontEndTech[2]={
+	Name="Enrichment        "
+	DefaultLeadTime=1.5	# years prior to fuel charge
+	DefaultCost=90.0	# Dollars / SWU
+	}
+FrontEndTech[3]={
+	Name="Fuel Fabrication  "
+	DefaultLeadTime=1.0	# years prior to fuel charge
+	DefaultCost=250.0	# Dollars / kg IHM
+	}	
+FrontEndTech[4]={
+	Name="Transportation->RX"
+	DefaultLeadTime=0.5	# years prior to fuel charge
+	DefaultCost=50.0	# Dollars / kg IHM
+	}	
+
+##### BACK END FUEL CYCLE PROCESSES #####
+BackEndTech[0]={		# LagTimes for closed-cycle back end processes are determined by fuel cycle dynamics
+	Name="SNF Storage       "
+	DefaultLagTime=0.0	# years after fuel discharge
+	DefaultCost=100.0	# Dollars / kg IHM
+	}	
+BackEndTech[1]={
+	Name="SNF Transportation"
+	DefaultLagTime=8.0	# years after fuel discharge: actual lag time determined by fuel cycle dynamics if fuel will be reprocessed
+	DefaultCost=50.0	# Dollars / kg IHM
+	}
+BackEndTech[2]={
+	Name="Reprocessing      "
+	DefaultLagTime=8.0	# years after fuel discharge: actual lag determined by fuel cycle dynamics
+	DefaultCost=800.0	# Dollars / kg IHM
+	PercentOfFeedLost=0.2
+	}
+BackEndTech[3]={
+	Name="SNF Disposal      "
+	DefaultLagTime=10.0	# years after fuel discharge
+	usesRepositorySpace=1.0	# default kg repository space used / kg of material (not used yet!)
+	DefaultCost=500.0	# Dollars / kg IHM
+	}	
+BackEndTech[4]={
+	Name="HLW Vitrification "
+	DefaultLagTime=10.0	# years after fuel discharge: actual lag determined by fuel cycle dynamics
+	DefaultCost=480.0	# Dollars / kg IHM in HLW
+	}		
+BackEndTech[5]={
+	Name="HLW Storage       "
+	DefaultLagTime=10.0	# years after fuel discharge: actual lag determined by fuel cycle dynamics
+	DefaultCost=100.0	# Dollars / kg IHM in HLW
+	}
+BackEndTech[6]={
+	Name="HLW Disposal      "
+	DefaultLagTime=50.0	# years after fuel discharge: actual lag determined by fuel cycle dynamics
+	usesRepositorySpace=4.0	# default kg repository space used / kg of material (not used yet!)
+	DefaultCost=1600.0	# Dollars / kg IHM in HLW
+	}

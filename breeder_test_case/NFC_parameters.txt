@@ -1,0 +1,155 @@
+##### GENERAL ECONOMIC INPUTS #####
+SocialDiscountRate=2.0         		# percent
+FinancialDiscountRate=7.0      		# percent
+RequiredReturnOnEquity=10.0    		# percent
+EquityFractionForNewCapacity=50.	# percent
+RiskFreeRateOfReturn=2.0		# percent
+
+##### FUEL CYCLE INPUTS #####
+NewReactorLifetime=50.0			# years
+ReactorConstructionTime=4.0		# years
+NaturalUEnrichment=0.72			# percent U-235 in U
+TailsUEnrichment=0.25			# percent U-235 in U
+SeparatedActinideStorageCost=500	# $ / kg / yr
+SeparatedActinideVitDisposalCost=6000	# $ / kg
+SeparatedActinideRepositorySpace=10.0	# kg repository space used / kg actinide
+StartYear=1990				# integer
+EndYear=2130				# integer
+AssessEquilibriumCostsAtYear=2100	# integer: equilibrium cost data will not be written if this is not in [StartYear,EndYear]
+					# choose a date late in the simulation when near-equilibrium behavior is expected
+					# however, choosing a date too close to EndYear will reflect undesirable 'end effects':
+					# e.g., SNF going unreprocessed since no reactor demands it prior to EndYear
+LegacySNF=20000.			# metric tons IHM
+LegacySNFIsOfType=0			# reactor type from which SNF composition obtained
+
+##### EXOGENOUS DEMAND FOR NUCLEAR ENERGY #####
+InitialGenerationCapacity=97.		# GW(e)
+YearInitialFleetBeginsRetiring=2010	
+YearInitialFleetFinishesRetiring=2040	# initial fleet decays linearly between these two dates	
+InitialCapacityData[0]={
+	Type=1
+	Percentage=68.			# sum of percentages for initial capacity by type must add to 100.
+	}
+InitialCapacityData[1]={
+	Type=2
+	Percentage=32.			# sum of percentages for initial capacity by type must add to 100.
+	}
+	
+GrowthSpecified[0]={
+	Year=2010			# integer Year for GrowthSpecified[i] should be > StartYear and < Year of GrowthSpecified[i+1] 
+	GrowthRate=0.			
+	}
+GrowthSpecified[1]={
+	Year=2010
+	GrowthRate=1.7			# percent/year demand growth rate applied to this and subsequent years 
+	}
+GrowthSpecified[2]={
+	Year=2050
+	GrowthRate=1.7
+	}
+	
+##### SCENARIO RULES #####
+ScenarioRules[0]={
+	Year=1900 			# first set of rules should always be imposed at Year <= START_YEAR
+	TryToBuild[0]={
+		FacilityNumber=1
+		Percentage=68.		# target percentage of deployed net electric generation capacity obtained from this facility type
+		}
+	TryToBuild[1]={
+		FacilityNumber=2
+		Percentage=32.
+		}
+	}
+ScenarioRules[1]={
+	Year=2010
+	TryToBuild[0]={
+		FacilityNumber=3
+		Percentage=100.
+		}
+	}
+ScenarioRules[2]={
+	Year=2040
+	TryToBuild[0]={
+		FacilityNumber=7
+		Percentage=80.
+		}
+	TryToBuild[1]={
+		FacilityNumber=3
+		Percentage=20.
+		}
+	}
+ScenarioRules[3]={
+	Year=2070
+	TryToBuild[0]={
+		FacilityNumber=7
+		Percentage=100.
+		}
+	}
+##### FRONT END FUEL CYCLE PROCESSES #####
+# The number and function of the technologies is hard-coded into VEGAS.
+# One may use these commands to set scheduling and default cost data  
+FrontEndTech[0]={
+	Name="U Mining & Milling"
+	DefaultLeadTime=2.0		# years prior to fuel charge
+	DefaultCost=30.0		# Dollars / kg U as U3O8
+	}
+FrontEndTech[1]={
+	Name="Conversion to UF6 "
+	DefaultLeadTime=2.0		# years prior to fuel charge
+	DefaultCost=5.0			# Dollars / kg U as U3O8     
+	}
+FrontEndTech[2]={
+	Name="Enrichment        "
+	DefaultLeadTime=1.5		# years prior to fuel charge
+	DefaultCost=90.0		# Dollars / SWU
+	}
+FrontEndTech[3]={
+	Name="Fuel Fabrication  "
+	DefaultLeadTime=1.0		# years prior to fuel charge
+	DefaultCost=250.0		# Dollars / kg IHM
+	}	
+FrontEndTech[4]={
+	Name="Transportation->RX"
+	DefaultLeadTime=0.5		# years prior to fuel charge
+	DefaultCost=50.0		# Dollars / kg IHM
+	}	
+
+##### BACK END FUEL CYCLE PROCESSES #####
+BackEndTech[0]={
+	Name="SNF Storage       "
+	DefaultLagTime=0.0		# years after fuel discharge
+	DefaultCost=100.0		# Dollars / kg IHM
+	}	
+BackEndTech[1]={
+	Name="SNF Transportation"
+	DefaultLagTime=8.0		# years after fuel discharge
+	DefaultCost=50.0		# Dollars / kg IHM
+	}
+BackEndTech[2]={
+	Name="Reprocessing      "
+	DefaultLagTime=8.0		# years after fuel discharge
+	DefaultCost=800.0		# Dollars / kg IHM
+	PercentOfFeedLost=0.2
+	}
+BackEndTech[3]={
+	Name="SNF Disposal      "
+	DefaultLagTime=10.0		# years after fuel discharge
+	usesRepositorySpace=1.0		# default kg repository space used / kg of material
+	DefaultCost=500.0		# Dollars / kg IHM
+	}	
+BackEndTech[4]={
+	Name="HLW Vitrification "
+	DefaultLagTime=10.0		# years after fuel discharge
+	DefaultCost=480.0		# Dollars / kg IHM in HLW
+	}		
+BackEndTech[5]={
+	Name="HLW Storage       "
+	DefaultLagTime=10.0		# years after fuel discharge
+	DefaultCost=100.0		# Dollars / kg IHM in HLW
+	}
+BackEndTech[6]={
+	Name="HLW Disposal      "
+	DefaultLagTime=50.0		# years after fuel discharge
+	usesRepositorySpace=4.0		# default kg repository space used / kg of material
+	DefaultCost=1600.0		# Dollars / kg IHM in HLW
+	}
