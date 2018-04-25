@@ -1,6 +1,6 @@
 ##### GENERAL VEGAS SIMULATION INPUTS #####
 VerboseMode=false			# toggles verbose mode
-ReprocessOnDemand=false		# false to utilize full reprocessing capacity 
+ReprocessOnDemand=false		# false to utilize full reprocessing capacity # now changed within the Vegas class to follow the Try to Build scenarios
 
 ##### GENERAL ECONOMIC INPUTS #####
 SocialDiscountRate=2.0         		# percent
@@ -49,7 +49,7 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		}
 	AddCapacity[0]={
 		Year=2030
-		Capacity=100.
+		Capacity=600.
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity

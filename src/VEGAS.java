@@ -21,7 +21,7 @@ public class VEGAS {
 
 	/* Variables added by Birdy */
 	static boolean verbose;
-	static boolean ReprocessOnDemand;
+	static boolean[] ReprocessOnDemand;
 	static boolean boar=true;
 	
 	static boolean only_one=true;
@@ -280,7 +280,7 @@ public class VEGAS {
 		SFReprocessedByTier = new double[NumberOfTiers][END_YEAR-START_YEAR+1];
 		reprocessingUnitCost = new double[REACTORNAMES.length][END_YEAR-START_YEAR+1];
 		SFReprocessedByReactor = new double[REACTORNAMES.length][END_YEAR-START_YEAR+1];
-	
+		ReprocessOnDemand = new boolean[END_YEAR-START_YEAR+1];
 		facilitiesAddedSoFar = new int[REACTORNAMES.length];
 		yearlyReactorCharge = new double[END_YEAR-START_YEAR+1]; // 9 units added to reach NOAK; with or without the capital subsidy
 		yearlySimulationValues = new double[ChosenReprocessingCost.length][DisposalCost.length][FirstReactorBuildDecision.length][ChosenCapitalSubsidy.length][SecondReactorBuildDecision.length][HTGRCapitalCost.length][SFRCapitalCost.length][FinalReactorBuildDecision.length][END_YEAR-START_YEAR+1][4];
@@ -1349,7 +1349,7 @@ public class VEGAS {
 		int number_of_scenario_rules=0;              // default value for scenario rules
 		
 		verbose = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "VerboseMode"))==true) ? true : false;
-		ReprocessOnDemand = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "ReprocessOnDemand"))==true) ? true : false;
+		//ReprocessOnDemand = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "ReprocessOnDemand"))==true) ? true : false; // old instantiation
 		DisposalGrowthCoeff = nfc_file_parser.getParam(dummy_double, "DisposalCostGrowthCoefficient");
 		
 		socialDR=nfc_file_parser.getParam(dummy_double,"SocialDiscountRate")/100.;
@@ -1597,8 +1597,6 @@ public class VEGAS {
 			for(int i=0; i<try_to_build; i++) {
 				setARule(rule_parser.getSub("TryToBuild",i),i,rule_number);
 			}
-
-
 		}
 	}
 
@@ -1637,6 +1635,7 @@ public class VEGAS {
 
 		FacilityHierarchy[hierarchy][number]=a_rule.getParam(dummy_int,"FacilityNumber");
 		FacilityPercentage[hierarchy][number]=a_rule.getParam(dummy_double,"Percentage");
+		
 	}
 
 	public double augmentFrontEndCharges(double capacity, int reactor_type, int year_count, PrintWriter output_writer) {        // front end cost calculation
@@ -1877,9 +1876,6 @@ public class VEGAS {
 											yearSFReprocessed[j][i] = year;
 											AmountOfSFReprocessed[j][i].addElement(new Integer(year));
 											AmountOfSFReprocessed[j][i].addElement(new Double(amount_to_use));
-											if(k==0) {
-												System.out.print("here again");
-											}
 											pu_yield = getPuYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
 											ma_yield = getMAYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
 											ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(j,amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
@@ -2135,7 +2131,7 @@ public class VEGAS {
 					}
 				}
 			}
-			if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
+			//if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 		}
 		return(true);   
 	}
@@ -2654,6 +2650,7 @@ public class VEGAS {
 		getPossibleCycles();
 		massEquilibriumClculation(); 
 		setBuildOrders();
+		setReprocessOnDemand();
 		getMassConv();
 		assignGenerationCapacity(); 
 		/* original VEGAS implementation */
@@ -3094,6 +3091,31 @@ public class VEGAS {
 	
 	}
 	
+	public void setReprocessOnDemand() {
+		
+		boolean uses_sep_actinides=false;
+		
+		for (int scenario_set=0; scenario_set<FacilityPercentage.length; scenario_set++) {
+
+			if (scenario_set==0) {
+
+				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
+					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
+					if (uses_sep_actinides==true) break;
+				}
+				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ReprocessOnDemand[year] = uses_sep_actinides;
+			} else if (scenario_set>0 && scenario_set<FacilityPercentage.length) {
+				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
+					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
+					if (uses_sep_actinides==true) break;
+				}
+				for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ReprocessOnDemand[year] = uses_sep_actinides;
+			}
+			
+		}
+
+	}
+
 	public double[][] yearlyAnnualReports() {
 
 		int i,j,k,l;
