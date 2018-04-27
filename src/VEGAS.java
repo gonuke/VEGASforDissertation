@@ -2434,6 +2434,15 @@ public class VEGAS {
 		
 		return(metric);
 	}
+	
+	public double getBackEndRepMass(int reactor_type, double capacity) {
+		double mass=0.;
+		
+		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS[reactor_type][i];
+		mass=mass*capacity*capacityToMass(reactor_type);
+		
+		return(mass);
+	}
 
 	public void assessBackEndCosts() { /* Estonians */
 
@@ -2816,7 +2825,6 @@ public class VEGAS {
 				VEGAS mySim = new VEGAS();
 				mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
-				// THIS SHOULD ALL GO IN RUNTHESIM
 				for (int metric_no=0; metric_no<metrics.length; metric_no++) {
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 						metrics[metric_no] += yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][metric_no];
@@ -2907,7 +2915,19 @@ public class VEGAS {
 				}
 				output_writer_wastequantities.close();
 
-
+				File output_target_generationcapacity = new File(user_dir+File.separatorChar+"GeneratingCapacity.txt");
+				if (output_target_generationcapacity.exists()) output_target_generationcapacity.delete();
+				FileWriter output_filewriter_generationcapacity = new FileWriter(output_target_generationcapacity);
+				PrintWriter output_writer_generationcapacity = new PrintWriter(output_filewriter_generationcapacity);
+				
+				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+					output_writer_generationcapacity.print((year+START_YEAR) + " ");
+					for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+						output_writer_generationcapacity.print(genCap[n_rx][year] + " ");
+					}
+					output_writer_generationcapacity.print("\n");
+				}
+				output_writer_generationcapacity.close();
 
 			} else if (!only_one) {
 
@@ -3277,20 +3297,21 @@ public class VEGAS {
 					else add_to_integrals=false;
 
 					yearly_fe+=augmentFrontEndCharges(genCap[j][i],j,i);          // frontend costs
-
 					proliferation_resistance[i]+=getFrontEndProliferation(genCap[j][i],j);
 					mass_throughput[i]+=getFrontEndMass(genCap[j][i],j);
 
 					sf_dd=SFGenerated[j][i]-SFReprocessed[j][i];
 					
 					if(sf_dd > EPS) yearly_be+=augmentBackEndDDCharges(j,sf_dd/SFGenerated[j][i]*genCap[j][i],i);
-					if(sf_dd > EPS) proliferation_resistance[i]+=getBackEndDDProliferation(j,sf_dd/SFGenerated[j][i]*genCap[j][i],i);
+					if(sf_dd > EPS) proliferation_resistance[i]+=getBackEndDDProliferation(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
+					if(sf_dd > EPS) mass_throughput[i]+=getBackEndDDMass(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
 
 					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS_DD[3]*(sf_dd/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
 					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS[j][6]*(SFReprocessed[j][i]/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
 
 					if(SFReprocessed[j][i] > EPS) yearly_be+=augmentBackEndRepCharges(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i],i+START_YEAR,yearSFReprocessed[j][i]);
 					if(SFReprocessed[j][i] > EPS) proliferation_resistance[yearSFReprocessed[j][i]-START_YEAR]+=getBackEndRepProliferation(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
+					if(SFReprocessed[j][i] > EPS) mass_throughput[yearSFReprocessed[j][i]-START_YEAR]+=getBackEndRepMass(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
 					
 					if(i+START_YEAR >= start_integrating && i+START_YEAR<= stop_integrating) integratedCosts[j][integratedCosts[0].length-1]+=genCap[j][i]*AVAILABILITY[j]*365.*24.*socialPVF;
 					
@@ -3345,10 +3366,10 @@ public class VEGAS {
 		 * This implies that the average COE is the minimizing objective
 		 */
 		for (i=0; i<END_YEAR-START_YEAR+1-NewReactorLifetime; i++) {
-			yearlyLeafValues[i][0] = backend_costs[i];
-			yearlyLeafValues[i][1] = decay_heat[i];
-			yearlyLeafValues[i][2] = proliferation_resistance[i];
-			yearlyLeafValues[i][3] = frontend_and_reactor_costs[i];
+			yearlyLeafValues[i][0] = backend_costs[i]; // cumulative back end costs
+			yearlyLeafValues[i][1] = decay_heat[i]; // cumulative decay heat
+			yearlyLeafValues[i][2] = proliferation_resistance[i]; // cumulative proliferation resistance = integral over time for the fuel cycle
+			yearlyLeafValues[i][3] = frontend_and_reactor_costs[i]; // cumulative front end and reactor costs
 		}
 		
 		return(yearlyLeafValues);
