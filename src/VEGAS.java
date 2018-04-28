@@ -21,7 +21,9 @@ public class VEGAS {
 
 	/* Variables added by Birdy */
 	static boolean verbose;
-	static boolean[] ReprocessOnDemand;
+	static boolean ReprocessOnDemand;
+	static boolean UseScriptedReprocessOnDemand;
+	static boolean[] ScriptedReprocessOnDemand;
 	static boolean boar=true;
 	
 	static boolean only_one=true;
@@ -58,8 +60,8 @@ public class VEGAS {
 	static double yearlySimulationValues[][][][][][][][][][];
 	
 	static double[][] decay_heat = DMInputs.getDecayHeat();
-	static double[][] front_end_proliferation_resistance = DMInputs.getFEProliferationMetric();
-	static double[][] back_end_proliferation_resistance = DMInputs.getBEProliferationMetric();
+	static double[][] front_end_proliferationresistance = DMInputs.getFEProliferationMetric();
+	static double[][] back_end_proliferationresistance = DMInputs.getBEProliferationMetric();
 
 	static boolean[] RX_PROTOTYPE;
 	
@@ -278,11 +280,12 @@ public class VEGAS {
 		SFReprocessedByTier = new double[NumberOfTiers][END_YEAR-START_YEAR+1];
 		reprocessingUnitCost = new double[REACTORNAMES.length][END_YEAR-START_YEAR+1];
 		SFReprocessedByReactor = new double[REACTORNAMES.length][END_YEAR-START_YEAR+1];
-		ReprocessOnDemand = new boolean[END_YEAR-START_YEAR+1];
+	
 		facilitiesAddedSoFar = new int[REACTORNAMES.length];
 		yearlyReactorCharge = new double[END_YEAR-START_YEAR+1]; // 9 units added to reach NOAK; with or without the capital subsidy
 		yearlySimulationValues = new double[ChosenReprocessingCost.length][DisposalCost.length][FirstReactorBuildDecision.length][ChosenCapitalSubsidy.length][SecondReactorBuildDecision.length][HTGRCapitalCost.length][SFRCapitalCost.length][FinalReactorBuildDecision.length][END_YEAR-START_YEAR+1][4];
-
+		ScriptedReprocessOnDemand = new boolean[END_YEAR-START_YEAR+1];
+		
 	}
 
 	public double getFeedMass(double targ_enrich) {
@@ -1255,7 +1258,7 @@ public class VEGAS {
 					YearReplaceWithTypeSpecified[i]=parseCommaDelineatedString(dummy_string);
 				}
 			}
-
+			
 		}
 		catch(IOException IOE) {
 			System.err.println("VEGAS Error 01: Error reading reactor input file "+ReactorParameterFile);
@@ -1317,7 +1320,8 @@ public class VEGAS {
 		int number_of_scenario_rules=0;              // default value for scenario rules
 		
 		verbose = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "VerboseMode"))==true) ? true : false;
-		//ReprocessOnDemand = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "ReprocessOnDemand"))==true) ? true : false; // old instantiation
+		ReprocessOnDemand = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "ReprocessOnDemand"))==true) ? true : false;
+		UseScriptedReprocessOnDemand = (Boolean.parseBoolean(nfc_file_parser.getParam(dummy_string, "UseScriptedReprocessOnDemand"))==true) ? true : false;
 		DisposalGrowthCoeff = nfc_file_parser.getParam(dummy_double, "DisposalCostGrowthCoefficient");
 		
 		socialDR=nfc_file_parser.getParam(dummy_double,"SocialDiscountRate")/100.;
@@ -1565,6 +1569,8 @@ public class VEGAS {
 			for(int i=0; i<try_to_build; i++) {
 				setARule(rule_parser.getSub("TryToBuild",i),i,rule_number);
 			}
+
+
 		}
 	}
 
@@ -1603,7 +1609,6 @@ public class VEGAS {
 
 		FacilityHierarchy[hierarchy][number]=a_rule.getParam(dummy_int,"FacilityNumber");
 		FacilityPercentage[hierarchy][number]=a_rule.getParam(dummy_double,"Percentage");
-		
 	}
 
 	public double augmentFrontEndCharges(double capacity, int reactor_type, int year_count, PrintWriter output_writer) {        // front end cost calculation
@@ -1667,21 +1672,17 @@ public class VEGAS {
 	}
 	
 	/* added by Birdy for proliferation metric calculation */
-	public double getFrontEndProliferation(double capacity, int reactor_type) {
-		double metric=0.;
-
-		for(int i=0; i<FRONTENDTECH.length; i++) metric+=FRONTENDMASS[reactor_type][i]*front_end_proliferation_resistance[reactor_type][i];
-		metric=metric*capacity*capacityToMass(reactor_type);
-		
-		return(metric);
+	public double getFrontEndProliferation(int reactor_type, double capacity) {
+		double proliferation_resistance=0.;
+		for(int i=0; i<FRONTENDTECH.length; i++) proliferation_resistance+=FRONTENDMASS[reactor_type][i]*front_end_proliferationresistance[reactor_type][i];
+		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
+		return(proliferation_resistance);
 	}
 	
-	public double getFrontEndMass(double capacity, int reactor_type) {
+	public double getFrontEndMass(int reactor_type, double capacity) {
 		double mass=0.;
-
 		for(int i=0; i<FRONTENDTECH.length; i++) mass+=FRONTENDMASS[reactor_type][i];
 		mass=mass*capacity*capacityToMass(reactor_type);
-		
 		return(mass);
 	}
 
@@ -1845,7 +1846,7 @@ public class VEGAS {
 										if(amount_to_use>EPS) {
 											throughput_by_tier[k] += amount_to_use;
 											SFReprocessed[j][i] += amount_to_use;
-											SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
+											//SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
 											yearSFReprocessed[j][i] = year;
 											AmountOfSFReprocessed[j][i].addElement(new Integer(year));
 											AmountOfSFReprocessed[j][i].addElement(new Double(amount_to_use));
@@ -1870,7 +1871,7 @@ public class VEGAS {
 									if(amount_to_use>EPS) {
 										throughput_by_tier[k] += amount_to_use;
 										SFReprocessed[j][i] += amount_to_use;
-										SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
+										//SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
 										yearSFReprocessed[j][i] = year;
 										AmountOfSFReprocessed[j][i].addElement(new Integer(year));
 										AmountOfSFReprocessed[j][i].addElement(new Double(amount_to_use));
@@ -1895,6 +1896,31 @@ public class VEGAS {
 		} // all the tiers
 
 		return(throughput_by_tier);
+	}
+	
+	public void setReprocessOnDemand() {
+
+		boolean uses_sep_actinides=false;
+
+		for (int scenario_set=0; scenario_set<FacilityPercentage.length; scenario_set++) {
+
+			if (scenario_set==0) {
+
+				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
+					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
+					if (uses_sep_actinides==true) break;
+				}
+				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ScriptedReprocessOnDemand[year] = (uses_sep_actinides == true) ? false : true;
+			} else if (scenario_set>0 && scenario_set<FacilityPercentage.length) {
+				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
+					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
+					if (uses_sep_actinides==true) break;
+				}
+				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ScriptedReprocessOnDemand[year] = (uses_sep_actinides == true) ? false : true;
+			}
+
+		}
+
 	}
 
 	public double[] traverseReprocessHierarchy(int year, int reactor_type, double pu_demand, double ma_demand, boolean is_for_real, double[] capacity_by_tier) {
@@ -1952,7 +1978,7 @@ public class VEGAS {
 							if (amount_to_use + throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]] > capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]) amount_to_use = capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]-throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]];
 							throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]+=amount_to_use;
 							if(is_for_real) SFReprocessed[ReprocessHierarchy[reactor_type][i]][j]+=amount_to_use;
-							if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]+=amount_to_use;
+							//if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]+=amount_to_use;
 							if(is_for_real) yearSFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=year;
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Integer(year));
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Double(amount_to_use));			   
@@ -1962,7 +1988,7 @@ public class VEGAS {
 							if (amount_to_use + throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]] > capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]) amount_to_use = capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]-throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]];
 							throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]+=amount_to_use;
 							if(is_for_real) SFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=SFGenerated[ReprocessHierarchy[reactor_type][i]][j];
-							if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]=SFGenerated[ReprocessHierarchy[reactor_type][i]][year-START_YEAR];
+							//if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]=SFGenerated[ReprocessHierarchy[reactor_type][i]][year-START_YEAR];
 							if(is_for_real) yearSFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=year;
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Integer(year));
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Double(amount_to_use));				   
@@ -2104,7 +2130,8 @@ public class VEGAS {
 					}
 				}
 			}
-			//if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
+			if(UseScriptedReprocessOnDemand) if(!ScriptedReprocessOnDemand[i]) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
+			if(!UseScriptedReprocessOnDemand) if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 		}
 		return(true);   
 	}
@@ -2295,21 +2322,17 @@ public class VEGAS {
 	}
 	
 	/* added by Birdy for proliferation metric calculation */
-	public double getBackEndDDProliferation(int reactor_type, double capacity) {
-		double metric=0.;
-
-		for(int i=0; i<BACKENDTECH.length; i++) metric+=BACKENDMASS_DD[i]*back_end_proliferation_resistance[reactor_type][i];	
-		metric=metric*capacity*capacityToMass(reactor_type);
-		
-		return(metric);
+	public double getBackEndDDProliferationResistance(int reactor_type, double capacity) {
+		double proliferation_resistance=0.;
+		for(int i=0; i<BACKENDTECH.length; i++) proliferation_resistance+=BACKENDMASS_DD[i]*back_end_proliferationresistance[reactor_type][i];
+		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
+		return(proliferation_resistance);
 	}
 	
 	public double getBackEndDDMass(int reactor_type, double capacity) {
 		double mass=0.;
-		
 		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS_DD[i];
 		mass=mass*capacity*capacityToMass(reactor_type);
-		
 		return(mass);
 	}
 
@@ -2426,21 +2449,17 @@ public class VEGAS {
 	}   
 	
 	/* added by Birdy for proliferation metric calculation */
-	public double getBackEndRepProliferation(int reactor_type, double capacity) {
-		double metric=0.;
-
-		for(int i=0; i<BACKENDTECH.length; i++) metric+=BACKENDMASS[reactor_type][i]*back_end_proliferation_resistance[reactor_type][i];		
-		metric=metric*capacity*capacityToMass(reactor_type);
-		
-		return(metric);
+	public double getBackEndRepProliferationResistance(int reactor_type, double capacity) {
+		double proliferation_resistance=0.;
+		for(int i=0; i<BACKENDTECH.length; i++) proliferation_resistance+=BACKENDMASS[reactor_type][i]*back_end_proliferationresistance[reactor_type][i];
+		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
+		return(proliferation_resistance);
 	}
 	
 	public double getBackEndRepMass(int reactor_type, double capacity) {
 		double mass=0.;
-		
 		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS[reactor_type][i];
 		mass=mass*capacity*capacityToMass(reactor_type);
-		
 		return(mass);
 	}
 
@@ -2512,6 +2531,7 @@ public class VEGAS {
 					int count = 0;
 					double repUnitCost = 0.;
 					for(j=0; j<sf_reprocessed_by_tier.length; j++) sf_reprocessed_by_tier[j]=0.;
+					for(j=0; j<REACTORNAMES.length; j++) sf_reprocessed_by_reactor[j]=0.;
 					if(i>0) sf_reprocessed_by_tier[0]-=(legacySFStockpile[i]-legacySFStockpile[i-1]);
 					for(j=0; j<REACTORNAMES.length; j++) {                                     
 						for(k=0; k<i+1; k++) {
@@ -2522,13 +2542,15 @@ public class VEGAS {
 									amount_reprocessed_this_year=((Double)AmountOfSFReprocessed[j][k].elementAt(2*m+1)).doubleValue();
 									if(year_of_reprocessing==i+START_YEAR) {
 										sf_reprocessed_by_tier[BELONGS_TO_TIER[j]]+=amount_reprocessed_this_year;
+										sf_reprocessed_by_reactor[j]+=amount_reprocessed_this_year;
 									}
 								}
 							}
 						}
 					}
 					for (j = 0; j < NumberOfTiers; j++) SFReprocessedByTier[j][i] = sf_reprocessed_by_tier[j];
-
+					for (j = 0; j < REACTORNAMES.length; j++) SFReprocessedByReactor[j][i] = sf_reprocessed_by_reactor[j]; 
+					//System.out.print("Reprocessed fuel for reactor " + j + " in year " + i + " equals " + sf_reprocessed_by_reactor[j] + " kgIHM \n");
 					// For now! Only calculates the unit cost for tier 0 reactors
 					for (j = 0; j < REACTORNAMES.length; j++) {
 						if (BELONGS_TO_TIER[j] == 0) {
@@ -2555,6 +2577,7 @@ public class VEGAS {
 				int count = 0;
 				double repUnitCost = 0.;
 				for(j=0; j<sf_reprocessed_by_tier.length; j++) sf_reprocessed_by_tier[j]=0.;
+				for(j=0; j<REACTORNAMES.length; j++) sf_reprocessed_by_reactor[j]=0.;
 				if(i>0) sf_reprocessed_by_tier[0]-=(legacySFStockpile[i]-legacySFStockpile[i-1]);
 				for(j=0; j<REACTORNAMES.length; j++) {                                     
 					for(k=0; k<i+1; k++) {
@@ -2564,13 +2587,18 @@ public class VEGAS {
 								year_of_reprocessing=((Integer)AmountOfSFReprocessed[j][k].elementAt(2*m)).intValue();
 								amount_reprocessed_this_year=((Double)AmountOfSFReprocessed[j][k].elementAt(2*m+1)).doubleValue();
 								if(year_of_reprocessing==i+START_YEAR) {
+									System.out.print("It's tier " + BELONGS_TO_TIER[j] + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
 									sf_reprocessed_by_tier[BELONGS_TO_TIER[j]]+=amount_reprocessed_this_year;
+									System.out.print("It's reactor " + j + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
+									sf_reprocessed_by_reactor[j]+=amount_reprocessed_this_year;
+									System.out.print("It's reactor " + j + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
 								}
 							}
 						}
 					}
 				}
 				for (j=0; j<NumberOfTiers; j++) SFReprocessedByTier[j][i] = sf_reprocessed_by_tier[j];
+				for (j=0; j<REACTORNAMES.length; j++) SFReprocessedByReactor[j][i] = sf_reprocessed_by_reactor[j];
 			}
 			
 		}
@@ -2633,9 +2661,9 @@ public class VEGAS {
 		getPossibleCycles();
 		massEquilibriumClculation(); 
 		setBuildOrders();
-		setReprocessOnDemand();
 		getMassConv();
 		assignGenerationCapacity(); 
+		if (UseScriptedReprocessOnDemand) setReprocessOnDemand();
 		/* original VEGAS implementation */
 		//getReactorCharges();
 		while(!success) {
@@ -2819,12 +2847,13 @@ public class VEGAS {
 				sfr_capital_cost = robustInts[6];
 				htgr_capital_cost = robustInts[7];
 
-				printNFCParamComboFile(first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision);
-				printReactorParamFile(first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision);
+				printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+				printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 				System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + ", final reactor build decision " + final_reactor_build_decision + "\n");
 				VEGAS mySim = new VEGAS();
 				mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
+				// THIS SHOULD ALL GO IN RUNTHESIM
 				for (int metric_no=0; metric_no<metrics.length; metric_no++) {
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 						metrics[metric_no] += yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][metric_no];
@@ -2902,7 +2931,7 @@ public class VEGAS {
 				if (output_target_wastequantities.exists()) output_target_wastequantities.delete();
 				FileWriter output_filewriter_wastequantities = new FileWriter(output_target_wastequantities);
 				PrintWriter output_writer_wastequantities = new PrintWriter(output_filewriter_wastequantities);
-				output_writer_wastequantities.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost ");
+				output_writer_wastequantities.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost " + "\n");
 				output_writer_wastequantities.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 				output_writer_wastequantities.print("year lwr_wastegenerated lwr_wastereprocessed_byyear lwr_wastereprocessed htgr_wastegenerated htgr_wastereprocessed_byyear htgr_wastereprocessed sfr_wastegenerated sfr_wastereprocessed_byyear sfr_wastereprocessed" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
@@ -2914,20 +2943,26 @@ public class VEGAS {
 					output_writer_wastequantities.print("\n");
 				}
 				output_writer_wastequantities.close();
+				
 
 				File output_target_generationcapacity = new File(user_dir+File.separatorChar+"GeneratingCapacity.txt");
 				if (output_target_generationcapacity.exists()) output_target_generationcapacity.delete();
 				FileWriter output_filewriter_generationcapacity = new FileWriter(output_target_generationcapacity);
 				PrintWriter output_writer_generationcapacity = new PrintWriter(output_filewriter_generationcapacity);
-				
+				output_writer_generationcapacity.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost " + "\n");
+				output_writer_generationcapacity.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+				output_writer_generationcapacity.print("year lwr_gencap htgr_gencap sfr_gencap" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 					output_writer_generationcapacity.print((year+START_YEAR) + " ");
 					for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-						output_writer_generationcapacity.print(genCap[n_rx][year] + " ");
+						output_writer_generationcapacity.print((genCap[n_rx][year]/1e6) + " ");
 					}
 					output_writer_generationcapacity.print("\n");
 				}
 				output_writer_generationcapacity.close();
+
+
+
 
 			} else if (!only_one) {
 
@@ -3085,31 +3120,6 @@ public class VEGAS {
 	
 	}
 	
-	public void setReprocessOnDemand() {
-		
-		boolean uses_sep_actinides=false;
-		
-		for (int scenario_set=0; scenario_set<FacilityPercentage.length; scenario_set++) {
-
-			if (scenario_set==0) {
-
-				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
-					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
-					if (uses_sep_actinides==true) break;
-				}
-				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ReprocessOnDemand[year] = uses_sep_actinides;
-			} else if (scenario_set>0 && scenario_set<FacilityPercentage.length) {
-				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
-					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
-					if (uses_sep_actinides==true) break;
-				}
-				for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ReprocessOnDemand[year] = uses_sep_actinides;
-			}
-			
-		}
-
-	}
-
 	public double[][] yearlyAnnualReports() {
 
 		int i,j,k,l;
@@ -3297,21 +3307,22 @@ public class VEGAS {
 					else add_to_integrals=false;
 
 					yearly_fe+=augmentFrontEndCharges(genCap[j][i],j,i);          // frontend costs
-					proliferation_resistance[i]+=getFrontEndProliferation(genCap[j][i],j);
-					mass_throughput[i]+=getFrontEndMass(genCap[j][i],j);
+
+					proliferation_resistance[i]+=getFrontEndProliferation(j,genCap[j][i]);
+					mass_throughput[i]+=getFrontEndMass(j,genCap[j][i]);
 
 					sf_dd=SFGenerated[j][i]-SFReprocessed[j][i];
 					
 					if(sf_dd > EPS) yearly_be+=augmentBackEndDDCharges(j,sf_dd/SFGenerated[j][i]*genCap[j][i],i);
-					if(sf_dd > EPS) proliferation_resistance[i]+=getBackEndDDProliferation(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
+					if(sf_dd > EPS) proliferation_resistance[i]+=getBackEndDDProliferationResistance(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
 					if(sf_dd > EPS) mass_throughput[i]+=getBackEndDDMass(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
 
 					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS_DD[3]*(sf_dd/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
 					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS[j][6]*(SFReprocessed[j][i]/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
 
 					if(SFReprocessed[j][i] > EPS) yearly_be+=augmentBackEndRepCharges(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i],i+START_YEAR,yearSFReprocessed[j][i]);
-					if(SFReprocessed[j][i] > EPS) proliferation_resistance[yearSFReprocessed[j][i]-START_YEAR]+=getBackEndRepProliferation(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
-					if(SFReprocessed[j][i] > EPS) mass_throughput[yearSFReprocessed[j][i]-START_YEAR]+=getBackEndRepMass(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
+					if(SFReprocessed[j][i] > EPS) proliferation_resistance[i]+=getBackEndRepProliferationResistance(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
+					if(SFReprocessed[j][i] > EPS) mass_throughput[i]+=getBackEndRepMass(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
 					
 					if(i+START_YEAR >= start_integrating && i+START_YEAR<= stop_integrating) integratedCosts[j][integratedCosts[0].length-1]+=genCap[j][i]*AVAILABILITY[j]*365.*24.*socialPVF;
 					
@@ -3366,10 +3377,10 @@ public class VEGAS {
 		 * This implies that the average COE is the minimizing objective
 		 */
 		for (i=0; i<END_YEAR-START_YEAR+1-NewReactorLifetime; i++) {
-			yearlyLeafValues[i][0] = backend_costs[i]; // cumulative back end costs
-			yearlyLeafValues[i][1] = decay_heat[i]; // cumulative decay heat
-			yearlyLeafValues[i][2] = proliferation_resistance[i]; // cumulative proliferation resistance = integral over time for the fuel cycle
-			yearlyLeafValues[i][3] = frontend_and_reactor_costs[i]; // cumulative front end and reactor costs
+			yearlyLeafValues[i][0] = backend_costs[i];
+			yearlyLeafValues[i][1] = decay_heat[i];
+			yearlyLeafValues[i][2] = proliferation_resistance[i]/mass_throughput[i];
+			yearlyLeafValues[i][3] = frontend_and_reactor_costs[i];
 		}
 		
 		return(yearlyLeafValues);
