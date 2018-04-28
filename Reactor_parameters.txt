@@ -38,7 +38,7 @@ HLWDisposalCost					D			D			D
 NOAKCapitalCost					4100		4000		4000
 %%% REPROCESSING HIERARCHY %%% SEE COMMENTS BELOW %%%															
 Members							X			X			2,1,0
-IfCausesTiltReplaceWithType		0			1		 	1,1,1
+IfCausesTiltReplaceWithType		0			1		 	1,0,0
 IfCausesTiltYear				2015		2015		2030,2040,2050
 			
 %%%%%% COMMENTS & SAMPLE INPUTS %%%%%%  

@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 	
 	static boolean only_one=true;
-	static int[] robustInts = {3,3,3,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,2,2,1,1,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -932,6 +932,8 @@ public class VEGAS {
 				if(count>=BuildOrder[hierarchy_to_use].length) count=0;
 				facility_to_use=BuildOrder[hierarchy_to_use][count];
 				
+				//if(RX_PROTOTYPE[facility_to_use]facility_to_use)
+				
 				facility_built=false;
 				
 				if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) { /* need to compare the different facility to use plant size to the genCap difference */
@@ -945,49 +947,48 @@ public class VEGAS {
 						totalGenCap[j]+=PLANT_SIZE[facility_to_use]; 
 					}
 					
-				}
-				else break;
+				} else break;
 				
-				if (RX_PROTOTYPE[facility_to_use]==true && facility_built==true) {
-					
-					years_in_ramp_up=0;
-					for (j=1; j<=i; j++) if(facilitiesAdded[facility_to_use][j]>0) years_in_ramp_up++;
-					if (years_in_ramp_up>0 && years_in_ramp_up<=ramp_up.length) {
-						if (facilitiesAdded[facility_to_use][i]>ramp_up[years_in_ramp_up-1]) {
-							/* remove the last build facility */
-							facilitiesAdded[facility_to_use][i]--;
-							for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
-								genCap[facility_to_use][j]-=PLANT_SIZE[facility_to_use];
-								totalGenCap[j]-=PLANT_SIZE[facility_to_use]; 
-							}
-							
-							old_facility_to_use = facility_to_use;
-							for (k=0; k<BuildOrder[hierarchy_to_use].length; k++) { /* reset the facility to use */
-								if (BuildOrder[hierarchy_to_use][k]!=old_facility_to_use) {
-									facility_to_use=BuildOrder[hierarchy_to_use][k];
-									break;
-								}
-							} 
-							// if you go through the entire Build Order array without replacing the facility type
-							for (j=0; j<YearReplaceWithTypeSpecified[old_facility_to_use].length; j++) {
-								if (i >= YearReplaceWithTypeSpecified[old_facility_to_use][j]-START_YEAR) {
-									if (facility_to_use==old_facility_to_use) facility_to_use = ReplaceWithType[old_facility_to_use][j];	
-								}
-							}
-
-							/* add the different building in the hierarchy */
-							if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) {
-								facilitiesAdded[facility_to_use][i]++;
-								for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
-									genCap[facility_to_use][j]+=PLANT_SIZE[facility_to_use];
-									totalGenCap[j]+=PLANT_SIZE[facility_to_use]; 
-								}
-							}
-							else break;
-							
-						}
-					}
-				}
+//				if (RX_PROTOTYPE[facility_to_use]==true && facility_built==true) {
+//					
+//					years_in_ramp_up=0;
+//					for (j=1; j<=i; j++) if(facilitiesAdded[facility_to_use][j]>0) years_in_ramp_up++;
+//					if (years_in_ramp_up>0 && years_in_ramp_up<=ramp_up.length) {
+//						if (facilitiesAdded[facility_to_use][i]>ramp_up[years_in_ramp_up-1]) {
+//							/* remove the last build facility */
+//							facilitiesAdded[facility_to_use][i]--;
+//							for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
+//								genCap[facility_to_use][j]-=PLANT_SIZE[facility_to_use];
+//								totalGenCap[j]-=PLANT_SIZE[facility_to_use]; 
+//							}
+//							
+//							old_facility_to_use = facility_to_use;
+//							for (k=0; k<BuildOrder[hierarchy_to_use].length; k++) { /* reset the facility to use */
+//								if (BuildOrder[hierarchy_to_use][k]!=old_facility_to_use) {
+//									facility_to_use=BuildOrder[hierarchy_to_use][k];
+//									break;
+//								}
+//							} 
+//							// if you go through the entire Build Order array without replacing the facility type
+//							for (j=0; j<YearReplaceWithTypeSpecified[old_facility_to_use].length; j++) {
+//								if (i >= YearReplaceWithTypeSpecified[old_facility_to_use][j]-START_YEAR) {
+//									if (facility_to_use==old_facility_to_use) facility_to_use = ReplaceWithType[old_facility_to_use][j];	
+//								}
+//							}
+//
+//							/* add the different building in the hierarchy */
+//							if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) {
+//								facilitiesAdded[facility_to_use][i]++;
+//								for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
+//									genCap[facility_to_use][j]+=PLANT_SIZE[facility_to_use];
+//									totalGenCap[j]+=PLANT_SIZE[facility_to_use]; 
+//								}
+//							}
+//							else break;
+//							
+//						}
+//					}
+//				}
 				
 				
 			}
@@ -2179,9 +2180,30 @@ public class VEGAS {
 				if(bug) 
 					if (verbose) System.out.println("Removed "+REACTORNAMES[reactor_type]+" commissioned in "+year_counter);
 				//type_to_replace_with=ReplaceWithType[reactor_type];
-				for(j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-					if (year_counter >= YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+				
+				
+				if(year_counter<YearReplaceWithTypeSpecified[reactor_type][0]) {
+					type_to_replace_with=ReplaceWithType[reactor_type][0];
+				} else {
+					for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length-1; j++) {
+						if(year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+					}
+					type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1];
 				}
+				
+//				
+//				for(j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+//					
+//					
+//					
+//					
+//					
+//					if (year_counter >= YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+////					if (year_count>= System.out.print("we can pause here");
+//				}
+				
+				
+				
 				for(j=year_counter-START_YEAR; j<Math.min(END_YEAR-START_YEAR+1,year_counter-START_YEAR+NewReactorLifetime); j++) {
 					genCap[reactor_type][j]-=PLANT_SIZE[reactor_type];
 					totalGenCap[j]-=PLANT_SIZE[reactor_type];
@@ -2207,7 +2229,7 @@ public class VEGAS {
 					added_one=true;
 				}
 				else break;
-				if(added_one) break;
+				//if(added_one) break;
 			}
 			if(added_one) break;
 		} 
@@ -2587,11 +2609,8 @@ public class VEGAS {
 								year_of_reprocessing=((Integer)AmountOfSFReprocessed[j][k].elementAt(2*m)).intValue();
 								amount_reprocessed_this_year=((Double)AmountOfSFReprocessed[j][k].elementAt(2*m+1)).doubleValue();
 								if(year_of_reprocessing==i+START_YEAR) {
-									System.out.print("It's tier " + BELONGS_TO_TIER[j] + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
 									sf_reprocessed_by_tier[BELONGS_TO_TIER[j]]+=amount_reprocessed_this_year;
-									System.out.print("It's reactor " + j + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
 									sf_reprocessed_by_reactor[j]+=amount_reprocessed_this_year;
-									System.out.print("It's reactor " + j + " in year " + i + " and the sf reprocessed is " + amount_reprocessed_this_year + "\n");
 								}
 							}
 						}
@@ -2847,11 +2866,11 @@ public class VEGAS {
 				sfr_capital_cost = robustInts[6];
 				htgr_capital_cost = robustInts[7];
 
-				printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
-				printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+				printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
+				printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 				System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + ", final reactor build decision " + final_reactor_build_decision + "\n");
 				VEGAS mySim = new VEGAS();
-				mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+				mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 
 				// THIS SHOULD ALL GO IN RUNTHESIM
 				for (int metric_no=0; metric_no<metrics.length; metric_no++) {
@@ -2879,7 +2898,7 @@ public class VEGAS {
 				output_writer_glcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 				output_writer_glcoe.print("year glcoe" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-					output_writer_glcoe.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][0]);
+					output_writer_glcoe.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][0]);
 					output_writer_glcoe.print("\n");
 				}
 				output_writer_glcoe.close();
@@ -2893,7 +2912,7 @@ public class VEGAS {
 				output_writer_decayheat.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 				output_writer_decayheat.print("year decayheat" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-					output_writer_decayheat.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][1]);
+					output_writer_decayheat.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][1]);
 					output_writer_decayheat.print("\n");
 				}
 				output_writer_decayheat.close();
@@ -2907,7 +2926,7 @@ public class VEGAS {
 				output_writer_proliferationresistance.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 				output_writer_proliferationresistance.print("year proliferationresistance" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-					output_writer_proliferationresistance.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][2]);
+					output_writer_proliferationresistance.print((year+START_YEAR) + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2]);
 					output_writer_proliferationresistance.print("\n");
 				}
 				output_writer_proliferationresistance.close();
@@ -2922,7 +2941,7 @@ public class VEGAS {
 				output_writer_ulcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 				output_writer_ulcoe.print("year ulcoe" + "\n");
 				for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-					output_writer_ulcoe.print(year + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][3]);
+					output_writer_ulcoe.print(year + " " + yearlySimulationValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][3]);
 					output_writer_ulcoe.print("\n");
 				}
 				output_writer_ulcoe.close();
@@ -2939,7 +2958,7 @@ public class VEGAS {
 					for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 						output_writer_wastequantities.print((SFGenerated[n_rx][year]/1000) + " " + (SFReprocessedByReactor[n_rx][year]/1000) + " " + (SFReprocessed[n_rx][year]/1000) + " ");
 					}
-					output_writer_wastequantities.print((SFReprocessedByTier[0][year]/1000));
+					//output_writer_wastequantities.print((SFReprocessedByTier[0][year]/1000));
 					output_writer_wastequantities.print("\n");
 				}
 				output_writer_wastequantities.close();
@@ -3110,8 +3129,8 @@ public class VEGAS {
     		if (n_rx==2) print.print("		Percentage=0" + "\n");
     	} else if (strategy==2) {
     		if (n_rx==0) print.print("		Percentage=0" + "\n");
-    		if (n_rx==1) print.print("		Percentage=0" + "\n");
-    		if (n_rx==2) print.print("		Percentage=100" + "\n");
+    		if (n_rx==1) print.print("		Percentage=75" + "\n");
+    		if (n_rx==2) print.print("		Percentage=25" + "\n");
 		} else if (strategy==3) {
     		if (n_rx==0) print.print("		Percentage=0" + "\n");
     		if (n_rx==1) print.print("		Percentage=0" + "\n");
