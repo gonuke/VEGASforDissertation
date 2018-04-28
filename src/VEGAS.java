@@ -2181,15 +2181,24 @@ public class VEGAS {
 					if (verbose) System.out.println("Removed "+REACTORNAMES[reactor_type]+" commissioned in "+year_counter);
 				//type_to_replace_with=ReplaceWithType[reactor_type];
 				
-				
-				if(year_counter<YearReplaceWithTypeSpecified[reactor_type][0]) {
-					type_to_replace_with=ReplaceWithType[reactor_type][0];
-				} else {
-					for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length-1; j++) {
-						if(year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
-					}
-					type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1];
+				type_to_replace_with=0;
+				for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+					if (j<YearReplaceWithTypeSpecified[reactor_type].length-1) if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+					else type_to_replace_with=ReplaceWithType[reactor_type][j];
 				}
+				//if (year_counter>YearReplaceWithTypeSpecified[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1]) type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type][YearReplaceWithTypeSpecified.length-1]];
+//				
+//				if(year_counter<YearReplaceWithTypeSpecified[reactor_type][0]) {
+//					type_to_replace_with=ReplaceWithType[reactor_type][0];
+//				} else {
+//					for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+//						if (j<YearReplaceWithTypeSpecified[reactor_type].length-1) {
+//							if(year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+//						} else {
+//							type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1];
+//						}
+//					}
+//				}
 				
 //				
 //				for(j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
