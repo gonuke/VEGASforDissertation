@@ -31,13 +31,13 @@ DisposalCostGrowthCoefficient=0.0		# need to document TODO
 ##### EXOGENOUS DEMAND FOR NUCLEAR ENERGY #####
 InitialGenerationCapacity=100.		# GW(e): existing at StartYear
 YearInitialFleetBeginsRetiring=2020
-YearInitialFleetFinishesRetiring=2035	# initial fleet retires at constant rate during this interval
+YearInitialFleetFinishesRetiring=2040	# initial fleet retires at constant rate during this interval
 InitialCapacityData[0]={
 	Type=0
 	Percentage=100.		# sum of percentages for initial capacity by type must add to 100.
 	}
 GrowthSpecified[0]={		# Use GrowthSpecified to define the demand for nuclear energy.
-	Year=2015		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
+	Year=2020		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
 	GrowthRate=2.3		# zero growth through 2010, then...
 	}
 
@@ -48,7 +48,7 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=0.
 		}
 	AddCapacity[0]={
-		Year=2030
+		Year=2035
 		Capacity=800.
 		}
 	}
@@ -67,7 +67,7 @@ ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 
 
 ##### SCENARIO RULES #####
-ScenarioSet=true                 # Change manual or dynamic building orders
+ScenarioSet=true                # Change manual or dynamic building orders
 ScenarioRules[0]={
 	Year=2015 		  # first set of rules should always be imposed at Year <= StartYear
 	TryToBuild[0]={		  # VEGAS will meet nuclear energy demand by building the facility types given below
@@ -76,7 +76,7 @@ ScenarioRules[0]={
 		}
 	}
 ScenarioRules[1]={
-	Year=2030
+	Year=2035
 	TryToBuild[0]={
 		FacilityNumber=0
 		Percentage=0
@@ -91,33 +91,33 @@ ScenarioRules[1]={
 		}
 	}
 ScenarioRules[2]={
-	Year=2040
+	Year=2045
 	TryToBuild[0]={
 		FacilityNumber=0
 		Percentage=0
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
-		Percentage=75
+		Percentage=0
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=25
+		Percentage=100
 		}
 	}
 ScenarioRules[3]={
-	Year=2050
+	Year=2055
 	TryToBuild[0]={
 		FacilityNumber=0
 		Percentage=0
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
-		Percentage=75
+		Percentage=0
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=25
+		Percentage=100
 		}
 	}
 

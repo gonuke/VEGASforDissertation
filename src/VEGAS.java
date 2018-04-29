@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 	
 	static boolean only_one=true;
-	static int[] robustInts = {3,2,2,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,2,3,1,1,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -854,7 +854,6 @@ public class VEGAS {
 		int facility_to_use, old_facility_to_use;
 		int[][] number_added=new int[END_YEAR-START_YEAR+1][REACTORNAMES.length];
 		int years_in_ramp_up=0;
-		int[] ramp_up = {1,2,3,5};
 
 		genCap[0][0]=0.;
 		frontEndCharges=0.;
@@ -1811,87 +1810,88 @@ public class VEGAS {
 	/* added by Birdy to fix implementation of limiting builds based on reprocessing capacity */
 	public double[] allTheReprocessing(int year, double[] throughput_by_tier, double[] capacity_by_tier) {
 		
-		int i,j,k;
+		int i,j,k,h;
 		double amount_to_use,amount_available;
 		double pu_yield,ma_yield;
-		
+
 		for(k=0; k < throughput_by_tier.length; k++) {
 			if(capacity_by_tier[k]>throughput_by_tier[k]) {
 
 				for(j=0; j < REACTORNAMES.length; j++) {
-					if(BELONGS_TO_TIER[j] == k) {
+					for (h=0; h<ReprocessHierarchy[j].length; h++) {
+						if(BELONGS_TO_TIER[ReprocessHierarchy[j][h]] == k) {
 
-						if(j==LegacySFType) {
-							if( legacySFStockpile[year-START_YEAR] > EPS) { // if there's legacy fuel in the stockpile else
-								amount_to_use = Math.min(capacity_by_tier[k]-throughput_by_tier[k], legacySFStockpile[year-START_YEAR]);
-								if(amount_to_use>EPS) {
-									throughput_by_tier[k] += amount_to_use;
-									legacySFStockpile[year-START_YEAR] -= amount_to_use;
+							if(ReprocessHierarchy[j][h]==LegacySFType) {
+								if( legacySFStockpile[year-START_YEAR] > EPS) { // if there's legacy fuel in the stockpile else
+									amount_to_use = Math.min(capacity_by_tier[k]-throughput_by_tier[k], legacySFStockpile[year-START_YEAR]);
+									if(amount_to_use>EPS) {
+										throughput_by_tier[k] += amount_to_use;
+										legacySFStockpile[year-START_YEAR] -= amount_to_use;
 
-									pu_yield = getPuYieldOfSF(LegacySFType,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-									ma_yield = getMAYieldOfSF(LegacySFType,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-									ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(LegacySFType,amount_to_use)*(1.-REPROCESS_RECOVERY_FRACTION);
-									ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(LegacySFType,amount_to_use)*(1.-REPROCESS_RECOVERY_FRACTION);
+										pu_yield = getPuYieldOfSF(LegacySFType,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+										ma_yield = getMAYieldOfSF(LegacySFType,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+										ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(LegacySFType,amount_to_use)*(1.-REPROCESS_RECOVERY_FRACTION);
+										ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(LegacySFType,amount_to_use)*(1.-REPROCESS_RECOVERY_FRACTION);
 
-									puStockpile[year-START_YEAR] += pu_yield;
-									maStockpile[year-START_YEAR] += ma_yield;
+										puStockpile[year-START_YEAR] += pu_yield;
+										maStockpile[year-START_YEAR] += ma_yield;
 
-									updateLegacyStockpile(year);
-								} 
-								
-							} else {
-								for(i=0; i < year-COOLING_TIMES[j]-RES_TIMES[j]-START_YEAR; i++) {
-									amount_available = Math.max(SFGenerated[j][i]-SFReprocessed[j][i], 0.);
+										updateLegacyStockpile(year);
+									} 
+
+								} else {
+									for(i=0; i < year-COOLING_TIMES[ReprocessHierarchy[j][h]]-RES_TIMES[ReprocessHierarchy[j][h]]-START_YEAR; i++) {
+										amount_available = Math.max(SFGenerated[ReprocessHierarchy[j][h]][i]-SFReprocessed[ReprocessHierarchy[j][h]][i], 0.);
+										if(amount_available>EPS) {
+											amount_to_use = Math.min(capacity_by_tier[k]-throughput_by_tier[k], amount_available);
+											if(amount_to_use>EPS) {
+												throughput_by_tier[k] += amount_to_use;
+												SFReprocessed[ReprocessHierarchy[j][h]][i] += amount_to_use;
+												yearSFReprocessed[ReprocessHierarchy[j][h]][i] = year;
+												AmountOfSFReprocessed[ReprocessHierarchy[j][h]][i].addElement(new Integer(year));
+												AmountOfSFReprocessed[ReprocessHierarchy[j][h]][i].addElement(new Double(amount_to_use));
+												pu_yield = getPuYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+												ma_yield = getMAYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+												ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
+												ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
+
+												puStockpile[year-START_YEAR] += pu_yield;
+												maStockpile[year-START_YEAR] += ma_yield;
+											}
+										}
+									}
+								}
+
+							} else if (ReprocessHierarchy[j][h]!=LegacySFType) {
+
+								for(i=0; i < year-COOLING_TIMES[ReprocessHierarchy[j][h]]-RES_TIMES[ReprocessHierarchy[j][h]]-START_YEAR; i++) {
+									amount_available = Math.max(SFGenerated[ReprocessHierarchy[j][h]][i]-SFReprocessed[ReprocessHierarchy[j][h]][i], 0.);
 									if(amount_available>EPS) {
 										amount_to_use = Math.min(capacity_by_tier[k]-throughput_by_tier[k], amount_available);
 										if(amount_to_use>EPS) {
 											throughput_by_tier[k] += amount_to_use;
-											SFReprocessed[j][i] += amount_to_use;
-											//SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
-											yearSFReprocessed[j][i] = year;
-											AmountOfSFReprocessed[j][i].addElement(new Integer(year));
-											AmountOfSFReprocessed[j][i].addElement(new Double(amount_to_use));
-											pu_yield = getPuYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-											ma_yield = getMAYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-											ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(j,amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
-											ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(j,amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
+											SFReprocessed[ReprocessHierarchy[j][h]][i] += amount_to_use;
+											yearSFReprocessed[ReprocessHierarchy[j][h]][i] = year;
+											AmountOfSFReprocessed[ReprocessHierarchy[j][h]][i].addElement(new Integer(year));
+											AmountOfSFReprocessed[ReprocessHierarchy[j][h]][i].addElement(new Double(amount_to_use));
+
+											pu_yield = getPuYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+											ma_yield = getMAYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*REPROCESS_RECOVERY_FRACTION;
+											ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
+											ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(ReprocessHierarchy[j][h],amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
 
 											puStockpile[year-START_YEAR] += pu_yield;
 											maStockpile[year-START_YEAR] += ma_yield;
 										}
 									}
 								}
+
 							}
 
-						} else if (j!=LegacySFType) {
-
-							for(i=0; i < year-COOLING_TIMES[j]-RES_TIMES[j]-START_YEAR; i++) {
-								amount_available = Math.max(SFGenerated[j][i]-SFReprocessed[j][i], 0.);
-								if(amount_available>EPS) {
-									amount_to_use = Math.min(capacity_by_tier[k]-throughput_by_tier[k], amount_available);
-									if(amount_to_use>EPS) {
-										throughput_by_tier[k] += amount_to_use;
-										SFReprocessed[j][i] += amount_to_use;
-										//SFReprocessedByReactor[j][year-START_YEAR] += amount_to_use;
-										yearSFReprocessed[j][i] = year;
-										AmountOfSFReprocessed[j][i].addElement(new Integer(year));
-										AmountOfSFReprocessed[j][i].addElement(new Double(amount_to_use));
-
-										pu_yield = getPuYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-										ma_yield = getMAYieldOfSF(j,amount_to_use)*REPROCESS_RECOVERY_FRACTION;
-										ActinideWasteStream[1][year-START_YEAR] += getPuYieldOfSF(j,amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
-										ActinideWasteStream[2][year-START_YEAR] += getMAYieldOfSF(j,amount_to_use)*(1-REPROCESS_RECOVERY_FRACTION);
-
-										puStockpile[year-START_YEAR] += pu_yield;
-										maStockpile[year-START_YEAR] += ma_yield;
-									}
-								}
-							}
-
-						}
-
-					}
-				} // all the reactor types
+						} 
+					} // all reactor types in j's hierarchy
+				} // all reactor types (logic statement if h is in tier k)
+				
 
 			} 
 		} // all the tiers
@@ -1918,6 +1918,7 @@ public class VEGAS {
 					if (uses_sep_actinides==true) break;
 				}
 				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ScriptedReprocessOnDemand[year] = (uses_sep_actinides == true) ? false : true;
+		
 			}
 
 		}
@@ -1979,7 +1980,6 @@ public class VEGAS {
 							if (amount_to_use + throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]] > capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]) amount_to_use = capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]-throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]];
 							throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]+=amount_to_use;
 							if(is_for_real) SFReprocessed[ReprocessHierarchy[reactor_type][i]][j]+=amount_to_use;
-							//if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]+=amount_to_use;
 							if(is_for_real) yearSFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=year;
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Integer(year));
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Double(amount_to_use));			   
@@ -1989,7 +1989,6 @@ public class VEGAS {
 							if (amount_to_use + throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]] > capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]) amount_to_use = capacity_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]-throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]];
 							throughput_by_tier[BELONGS_TO_TIER[ReprocessHierarchy[reactor_type][i]]]+=amount_to_use;
 							if(is_for_real) SFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=SFGenerated[ReprocessHierarchy[reactor_type][i]][j];
-							//if(is_for_real) SFReprocessedByReactor[ReprocessHierarchy[reactor_type][i]][year-START_YEAR]=SFGenerated[ReprocessHierarchy[reactor_type][i]][year-START_YEAR];
 							if(is_for_real) yearSFReprocessed[ReprocessHierarchy[reactor_type][i]][j]=year;
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Integer(year));
 							if(is_for_real) AmountOfSFReprocessed[ReprocessHierarchy[reactor_type][i]][j].addElement(new Double(amount_to_use));				   
@@ -2183,35 +2182,8 @@ public class VEGAS {
 				
 				type_to_replace_with=0;
 				for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-					if (j<YearReplaceWithTypeSpecified[reactor_type].length-1) if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
-					else type_to_replace_with=ReplaceWithType[reactor_type][j];
+					if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
 				}
-				//if (year_counter>YearReplaceWithTypeSpecified[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1]) type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type][YearReplaceWithTypeSpecified.length-1]];
-//				
-//				if(year_counter<YearReplaceWithTypeSpecified[reactor_type][0]) {
-//					type_to_replace_with=ReplaceWithType[reactor_type][0];
-//				} else {
-//					for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-//						if (j<YearReplaceWithTypeSpecified[reactor_type].length-1) {
-//							if(year_counter>=YearReplaceWithTypeSpecified[reactor_type][j] && year_counter<YearReplaceWithTypeSpecified[reactor_type][j+1]) type_to_replace_with=ReplaceWithType[reactor_type][j];
-//						} else {
-//							type_to_replace_with=ReplaceWithType[reactor_type][YearReplaceWithTypeSpecified[reactor_type].length-1];
-//						}
-//					}
-//				}
-				
-//				
-//				for(j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-//					
-//					
-//					
-//					
-//					
-//					if (year_counter >= YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
-////					if (year_count>= System.out.print("we can pause here");
-//				}
-				
-				
 				
 				for(j=year_counter-START_YEAR; j<Math.min(END_YEAR-START_YEAR+1,year_counter-START_YEAR+NewReactorLifetime); j++) {
 					genCap[reactor_type][j]-=PLANT_SIZE[reactor_type];
@@ -3138,8 +3110,8 @@ public class VEGAS {
     		if (n_rx==2) print.print("		Percentage=0" + "\n");
     	} else if (strategy==2) {
     		if (n_rx==0) print.print("		Percentage=0" + "\n");
-    		if (n_rx==1) print.print("		Percentage=75" + "\n");
-    		if (n_rx==2) print.print("		Percentage=25" + "\n");
+    		if (n_rx==1) print.print("		Percentage=0" + "\n");
+    		if (n_rx==2) print.print("		Percentage=100" + "\n");
 		} else if (strategy==3) {
     		if (n_rx==0) print.print("		Percentage=0" + "\n");
     		if (n_rx==1) print.print("		Percentage=0" + "\n");
