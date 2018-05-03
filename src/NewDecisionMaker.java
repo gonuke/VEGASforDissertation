@@ -48,9 +48,11 @@ public class NewDecisionMaker {
 	/* G's objective function weights */
 	static double[] g_weights = DMInputs.getGWeights();
 	/* G's R&D options */
-	static int[] g_one_strategy = DMInputs.getChosenReprocessingCost().length; // this is just the length of reprocessing cost outcomes
+	static double[] chosen_reprocessing_cost = DMInputs.getChosenReprocessingCost();
+	static int[] g_one_strategy;
 	/* G's policy incentives: indexes over the possible capital subsidies offered  */
-	static int[] g_two_strategy = DMInputs.get_g_StageTwoStrategies();
+	static double[][] chosen_capital_subsidy = DMInputs.getChosenCapitalSubsidy();
+	static int[] g_two_strategy;
 	/* End */
 
 	/* Nature outcomes */
@@ -80,28 +82,31 @@ public class NewDecisionMaker {
 	static double[][] dispcost_probability = DMInputs.getDisposalCostProbabilities();
 	/* End */
 
-	static double[][][][][][][][][] leaf_values = new double[u_one_strategy.length][u_one_strategy.length][u_one_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost][4];
+	static double[][][][][][][][][] leaf_values;
 	
 	/* For perfect information strategies */
 	/* u_three_perfectinfo[u_one][u_two][g_one][g_two][dispcost_outcome][htgr_capcost][sfr_capcost] */
-	static int[][][][][][][] u_three_perfectinfo = new int[u_one_strategy.length][u_two_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
-	static int[][][][][][] u_two_perfectinfo = new int[u_one_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
-	static int[][][][][] g_two_perfectinfo = new int[u_one_strategy.length][g_one_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
-	static int[][][][] u_one_perfectinfo = new int[g_one_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
-	static int[][][] g_one_perfectinfo = new int[n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
-
+	static int[][][][][][][] u_three_perfectinfo;
+	static int[][][][][][] u_two_perfectinfo;
+	static int[][][][][] g_two_perfectinfo;
+	static int[][][][] u_one_perfectinfo;
+	static int[][][] g_one_perfectinfo;
+	
 	/* For hedging strategies */
 	/* iff htgr or sfr outcome == 3, this means that the capital cost hasn't been realized */
-	static int[][][][][][] u_two_hedge = new int[g_one_strategy.length][n_dispcost_outcome][u_one_strategy.length][n_htgr_capcost+1][n_sfr_capcost+1][g_two_strategy.length];
-	static int[][][][][] g_two_hedge = new int[g_one_strategy.length][n_dispcost_outcome][u_one_strategy.length][n_htgr_capcost+1][n_sfr_capcost+1];
-	static int[][] u_one_hedge = new int[g_one_strategy.length][n_dispcost_outcome];
-	static int g_one_hedge = 0;
+	static int[][][][][][] u_two_hedge;
+	static int[][][][][] g_two_hedge;
+	static int[][] u_one_hedge;
+	static int g_one_hedge;
+	
+	
 
 	public NewDecisionMaker() {
 	}
 
 	public static void main(String args[]) {
 		NewDecisionMaker decide = new NewDecisionMaker();
+		decide.dimensionArrays();
 		/* get the data, then normalize it */
 		decide.loadData();
 		decide.normalizeData();
@@ -113,6 +118,33 @@ public class NewDecisionMaker {
 		decide.printHedgingStrategies();
 	}
 
+	public void dimensionArrays() {
+		
+		g_one_strategy = new int[chosen_reprocessing_cost.length];
+		for (int i=0; i<chosen_reprocessing_cost.length; i++) g_one_strategy[i] = i;
+		
+		g_two_strategy = new int[chosen_capital_subsidy.length];
+		for (int i=0; i<chosen_capital_subsidy.length; i++) g_two_strategy[i] = i;
+		
+		leaf_values = new double[u_one_strategy.length][u_one_strategy.length][u_one_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost][4];
+		
+		/* For perfect information strategies */
+		/* u_three_perfectinfo[u_one][u_two][g_one][g_two][dispcost_outcome][htgr_capcost][sfr_capcost] */
+		u_three_perfectinfo = new int[u_one_strategy.length][u_two_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
+		u_two_perfectinfo = new int[u_one_strategy.length][g_one_strategy.length][g_two_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
+		g_two_perfectinfo = new int[u_one_strategy.length][g_one_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
+		u_one_perfectinfo = new int[g_one_strategy.length][n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
+		g_one_perfectinfo = new int[n_dispcost_outcome][n_htgr_capcost][n_sfr_capcost];
+
+		/* For hedging strategies */
+		/* iff htgr or sfr outcome == 3, this means that the capital cost hasn't been realized */
+		u_two_hedge = new int[g_one_strategy.length][n_dispcost_outcome][u_one_strategy.length][n_htgr_capcost+1][n_sfr_capcost+1][g_two_strategy.length];
+		g_two_hedge = new int[g_one_strategy.length][n_dispcost_outcome][u_one_strategy.length][n_htgr_capcost+1][n_sfr_capcost+1];
+		u_one_hedge = new int[g_one_strategy.length][n_dispcost_outcome];
+		g_one_hedge = 0;
+		
+	}
+	
 	public void loadData() {
 
 		String inputFile = "DecisionMakingResults.txt";
@@ -130,7 +162,9 @@ public class NewDecisionMaker {
 			int numberOfLines = readLines();
 			buf = new BufferedReader(new FileReader(data));
 			
-			for (j=0; j<numberOfLines; j++) {
+			current_line = buf.readLine();
+			
+			for (j=0; j<numberOfLines-1; j++) {
 
 				current_line = buf.readLine();
 
@@ -336,7 +370,7 @@ public class NewDecisionMaker {
 						g_stage_two = g_two_perfectinfo[u_stage_one][g_stage_one][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]];
 						u_stage_two = u_two_perfectinfo[u_stage_one][g_stage_one][g_stage_two][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]];
 						u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]];
-						obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]]);
+						obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]]);
 						temp_double[u_stage_one] = obj_function;
 					}
 					u_one_perfectinfo[g_stage_one][dispcost_outcome][CapitalCostCombos[capital_cost][1]][CapitalCostCombos[capital_cost][2]] = u_one_strategy[getIndexOfMax(temp_double)];
@@ -415,7 +449,7 @@ public class NewDecisionMaker {
 										temp_double[u_stage_two] += chance*obj_function;
 									}
 								}
-								int the_max = getIndexOfMax(temp_double);
+								//int the_max = getIndexOfMax(temp_double);
 								u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = u_two_strategy[getIndexOfMax(temp_double)];
 								//int the_hedge = u_two_strategy[getIndexOfMax(temp_double)];
 								//u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = the_hedge;
@@ -614,7 +648,7 @@ public class NewDecisionMaker {
 							for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
 								u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome];
 								chance = dispcost_probability[g_stage_one][dispcost_outcome]*htgr_capcost_probability[u_two_htgr_outcome]*sfr_capcost_probability[u_two_sfr_outcome];
-								obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome]);
+								obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome]);
 								temp_double[g_stage_one] += chance*obj_function;
 							}
 						}
@@ -626,7 +660,7 @@ public class NewDecisionMaker {
 							for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
 								u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome];
 								chance = dispcost_probability[g_stage_one][dispcost_outcome]*htgr_capcost_probability[u_one_htgr_outcome]*sfr_capcost_probability[u_two_sfr_outcome];
-								obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome]);
+								obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome]);
 								temp_double[g_stage_one] += chance*obj_function;
 							}
 						}
@@ -638,7 +672,7 @@ public class NewDecisionMaker {
 							for (u_two_htgr_outcome=0; u_two_htgr_outcome<n_sfr_capcost; u_two_htgr_outcome++) {
 								u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome];
 								chance = dispcost_probability[g_stage_one][dispcost_outcome]*htgr_capcost_probability[u_two_htgr_outcome]*sfr_capcost_probability[u_one_sfr_outcome];
-								obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome]);
+								obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome]);
 								temp_double[g_stage_one] += chance*obj_function;
 							}
 						}
@@ -649,7 +683,7 @@ public class NewDecisionMaker {
 								u_stage_two = u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two];
 								u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_one_sfr_outcome];
 								chance = htgr_capcost_probability[u_one_htgr_outcome]*sfr_capcost_probability[u_one_sfr_outcome];
-								obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_one_sfr_outcome]);
+								obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_one_sfr_outcome]);
 								temp_double[g_stage_one] += chance*obj_function;
 							}
 						}

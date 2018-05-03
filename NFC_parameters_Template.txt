@@ -1,6 +1,7 @@
 ##### GENERAL VEGAS SIMULATION INPUTS #####
 VerboseMode=false			# toggles verbose mode
 ReprocessOnDemand=false		# false to utilize full reprocessing capacity # now changed within the Vegas class to follow the Try to Build scenarios
+UseScriptedReprocessOnDemand=true
 
 ##### GENERAL ECONOMIC INPUTS #####
 SocialDiscountRate=2.0         		# percent

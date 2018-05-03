@@ -1,7 +1,7 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) 1/2, (double) 1/2, (double) 0};
+	static double[] GCriterionWeights = {(double) 1/3, (double) 1/3, (double) 1/3};
 	static double[] UCriterionWeights = {(double) 1};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
