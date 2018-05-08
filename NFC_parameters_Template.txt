@@ -48,9 +48,13 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Year=2015
 		Capacity=0.
 		}
-	AddCapacity[0]={
+	AddCapacity[1]={
 		Year=2035
 		Capacity=800.
+		}
+	AddCapacity[2]={
+		Year=2055
+		Capacity=1800.
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
@@ -70,7 +74,7 @@ ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 ##### SCENARIO RULES #####
 ScenarioSet=true                # Change manual or dynamic building orders
 ScenarioRules[0]={
-	Year=2015 		  # first set of rules should always be imposed at Year <= StartYear
+	Year=2020 		  # first set of rules should always be imposed at Year <= StartYear
 	TryToBuild[0]={		  # VEGAS will meet nuclear energy demand by building the facility types given below
 		FacilityNumber=0   # This is referenced to the FacilityNumber in Reactor_parameters.txt
 		Percentage=100.	  # target percentage of new plant builds by net electric generation capacity

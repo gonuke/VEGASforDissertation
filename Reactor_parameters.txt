@@ -2,7 +2,7 @@
 FacilityNumber					0			1			2
 Name							APWR-UOX	HTGR-UOX	SFR
 BelongsToTier					0			0			2
-YearAvailable					2015		2015		2015
+YearAvailable					2020		2020		2020
 ReactorPrototype				FALSE		TRUE		TRUE
 AllowedToUseSeparatedActinides	FALSE		FALSE		TRUE
 PlantSize						3000		350			1000
@@ -38,8 +38,8 @@ HLWDisposalCost					D			D			D
 NOAKCapitalCost					4100		4000		4000
 %%% REPROCESSING HIERARCHY %%% SEE COMMENTS BELOW %%%															
 Members							X			X			2,1,0
-IfCausesTiltReplaceWithType		0			1		 	1,1,1
-IfCausesTiltYear				2015		2015		2035,2045,2055
+IfCausesTiltReplaceWithType		0			1		 	1,0,1
+IfCausesTiltYear				2020		2020		2035,2045,2055
 			
 %%%%%% COMMENTS & SAMPLE INPUTS %%%%%%  
 Name="PWR"  				# Keep this short as it appears on the plots; no spaces allowed
