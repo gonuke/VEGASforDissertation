@@ -1342,7 +1342,7 @@ public class VEGAS {
 			}
 		}
 		
-		System.out.print("returning " + over_built + "\n");
+		//System.out.print("returning " + over_built + "\n");
 
 		return(over_built);
 
@@ -2495,38 +2495,40 @@ public class VEGAS {
 
 		type_to_replace_with=19;
 		year_counter=year;
-		while(!success) {
-			if(reactor_type<0) 
-				if (verbose) System.out.println("It's reactor type, in year "+year_counter);
-			if(year_counter-START_YEAR < 0) 
-				if (verbose) System.out.println("It's start year, "+year_counter+", rx type "+reactor_type);
-			if(facilitiesAdded[reactor_type][year_counter-START_YEAR]>0) {
-				success=true;
-				facilitiesAdded[reactor_type][year_counter-START_YEAR]--;
-				if(bug) 
-					if (verbose) System.out.println("Removed "+REACTORNAMES[reactor_type]+" commissioned in "+year_counter);
-				//type_to_replace_with=ReplaceWithType[reactor_type];
+		//while(!success) {
+		//if(reactor_type<0) // the reactor type is never less than 0 ... 
+		//if (!verbose) System.out.println("It's reactor type, in year "+year_counter);
+		if(year_counter-START_YEAR < 0) 
+			if (!verbose) System.out.println("It's start year, "+year_counter+", rx type "+reactor_type);
+		if(facilitiesAdded[reactor_type][year_counter-START_YEAR]>0) {
+			success=true;
+			facilitiesAdded[reactor_type][year_counter-START_YEAR]--;
+			if(bug) 
+				if (!verbose) System.out.println("Removed "+REACTORNAMES[reactor_type]+" commissioned in "+year_counter);
+			//type_to_replace_with=ReplaceWithType[reactor_type];
 
-				type_to_replace_with=0;
-				for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-					if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
-				}
 
-				for(j=year_counter-START_YEAR; j<Math.min(END_YEAR-START_YEAR+1,year_counter-START_YEAR+NewReactorLifetime); j++) {
-					genCap[reactor_type][j]-=PLANT_SIZE[reactor_type];
-					totalGenCap[j]-=PLANT_SIZE[reactor_type];
-					frontEndCharges-=augmentFrontEndChargesnp(PLANT_SIZE[reactor_type],reactor_type,j);
-					reactorCharges-=augmentReactorCharges(PLANT_SIZE[reactor_type],reactor_type);
-				}
+			for(j=year_counter-START_YEAR; j<Math.min(END_YEAR-START_YEAR+1,year_counter-START_YEAR+NewReactorLifetime); j++) {
+				genCap[reactor_type][j]-=PLANT_SIZE[reactor_type];
+				totalGenCap[j]-=PLANT_SIZE[reactor_type];
+				frontEndCharges-=augmentFrontEndChargesnp(PLANT_SIZE[reactor_type],reactor_type,j);
+				reactorCharges-=augmentReactorCharges(PLANT_SIZE[reactor_type],reactor_type);
 			}
-			else year_counter--;
+			//}
+			//else year_counter--;
 		}
-		boolean added_one=false;
+
+		type_to_replace_with=0;
+		for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+			if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) type_to_replace_with=ReplaceWithType[reactor_type][j];
+		}
+			
+		//boolean added_one=false;
 		for(i=year_counter-START_YEAR; i<END_YEAR-START_YEAR+1; i++) {
 			while(totalGenCap[i]<targetGenCap[i]) {
 				if(PLANT_SIZE[type_to_replace_with] < 0.5*(targetGenCap[i]-totalGenCap[i])) {
 					if(bug) 
-						if (verbose) System.out.println("Replaced with "+REACTORNAMES[type_to_replace_with]+" in "+(i+START_YEAR));
+						if (!verbose) System.out.println("Replaced with "+REACTORNAMES[type_to_replace_with]+" in "+(i+START_YEAR));
 					facilitiesAdded[type_to_replace_with][i]++;
 					for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
 						genCap[type_to_replace_with][j]+=PLANT_SIZE[type_to_replace_with];
@@ -2534,12 +2536,12 @@ public class VEGAS {
 						frontEndCharges+=augmentFrontEndChargesnp(PLANT_SIZE[type_to_replace_with],type_to_replace_with,j);   ////////////////not sure: i or j?
 						reactorCharges+=augmentReactorCharges(PLANT_SIZE[type_to_replace_with],type_to_replace_with);
 					}
-					added_one=true;
+					//added_one=true;
 				}
 				else break;
 				//if(added_one) break;
 			}
-			if(added_one) break;
+			//if(added_one) break;
 		} 
 
 		frontEndCharges=0.;
