@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static int[] robustInts = {3,2,2,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,1,1,1,1,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -981,9 +981,10 @@ public class VEGAS {
 
 				facility_to_use = j;
 				demand_satisfied = false;
+				for(int k=0; k<tried_this_one.length; k++) tried_this_one[k] = false;
 
 				if(RX_PROTOTYPE[j]) {
-					
+
 					if (overBuiltPrototype(i, j)) { // can delete this one
 
 						subtractOverBuiltFacilities(i, j);
@@ -994,57 +995,32 @@ public class VEGAS {
 						/* go through the build order array */
 						for (int k=0; k<BuildOrder[hierarchy_to_use].length; k++) { 
 							if (BuildOrder[hierarchy_to_use][k]!=facility_to_use && tried_this_one[BuildOrder[hierarchy_to_use][k]]==false) {
-								//if (!overBuildingPrototype(i, BuildOrder[hierarchy_to_use][k]) || !RX_PROTOTYPE[facility_to_use]) {
-
 								demand_satisfied = addReplacementFacilities(i, BuildOrder[hierarchy_to_use][k]);
 								if (demand_satisfied) break;
 								tried_this_one[BuildOrder[hierarchy_to_use][k]] = true;
-								//}
 							}
 						}
 
 						/* if we go through the BuildOrder without building */
 						/* go through the facility's replace with type list */
 						if (!demand_satisfied) {
-							
-//							for (n_replace_with_type=facility_to_use; n_replace_with_type>=0; n_replace_with_type--) {
-//
-//								if (!demand_satisfied) {
-//									for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[n_replace_with_type].length; n_replace_with_year++) {
-//										if (i >= YearReplaceWithTypeSpecified[n_replace_with_type][n_replace_with_year]-START_YEAR) break;
-//									}
-//
-//									if (!overBuildingPrototype(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]) || !RX_PROTOTYPE[ReplaceWithType[n_replace_with_type][n_replace_with_year]]) {
-//										demand_satisfied = addReplacementFacilities(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]);
-//										
-//										if (demand_satisfied == true && ReplaceWithType[n_replace_with_type][n_replace_with_year]==1) {
-//											System.out.print("It's year " + (i+START_YEAR) + " and we replaced facility " + j + " with facility " + ReplaceWithType[n_replace_with_type][n_replace_with_year] + "\n");
-//										}
-//										
-//									} else break;
-//								}
-//							}
-							
+
 							facility_to_use = j;
-							
+
 							for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-								
+
 								for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
 									if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
 								}
-								
+
 								if (tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]==false) demand_satisfied = addReplacementFacilities(i, ReplaceWithType[facility_to_use][n_replace_with_year]);
 								tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]=true;
 								if (demand_satisfied) break;
-								
+
 								facility_to_use = ReplaceWithType[facility_to_use][n_replace_with_year];
-								//facility_to_use = ReplaceWithType[n_replace_with_type]
 
 							}
-							
-							
-							
-							
+
 						}
 
 					}
@@ -1146,31 +1122,6 @@ public class VEGAS {
 
 		if (years_in_ramp_up[facility_to_use]>0 && years_in_ramp_up[facility_to_use]<=reactorRampUp[facility_to_use].length) {
 			if (facilitiesAdded[facility_to_use][year]>reactorRampUp[facility_to_use][years_in_ramp_up[facility_to_use]-1]) {
-				over_built=true;
-			}
-		}
-
-		return(over_built);
-
-	}
-	
-	/* checks if adding a facility exceeds the limit on prototype reactor orders */
-	public boolean overBuildingPrototype(int year, int facility_to_use) {
-
-		boolean over_built = false;
-		int n_rx;
-		int j;
-		int[] years_in_ramp_up = {0,0,0};
-		int[][] ramp_up = { {100000}, {1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
-
-		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-			for (j=1; j<=year; j++) {
-				if(facilitiesAdded[n_rx][j]>0) years_in_ramp_up[n_rx]++;
-			}
-		}
-
-		if (years_in_ramp_up[facility_to_use]>0 && years_in_ramp_up[facility_to_use]<=ramp_up[facility_to_use].length) {
-			if (facilitiesAdded[facility_to_use][year]>ramp_up[facility_to_use][years_in_ramp_up[facility_to_use]-1]) {
 				over_built=true;
 			}
 		}

@@ -54,7 +54,7 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		}
 	AddCapacity[2]={
 		Year=2055
-		Capacity=1800.
+		Capacity=400.
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
