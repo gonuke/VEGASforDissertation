@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static int[] robustInts = {2,2,2,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,2,2,1,1,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -943,29 +943,111 @@ public class VEGAS {
 				} else break;
 
 			}
+		}
 
-			if(ScenarioManual==false){ /* for Estonians */ 
-				for(j=0; j<REACTORNAMES.length; j++) { 
-					SFGenerated[j][i]+=genCap[j][i]*capacityToMass(j);
-					totalEnergyGenerated+=genCap[j][i]*365.*AVAILABILITY[j];
-					frontEndCharges+=augmentFrontEndChargesnp(genCap[j][i],j,i);
-					reactorCharges+=augmentReactorCharges(genCap[j][i],j);
-					NatUraniumUse[j][i]=SFGenerated[j][i]*FRONTENDMASS[j][0];       //initial NU use estimations based on TryToBuild
-				}
+		/* The indexing over years is wrong I think, but scenario manual isn't used */
+
+		for(j=0; j<REACTORNAMES.length; j++) { 
+			for (i=0; i<END_YEAR-START_YEAR+1; i++) {
+				SFGenerated[j][i]=genCap[j][i]*capacityToMass(j);
+				totalEnergyGenerated+=genCap[j][i]*365.*AVAILABILITY[j];
+				frontEndCharges+=augmentFrontEndChargesnp(genCap[j][i],j,i);
+				reactorCharges+=augmentReactorCharges(genCap[j][i],j);
 			}
-
 		}
 
 
-		/* increments the total generating capacity, SF inventories, and front end and reactor charges */
-		if(ScenarioManual==true){
+		if(ScenarioManual==false){ /* for Estonians */ 
 			for(j=0; j<REACTORNAMES.length; j++) { 
-				for(i=0; i<END_YEAR-START_YEAR+1; i++) {
-					//totalGenCap[i]+=genCap[j][i];
-					SFGenerated[j][i]+=genCap[j][i]*capacityToMass(j);
-					totalEnergyGenerated+=genCap[j][i]*365.*AVAILABILITY[j];
-					frontEndCharges+=augmentFrontEndChargesnp(genCap[j][i],j,i);
-					reactorCharges+=augmentReactorCharges(genCap[j][i],j);                       
+				for (i=0; i<END_YEAR-START_YEAR+1; i++) {
+					NatUraniumUse[j][i]=SFGenerated[j][i]*FRONTENDMASS[j][0];       //initial NU use estimations based on TryToBuild
+				}
+			}
+		}
+
+	}
+	
+	
+	public void orderPrototypeReactors() {
+		
+		int i,j;
+		int facility_to_use, hierarchy_to_use=0;
+		int n_replace_with_year, n_replace_with_type;
+		boolean demand_satisfied=false;
+		boolean[] tried_this_one = {false, false, false};
+
+		for(i=0; i<END_YEAR-START_YEAR+1; i++) {  
+			for(j=0; j<REACTORNAMES.length;j++) {
+
+				facility_to_use = j;
+				demand_satisfied = false;
+
+				if(RX_PROTOTYPE[j]) {
+					
+					if (overBuiltPrototype(i, j)) { // can delete this one
+
+						subtractOverBuiltFacilities(i, j);
+
+						/* find what year we're in, and use the appropriate Try To Build scenario rules */
+						if(i+START_YEAR > HierarchyByYear[hierarchy_to_use+1]) hierarchy_to_use++;
+
+						/* go through the build order array */
+						for (int k=0; k<BuildOrder[hierarchy_to_use].length; k++) { 
+							if (BuildOrder[hierarchy_to_use][k]!=facility_to_use && tried_this_one[BuildOrder[hierarchy_to_use][k]]==false) {
+								//if (!overBuildingPrototype(i, BuildOrder[hierarchy_to_use][k]) || !RX_PROTOTYPE[facility_to_use]) {
+
+								demand_satisfied = addReplacementFacilities(i, BuildOrder[hierarchy_to_use][k]);
+								if (demand_satisfied) break;
+								tried_this_one[BuildOrder[hierarchy_to_use][k]] = true;
+								//}
+							}
+						}
+
+						/* if we go through the BuildOrder without building */
+						/* go through the facility's replace with type list */
+						if (!demand_satisfied) {
+							
+//							for (n_replace_with_type=facility_to_use; n_replace_with_type>=0; n_replace_with_type--) {
+//
+//								if (!demand_satisfied) {
+//									for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[n_replace_with_type].length; n_replace_with_year++) {
+//										if (i >= YearReplaceWithTypeSpecified[n_replace_with_type][n_replace_with_year]-START_YEAR) break;
+//									}
+//
+//									if (!overBuildingPrototype(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]) || !RX_PROTOTYPE[ReplaceWithType[n_replace_with_type][n_replace_with_year]]) {
+//										demand_satisfied = addReplacementFacilities(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]);
+//										
+//										if (demand_satisfied == true && ReplaceWithType[n_replace_with_type][n_replace_with_year]==1) {
+//											System.out.print("It's year " + (i+START_YEAR) + " and we replaced facility " + j + " with facility " + ReplaceWithType[n_replace_with_type][n_replace_with_year] + "\n");
+//										}
+//										
+//									} else break;
+//								}
+//							}
+							
+							facility_to_use = j;
+							
+							for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+								
+								for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
+									if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
+								}
+								
+								if (tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]==false) demand_satisfied = addReplacementFacilities(i, ReplaceWithType[facility_to_use][n_replace_with_year]);
+								tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]=true;
+								if (demand_satisfied) break;
+								
+								facility_to_use = ReplaceWithType[facility_to_use][n_replace_with_year];
+								//facility_to_use = ReplaceWithType[n_replace_with_type]
+
+							}
+							
+							
+							
+							
+						}
+
+					}
 
 				}
 			}
@@ -977,21 +1059,29 @@ public class VEGAS {
 	public boolean addReplacementFacilities(int year, int facility_to_use) {
 		
 		int i, how_many=0;
-		boolean facility_replaced = false;
+		boolean demand_satisfied = false;
+		int years_in_ramp_up=0;
+		
+		for (i=0; i<=year; i++) {
+			if(facilitiesAdded[facility_to_use][i]>0) years_in_ramp_up++;
+		}
 		
 		while (totalGenCap[year]<targetGenCap[year]) {
 			
 			if (PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[year]-totalGenCap[year])) {
 				
 				facilitiesAdded[facility_to_use][year]++;
-				facility_replaced = true;
 				how_many++;
-				
+
 				for (int j=year; j<Math.min(END_YEAR-START_YEAR+1, year+NewReactorLifetime); j++) {
 					genCap[facility_to_use][j] += PLANT_SIZE[facility_to_use];
 					totalGenCap[j] += PLANT_SIZE[facility_to_use]; 
 				}
-				
+
+				if (years_in_ramp_up<reactorRampUp[facility_to_use].length) {
+					if (how_many==reactorRampUp[facility_to_use][years_in_ramp_up]) break;
+				}
+
 			} else break;
 			
 		}
@@ -1005,7 +1095,9 @@ public class VEGAS {
 
 		}
 		
-		return(facility_replaced);
+		if (PLANT_SIZE[facility_to_use] > 0.8*(targetGenCap[year]-totalGenCap[year])) demand_satisfied = true;
+		
+		return(demand_satisfied);
 		
 	}
 
@@ -1014,7 +1106,7 @@ public class VEGAS {
 		int i, how_many=0;
 		int years_in_ramp_up = 0;
 		
-		for (i=1; i<=year; i++) {
+		for (i=0; i<=year; i++) {
 			if(facilitiesAdded[facility_to_use][i]>0) years_in_ramp_up++;
 		}
 		
@@ -1045,16 +1137,15 @@ public class VEGAS {
 		int n_rx;
 		int j;
 		int[] years_in_ramp_up = {0,0,0};
-		int[][] ramp_up = { {100000}, {1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
 
 		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-			for (j=1; j<=year; j++) {
+			for (j=0; j<=year; j++) {
 				if(facilitiesAdded[n_rx][j]>0) years_in_ramp_up[n_rx]++;
 			}
 		}
 
-		if (years_in_ramp_up[facility_to_use]>0 && years_in_ramp_up[facility_to_use]<=ramp_up[facility_to_use].length) {
-			if (facilitiesAdded[facility_to_use][year]>ramp_up[facility_to_use][years_in_ramp_up[facility_to_use]-1]) {
+		if (years_in_ramp_up[facility_to_use]>0 && years_in_ramp_up[facility_to_use]<=reactorRampUp[facility_to_use].length) {
+			if (facilitiesAdded[facility_to_use][year]>reactorRampUp[facility_to_use][years_in_ramp_up[facility_to_use]-1]) {
 				over_built=true;
 			}
 		}
@@ -2110,9 +2201,8 @@ public class VEGAS {
 		boolean infinite_loop=true;
 		boolean switch_capacity=false;
 		int doing_tier=0;
-		int facility_to_use, hierarchy_to_use=0;
-		int n_replace_with_year, n_replace_with_type;
-		boolean facility_replaced=false;
+		int hierarchy_to_use=0;
+
 
 		puStockpile[0]=0;
 		maStockpile[0]=0;
@@ -2146,64 +2236,6 @@ public class VEGAS {
 			for(doing_tier=0; doing_tier<3; doing_tier++) {
 				for(j=0; j<REACTORNAMES.length;j++) {
 					if(BELONGS_TO_TIER[j]==doing_tier) {
-
-						facility_to_use = j;
-						facility_replaced = false;
-						
-						if(RX_PROTOTYPE[j] && overBuiltPrototype(i, j)) {
-
-							subtractOverBuiltFacilities(i, j);
-
-							/* find what year we're in, and use the appropriate Try To Build scenario rules */
-							if(i+START_YEAR > HierarchyByYear[hierarchy_to_use+1]) hierarchy_to_use++;
-
-							/* go through the build order array */
-							for (int k=0; k<BuildOrder[hierarchy_to_use].length; k++) { 
-								if (BuildOrder[hierarchy_to_use][k]!=facility_to_use) {
-									if (!overBuildingPrototype(i, BuildOrder[hierarchy_to_use][k]) || !RX_PROTOTYPE[facility_to_use]) {
-										facility_replaced = addReplacementFacilities(i, BuildOrder[hierarchy_to_use][k]);
-									}
-								}
-							}
-							
-							/* if we go through the BuildOrder without building */
-							/* go through the facility's replace with type list */
-							if (!facility_replaced) {
-								for (n_replace_with_type=facility_to_use; n_replace_with_type>-1; n_replace_with_type--) {
-
-									if (!facility_replaced) {
-										for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[n_replace_with_type].length; n_replace_with_year++) {
-											if (i >= YearReplaceWithTypeSpecified[n_replace_with_type][n_replace_with_year]-START_YEAR) break;
-										}
-
-										if (!overBuildingPrototype(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]) || !RX_PROTOTYPE[ReplaceWithType[n_replace_with_type][n_replace_with_year]]) {
-											facility_replaced = addReplacementFacilities(i, ReplaceWithType[n_replace_with_type][n_replace_with_year]);
-										} else break;
-									}
-								}
-							}
-
-							//if (facility_replaced) return(false);
-							
-						}
-						
-						if (i>16) {
-							System.out.print("look at demand");
-						}
-						
-						getPuDemand();
-						getMADemand();
-			
-						if (i>16) {
-							System.out.print("look at demand");
-						}
-						
-						//if (facility_replaced)
-						
-//						if (facility_replaced) {
-//							tilt = false;
-//							return(false);
-//						}
 						
 						if(puDemand[j][i] > 0. || maDemand[j][i] > 0.) {
 							is_for_real=true;
@@ -2247,7 +2279,6 @@ public class VEGAS {
 								}
 								if (tilt==true) {
 									if (!switch_capacity) modifyCapacity(j,i+START_YEAR);
-									System.out.print("resetting demand");
 									tilt=false;
 									return(false);
 								}
@@ -2807,6 +2838,7 @@ public class VEGAS {
 			if(bug) 
 				if (verbose) System.out.println("VEGAS Executing...");
 			setLegacySFStockpile();
+			orderPrototypeReactors();
 			getPuDemand();
 			getMADemand();
 			success=reprocessSF();
@@ -3538,7 +3570,7 @@ public class VEGAS {
 
 	public static void writeSFRReplace(PrintWriter print, String data, String key, int strategy_three, int strategy_six, int strategy_eight) {
 
-		StringBuilder value = new StringBuilder("IfCausesTiltReplaceWithType		0			1		 	");
+		StringBuilder value = new StringBuilder("IfCausesTiltReplaceWithType		0			0		 	");
 
 		if (strategy_three==0) value.append("0,");
 		if (strategy_three==1) value.append("1,");
