@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static int[] robustInts = {3,1,1,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,3,1,1,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -969,7 +969,7 @@ public class VEGAS {
 	
 	
 	public void orderPrototypeReactors() {
-		
+
 		int i,j;
 		int facility_to_use, hierarchy_to_use=0;
 		int n_replace_with_year, n_replace_with_type;
@@ -1086,7 +1086,7 @@ public class VEGAS {
 			if(facilitiesAdded[facility_to_use][i]>0) years_in_ramp_up++;
 		}
 		
-		if (years_in_ramp_up<reactorRampUp[facility_to_use].length) {
+		if (years_in_ramp_up<=reactorRampUp[facility_to_use].length) {
 			
 			how_many = facilitiesAdded[facility_to_use][year] - reactorRampUp[facility_to_use][years_in_ramp_up-1];
 			facilitiesAdded[facility_to_use][year] -= how_many;

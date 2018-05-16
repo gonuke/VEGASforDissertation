@@ -103,11 +103,11 @@ ScenarioRules[2]={
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
-		Percentage=100
+		Percentage=0
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=0
+		Percentage=100
 		}
 	}
 ScenarioRules[3]={
@@ -118,11 +118,11 @@ ScenarioRules[3]={
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
-		Percentage=100
+		Percentage=0
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=0
+		Percentage=100
 		}
 	}
 
