@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,1,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -2177,9 +2177,19 @@ public class VEGAS {
 			for (int k=0; k<NumberOfTiers; k++) {  //iterate through all tiers
 				capacity_by_feed_tier[k]=9.e15;    //default effectively infinite reprocessing value
 				for(j=0; j<ReprocessingAdditions[k]; j++) {
+					if (year >=2055) {
+						System.out.print("here with specified tier cap " + specifiedTierCap[k][j]!=0. + " and capacity by feed tier " + capacity_by_feed_tier[k] + "\n");
+					}
 					if(year>=YearReprocessingSpecified[k][j]) {
+						capacity_by_feed_tier[k]=9.e15;
 						if (specifiedTierCap[k][j]!=0. || capacity_by_feed_tier[k]==9.e15) {   // if the cap is not 0 or only the default infinite value
+							if(year>=2055) {
+								System.out.print("look here");
+							}
 							capacity_by_feed_tier[k]=specifiedTierCap[k][j];
+							if(year>=2055) {
+								System.out.print("look here");
+							}
 						}
 						else {                                                               // if growth is specified instead
 							if (year>=YearReprocessingSpecified[k][j+1]) {                      // if several different growths have to be included
@@ -2191,6 +2201,9 @@ public class VEGAS {
 						}
 					}
 				} 
+			}
+			if(year>=2055) {
+				System.out.print("look here");
 			}
 
 			for(doing_tier=0; doing_tier<3; doing_tier++) {
@@ -3551,22 +3564,29 @@ public class VEGAS {
 
 	}
 
-	// TODO
+	// TODO only expand based on sfr decisions.. 
 	public static void writeReprocessingCapacity(PrintWriter print, String key, int first_reactor_build_decision, int second_reactor_build_decision, int final_reactor_build_decision) {
 
-		int htgr_and_sfr_decisions=0;
-		int lwr_and_sfr_decisions=0;
-
-		if (first_reactor_build_decision==2) {
-			lwr_and_sfr_decisions++;
-		} else if (first_reactor_build_decision==3) {
-			htgr_and_sfr_decisions++;
-		}
-
-		if (second_reactor_build_decision==2) {
-			lwr_and_sfr_decisions++;
-		} else if (second_reactor_build_decision==3) {
-			htgr_and_sfr_decisions++;
+//		int htgr_and_sfr_decisions=0;
+//		int lwr_and_sfr_decisions=0;
+//
+//		if (first_reactor_build_decision==2) {
+//			lwr_and_sfr_decisions++;
+//		} else if (first_reactor_build_decision==3) {
+//			htgr_and_sfr_decisions++;
+//		}
+//
+//		if (second_reactor_build_decision==2) {
+//			lwr_and_sfr_decisions++;
+//		} else if (second_reactor_build_decision==3) {
+//			htgr_and_sfr_decisions++;
+//		}
+		
+		int sfr_decisions=0;
+		
+		if (first_reactor_build_decision==2 || first_reactor_build_decision==3) {
+			sfr_decisions++;
+			print.append("this value");
 		}
 
 	}
