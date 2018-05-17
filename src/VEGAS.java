@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static int[] robustInts = {3,3,3,1,1,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -41,6 +41,7 @@ public class VEGAS {
 
 	static double[] ChosenReprocessingCost = DMInputs.getChosenReprocessingCost();
 	static double[][] ChosenCapitalSubsidy = DMInputs.getChosenCapitalSubsidy();
+	static int CapitalSubsidyYear = DMInputs.getCapitalSubsidyYear();
 
 	static double[][] DisposalCost = DMInputs.getDisposalCostOutcomes();
 	static double LWRCapitalCost = DMInputs.getLWRCapitalCost();
@@ -793,34 +794,42 @@ public class VEGAS {
 		int n_rx,i,j,k;
 		double learn=0, capital_cost;
 		double effective_dr=ReturnOnEquity*EquityFraction+DiscountRate*(1-EquityFraction);
-		int[] addedSoFar = new int[REACTORNAMES.length];
+		int[] totalFacilitiesAdded = new int[REACTORNAMES.length];
+		int[] facilitiesAddedAfterSubsidy = {0,0,0};
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
+		
+		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
+
 
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {
 
 			learn = Math.log(NOAKCapitalCost[n_rx]/CAPITALCOST[n_rx]);
 			learn /= Math.log(9);
 
-			for (i=0; i<1; i++) { // this is just for i==0 .. why not just have a conditional? this seems dumb
+			for (i=0; i<1; i++) { // for START_YEAR
 				for (k=0; k<genCap[n_rx][i]/PLANT_SIZE[n_rx]; k++) {
-					capital_cost = (addedSoFar[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(addedSoFar[n_rx]+1,learn)-capital_subsidy[n_rx];
+					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
 					for (j=i; j<i+NewReactorLifetime; j++) {
 						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
 						if (j==END_YEAR-START_YEAR) break;
 					}
-					addedSoFar[n_rx]++;
+					totalFacilitiesAdded[n_rx]++;
 				}
 			}
 
 			for (i=1; i<END_YEAR-START_YEAR+1; i++) {
 
 				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
-					capital_cost = (addedSoFar[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(addedSoFar[n_rx]+1,learn)-capital_subsidy[n_rx];
+					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
+					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10) {
+						capital_cost -= capital_subsidy[n_rx];
+						facilitiesAddedAfterSubsidy[n_rx]++;
+					}
 					for (j=i; j<i+NewReactorLifetime; j++) {
 						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
 						if (j==END_YEAR-START_YEAR) break;
 					}
-					addedSoFar[n_rx]++;
+					totalFacilitiesAdded[n_rx]++;
 				}
 			}
 
@@ -3542,12 +3551,11 @@ public class VEGAS {
 
 	}
 
+	// TODO
 	public static void writeReprocessingCapacity(PrintWriter print, String key, int first_reactor_build_decision, int second_reactor_build_decision, int final_reactor_build_decision) {
 
 		int htgr_and_sfr_decisions=0;
 		int lwr_and_sfr_decisions=0;
-
-
 
 		if (first_reactor_build_decision==2) {
 			lwr_and_sfr_decisions++;
@@ -3560,30 +3568,6 @@ public class VEGAS {
 		} else if (second_reactor_build_decision==3) {
 			htgr_and_sfr_decisions++;
 		}
-
-
-
-		//		if (strategy_six)
-		//		
-		//		
-		//		StringBuilder value = new StringBuilder("IfCausesTiltReplaceWithType		0			1		 	");
-		//
-		//		if (strategy_three==0) value.append("0,");
-		//		if (strategy_three==1) value.append("1,");
-		//		if (strategy_three==2) value.append("0,");
-		//		if (strategy_three==3) value.append("1,");
-		//
-		//		if (strategy_six==0) value.append("0,");
-		//		if (strategy_six==1) value.append("1,");
-		//		if (strategy_six==2) value.append("0,");
-		//		if (strategy_six==3) value.append("1,");
-		//
-		//		if (strategy_eight==0) value.append("0").append("\n");
-		//		if (strategy_eight==1) value.append("1").append("\n");
-		//		if (strategy_eight==2) value.append("0").append("\n");
-		//		if (strategy_eight==3) value.append("1").append("\n");
-		//
-		//		print.print(value.toString());
 
 	}
 

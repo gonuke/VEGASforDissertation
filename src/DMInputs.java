@@ -22,7 +22,8 @@ public class DMInputs {
 	static double[] sfr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
 	
 //	static double[][] CapitalSubsidy = {{2000,0,0},{0,1000,1000},{0,2000,0},{0,0,2000}};
-	static double[][] ChosenCapitalSubsidy = {{300,0,0},{0,150,150},{0,300,0},{0,0,300}};
+	static double[][] ChosenCapitalSubsidy = {{200,0,0},{0,200,0},{0,0,200},{0,100,100}};
+	static int CapitalSubsidyYear = 2045;
 //	static double[][] CapitalSubsidy = {{0,0,0}};
 //	static int[] G_StageTwoStrategies = {0,1,2,3};
 //	static int[] G_StageTwoStrategies = {0};
@@ -64,6 +65,7 @@ public class DMInputs {
 	public static double[] getSFRCapCostProb() {return(sfr_capcost_probability);}
 	
 	public static double[][] getChosenCapitalSubsidy() {return(ChosenCapitalSubsidy);}
+	public static int getCapitalSubsidyYear() {return(CapitalSubsidyYear);}
 	
 	public static double[][] getDecayHeat() {return(decay_heat);}
 	

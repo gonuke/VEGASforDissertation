@@ -1,4 +1,4 @@
-first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost 3 3 3 1 1 1 1 1
+first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost 3 3 3 1 0 1 1 1
 year proliferationresistance
 2020 0.3698270058983523
 2021 0.3698270058983523
