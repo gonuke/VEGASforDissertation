@@ -2178,9 +2178,6 @@ public class VEGAS {
 				capacity_by_feed_tier[k]=9.e15;    //default effectively infinite reprocessing value
 				for(j=0; j<ReprocessingAdditions[k]; j++) {
 					
-					//if (year >=2055) {
-						System.out.print("here with specified tier cap " + specifiedTierCap[k][j]!=0. + " and capacity by feed tier " + capacity_by_feed_tier[k] + "\n");
-					//}
 					if(year>=YearReprocessingSpecified[k][j]) {
 						
 						if(growthRateTier[k][j]==1.) {
