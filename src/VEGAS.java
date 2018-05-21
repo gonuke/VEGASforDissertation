@@ -2177,21 +2177,15 @@ public class VEGAS {
 			for (int k=0; k<NumberOfTiers; k++) {  //iterate through all tiers
 				capacity_by_feed_tier[k]=9.e15;    //default effectively infinite reprocessing value
 				for(j=0; j<ReprocessingAdditions[k]; j++) {
-					if (year >=2055) {
+					
+					//if (year >=2055) {
 						System.out.print("here with specified tier cap " + specifiedTierCap[k][j]!=0. + " and capacity by feed tier " + capacity_by_feed_tier[k] + "\n");
-					}
+					//}
 					if(year>=YearReprocessingSpecified[k][j]) {
-						capacity_by_feed_tier[k]=9.e15;
-						if (specifiedTierCap[k][j]!=0. || capacity_by_feed_tier[k]==9.e15) {   // if the cap is not 0 or only the default infinite value
-							if(year>=2055) {
-								System.out.print("look here");
-							}
+						
+						if(growthRateTier[k][j]==1.) {
 							capacity_by_feed_tier[k]=specifiedTierCap[k][j];
-							if(year>=2055) {
-								System.out.print("look here");
-							}
-						}
-						else {                                                               // if growth is specified instead
+						} else {
 							if (year>=YearReprocessingSpecified[k][j+1]) {                      // if several different growths have to be included
 								capacity_by_feed_tier[k]=capacity_by_feed_tier[k]*java.lang.Math.pow(growthRateTier[k][j],YearReprocessingSpecified[k][j+1]-YearReprocessingSpecified[k][j]);
 							}
@@ -2199,11 +2193,10 @@ public class VEGAS {
 								capacity_by_feed_tier[k]=capacity_by_feed_tier[k]*java.lang.Math.pow(growthRateTier[k][j],year-YearReprocessingSpecified[k][j]);
 							}
 						}
+						
 					}
+					
 				} 
-			}
-			if(year>=2055) {
-				System.out.print("look here");
 			}
 
 			for(doing_tier=0; doing_tier<3; doing_tier++) {
