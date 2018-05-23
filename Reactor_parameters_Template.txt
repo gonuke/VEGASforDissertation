@@ -5,7 +5,7 @@ BelongsToTier					0			0			2
 YearAvailable					2020		2020		2020
 ReactorPrototype				FALSE		TRUE		TRUE
 AllowedToUseSeparatedActinides	FALSE		FALSE		TRUE
-PlantSize						3000		350			1000
+PlantSize						1000		175			400
 DischargeBurnup					50			120			73
 ThermalEfficiency				33			50			40
 RecirculatingPower				2			2			2
@@ -39,7 +39,7 @@ NOAKCapitalCost					4100		4000		4000
 %%% REPROCESSING HIERARCHY %%% SEE COMMENTS BELOW %%%															
 Members							X			X			2,1,0
 IfCausesTiltReplaceWithType		0			0		 	@SFRreplace
-IfCausesTiltYear				2020		2020		2035,2045,2055
+IfCausesTiltYear				2020		2020		2034,2044,2054
 			
 %%%%%% COMMENTS & SAMPLE INPUTS %%%%%%  
 Name="PWR"  				# Keep this short as it appears on the plots; no spaces allowed
