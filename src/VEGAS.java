@@ -2851,15 +2851,15 @@ public class VEGAS {
 
 			for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
-			System.out.print("... chosen reprocessing cost " + chosen_reprocessing_cost + ", chosen capital subsidy " + chosen_capital_subsidy + "\n");
-			System.out.print("... " + waste_disposal_cost + " waste disposal cost, " + htgr_capital_cost + " htgr capital cost, and " + sfr_capital_cost + " sfr capital cost" + "\n");
+			if (!scope_reprocessing_capacity) System.out.print("... chosen reprocessing cost " + chosen_reprocessing_cost + ", chosen capital subsidy " + chosen_capital_subsidy + "\n");
+			if (!scope_reprocessing_capacity) System.out.print("... " + waste_disposal_cost + " waste disposal cost, " + htgr_capital_cost + " htgr capital cost, and " + sfr_capital_cost + " sfr capital cost" + "\n");
 			LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision] = yearlyAnnualReports();
 			for (int m=0; m<4; m++) {
 				for (int year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 					metrics[m] += LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][m];
 				}
 			}
-			System.out.print("The metrics are " + metrics[0] + " for G's LCOE, " + metrics[1] + " for the decay heat, " + metrics[2] + " for the proliferation resistance, and " + metrics[3] + " for U's LCOE." + "\n");
+			if (!scope_reprocessing_capacity) System.out.print("The metrics are " + metrics[0] + " for G's LCOE, " + metrics[1] + " for the decay heat, " + metrics[2] + " for the proliferation resistance, and " + metrics[3] + " for U's LCOE." + "\n");
 
 			for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 			puStockpile = pu_stockpile;
@@ -2990,9 +2990,9 @@ public class VEGAS {
 
 					/* every 5 years between 2050 and 2100, not including 2100 yields 10 permutations */
 					int[][] capacity_deployment_schedule = new int[(int) Math.pow(2, 10)][10];
+					int dex=2;
 					System.out.print(capacity_deployment_schedule.length);
 					int count=0;
-					int dex=2;
 					for (int dex_zero=0; dex_zero<dex; dex_zero++) {
 						for (int dex_one=0; dex_one<dex; dex_one++) {
 							for (int dex_two=0; dex_two<dex; dex_two++) {
@@ -3027,12 +3027,21 @@ public class VEGAS {
 						}
 					}
 
-
+					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
+					
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
 
 						printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule[dex]);
 						printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-						System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
+						year=2050;
+						System.out.print("Running the sim with reprocessing facilities built in ");
+						for (int deployment_dex=0; deployment_dex<capacity_deployment_schedule[dex].length; deployment_dex++) {
+							if (capacity_deployment_schedule[dex][deployment_dex]==1) {
+								System.out.print(year + " ");
+							}
+							year+=5;
+						}
+						System.out.print("." + "\n");
 						VEGAS mySim = new VEGAS();
 						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
@@ -3242,7 +3251,7 @@ public class VEGAS {
 			String[] keys3 = {"3@LWR", "3@HTGR", "3@SFR"};
 			String[] keys6 = {"6@LWR", "6@HTGR", "6@SFR"};
 			String[] keys8 = {"8@LWR", "8@HTGR", "8@SFR"};
-			String write_reprocessing_capacity = "@write the reprocessing capacity@";
+			String write_reprocessing_capacity = "@write_reprocessing_capacity@";
 
 			for (i=0; i<data.length; i++) {
 
@@ -3256,7 +3265,9 @@ public class VEGAS {
 						writeTryToBuild(print,final_reactor_build_decision,j); Match=true; break;
 					}
 				}
-				if (data[i].contains(write_reprocessing_capacity)) writeReprocessingCapacity(print, first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision, deployment_schedule); Match=true;
+				if (data[i].contains(write_reprocessing_capacity)) {
+					writeReprocessingCapacity(print, first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision, deployment_schedule); Match=true;
+				}
 				if (!Match) print.print(data[i]+"\n");
 
 			}
@@ -3639,22 +3650,21 @@ public class VEGAS {
 		//StringBuilder value = new StringBuilder("AddCapacity[0]={");
 		print.print("	AddCapacity[0]={" + "\n");
 		print.print("		Year=2015" + "\n");
-		print.print("		Capacity=0.");
+		print.print("		Capacity=0." + "\n");
 		print.print("		}" + "\n");
 		
-		boolean recycle=false;
 		if (first_reactor_build_decision==2 || first_reactor_build_decision==3 ) {
 			
 			year=2030;
 			
-			for (year_dex=0; year_dex<separations_facility_ramp_up[0].length; year_dex++) {
+			for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
 				
-				year+=year_dex; capacity_addition_dex++;
 				facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
 				print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
 				print.print("		Year=" + year + "\n");
 				print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
 				print.print("		}" + "\n");
+				year++; capacity_addition_dex++;
 				
 			}
 			
@@ -3666,14 +3676,14 @@ public class VEGAS {
 				
 				year=2040;
 				
-				for (year_dex=0; year_dex<separations_facility_ramp_up[0].length; year_dex++) {
+				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
 					
-					year+=year_dex; capacity_addition_dex++;
 					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
 					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
 					print.print("		Year=" + year + "\n");
 					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
 					print.print("		}" + "\n");
+					year++; capacity_addition_dex++;
 					
 				}
 				
@@ -3685,17 +3695,17 @@ public class VEGAS {
 
 		for (schedule_dex=0; schedule_dex<deployment_schedule.length; schedule_dex++) {
 			
-			year = 2050+(schedule_dex+5);
+			year = 2050+(schedule_dex*5);
 			
 			if (deployment_schedule[schedule_dex]>0) {
 				
 				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
-					year+=year_dex; capacity_addition_dex++;
 					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
 					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
-					print.print("		Year=" + (2030+year_dex) + "\n");
+					print.print("		Year=" + year + "\n");
 					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
 					print.print("		}" + "\n");
+					year++; capacity_addition_dex++;
 				}
 				
 				capacity+=facility_size[separations_facilities_built]; separations_facilities_built++;

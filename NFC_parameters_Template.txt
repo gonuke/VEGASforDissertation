@@ -44,7 +44,7 @@ GrowthSpecified[0]={		# Use GrowthSpecified to define the demand for nuclear ene
 
 ##### REPROCESSING PLANT CAPACITIES #####
 ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
-	@write the reprocessing capacity@
+@write_reprocessing_capacity@
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
 	AddCapacity[0]={
