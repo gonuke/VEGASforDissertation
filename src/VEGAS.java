@@ -3614,254 +3614,97 @@ public class VEGAS {
 	// TODO only expand based on sfr decisions.. 
 	public static void writeReprocessingCapacity(PrintWriter print, int first_reactor_build_decision, int second_reactor_build_decision, int final_reactor_build_decision, int[] deployment_schedule) {
 		
-		int sfr_decisions=0;
-		
-		if (first_reactor_build_decision==2 || first_reactor_build_decision==3) {
-			sfr_decisions++;
-			print.append("this value");
-		}
-		
-		StringBuilder value = new StringBuilder("AddCapacity[0]={");
-		print.print("AddCapacity[0]={" + "\n");
-		print.print("Year=2015" + "\n");
-		print.print("Capacity=0.");
-		
-		if (first_reactor_build_decision==1) {
-			sfr_decisions++;
-			if (sfr_decisions==1) {
-				print.print("AddCapacity[0]={" + "\n");
-				print.print("Year=2015" + "\n");
-				print.print("Capacity=0.");
-				print.append(arg0)
-			}
-		}
-		
-		print.
-		
-//		AddCapacity[0]={
-//		Year=2015
-//		Capacity=0.
-//		}
-		
-		
-		
-// ######## USE THIS TO POPULATE THE REPROCESSING CAPACITY FILL IN ######## //
-//		AddCapacity[0]={
-//				Year=2015
-//				Capacity=0.
-//				}
-//			AddCapacity[1]={
-//				Year=2030
-//				Capacity=800.
-//				}
-//			AddCapacity[2]={
-//				Year=2031
-//				Capacity=800.
-//				}
-//			AddCapacity[3]={
-//				Year=2032
-//				Capacity=1800.
-//				}
-//			AddCapacity[4]={
-//				Year=2033
-//				Capacity=1800.
-//				}
-//			AddCapacity[5]={
-//				Year=2034
-//				Capacity=1800.
-//				}
-//			AddCapacity[6]={
-//				Year=2035
-//				Capacity=1800.
-//				}
-//			AddCapacity[7]={
-//				Year=2040
-//				Capacity=2800.
-//				}
-//			AddCapacity[8]={
-//				Year=2041
-//				Capacity=800.
-//				}
-//			AddCapacity[9]={
-//				Year=2042
-//				Capacity=800.
-//				}
-//			AddCapacity[10]={
-//				Year=2043
-//				Capacity=1800.
-//				}
-//			AddCapacity[11]={
-//				Year=2044
-//				Capacity=1800.
-//				}
-//			AddCapacity[12]={
-//				Year=2045
-//				Capacity=1800.
-//				}
-//			AddCapacity[13]={
-//				Year=2050
-//				Capacity=1800.
-//				}
-//			AddCapacity[14]={
-//				Year=2051
-//				Capacity=2800.
-//				}
-//			AddCapacity[15]={
-//				Year=2052
-//				Capacity=2800.
-//				}
-//			AddCapacity[16]={
-//				Year=2053
-//				Capacity=800.
-//				}
-//			AddCapacity[17]={
-//				Year=2055
-//				Capacity=800.
-//				}
-//			AddCapacity[18]={
-//				Year=2056
-//				Capacity=1800.
-//				}
-//			AddCapacity[19]={
-//				Year=2057
-//				Capacity=1800.
-//				}
-//			AddCapacity[20]={
-//				Year=2058
-//				Capacity=1800.
-//				}
-//			AddCapacity[21]={
-//				Year=2060
-//				Capacity=2800.
-//				}
-//			AddCapacity[22]={
-//				Year=2061
-//				Capacity=800.
-//				}
-//			AddCapacity[23]={
-//				Year=2062
-//				Capacity=800.
-//				}
-//			AddCapacity[24]={
-//				Year=2063
-//				Capacity=1800.
-//				}
-//			AddCapacity[25]={
-//				Year=2065
-//				Capacity=1800.
-//				}
-//			AddCapacity[26]={
-//				Year=2066
-//				Capacity=1800.
-//				}
-//			AddCapacity[27]={
-//				Year=2067
-//				Capacity=2800.
-//				}
-//			AddCapacity[28]={
-//				Year=2068
-//				Capacity=800.
-//				}
-//			AddCapacity[29]={
-//				Year=2070
-//				Capacity=800.
-//				}
-//			AddCapacity[30]={
-//				Year=2071
-//				Capacity=1800.
-//				}
-//			AddCapacity[31]={
-//				Year=2072
-//				Capacity=1800.
-//				}
-//			AddCapacity[32]={
-//				Year=2073
-//				Capacity=1800.
-//				}
-//			AddCapacity[33]={
-//				Year=2075
-//				Capacity=1800.
-//				}
-//			AddCapacity[34]={
-//				Year=2076
-//				Capacity=1800.
-//				}
-//			AddCapacity[35]={
-//				Year=2077
-//				Capacity=2800.
-//				}
-//			AddCapacity[36]={
-//				Year=2078
-//				Capacity=800.
-//				}
-//			AddCapacity[37]={
-//				Year=2080
-//				Capacity=800.
-//				}
-//			AddCapacity[38]={
-//				Year=2081
-//				Capacity=1800.
-//				}
-//			AddCapacity[39]={
-//				Year=2082
-//				Capacity=1800.
-//				}
-//			AddCapacity[40]={
-//				Year=2083
-//				Capacity=1800.
-//				}
-//			AddCapacity[41]={
-//				Year=2085
-//				Capacity=1800.
-//				}
-//			AddCapacity[42]={
-//				Year=2086
-//				Capacity=1800.
-//				}
-//			AddCapacity[42]={
-//				Year=2087
-//				Capacity=2800.
-//				}
-//			AddCapacity[43]={
-//				Year=2088
-//				Capacity=800.
-//				}
-//			AddCapacity[44]={
-//				Year=2090
-//				Capacity=800.
-//				}
-//			AddCapacity[45]={
-//				Year=2091
-//				Capacity=1800.
-//				}
-//			AddCapacity[46]={
-//				Year=2092
-//				Capacity=1800.
-//				}
-//			AddCapacity[47]={
-//				Year=2093
-//				Capacity=1800.
-//				}
-//			AddCapacity[48]={
-//				Year=2095
-//				Capacity=800.
-//				}
-//			AddCapacity[49]={
-//				Year=2096
-//				Capacity=1800.
-//				}
-//			AddCapacity[50]={
-//				Year=2097
-//				Capacity=1800.
-//				}
-//			AddCapacity[51]={
-//				Year=2098
-//				Capacity=1800.
-//				}
-		
-		
-		
+		int separations_facilities_built=0;
+		double capacity=0.;
+		double facility_capacity_addition=0.;
+		int facility_dex;
+		int capacity_addition_dex=1;
+		double[][] separations_facility_ramp_up = {{0.05, 0.1, 0.2, 0.4, 0.6, 1.}, 
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.},
+				{0.1, 0.3, 0.6, 1.}};
+		double[] facility_size = {800., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500.};
+		int year=0;
+		int year_dex=0;
+		int schedule_dex;
 
+		
+		//StringBuilder value = new StringBuilder("AddCapacity[0]={");
+		print.print("	AddCapacity[0]={" + "\n");
+		print.print("		Year=2015" + "\n");
+		print.print("		Capacity=0.");
+		print.print("		}" + "\n");
+		
+		boolean recycle=false;
+		if (first_reactor_build_decision==2 || first_reactor_build_decision==3 ) {
+			
+			year=2030;
+			
+			for (year_dex=0; year_dex<separations_facility_ramp_up[0].length; year_dex++) {
+				
+				year+=year_dex; capacity_addition_dex++;
+				facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+				print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
+				print.print("		Year=" + year + "\n");
+				print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
+				print.print("		}" + "\n");
+				
+			}
+			
+			capacity=facility_size[separations_facilities_built]; separations_facilities_built++;
+
+		} else { // if the move to recycle doesn't happen in 2035
+
+			if (second_reactor_build_decision==2 || first_reactor_build_decision==3) {
+				
+				year=2040;
+				
+				for (year_dex=0; year_dex<separations_facility_ramp_up[0].length; year_dex++) {
+					
+					year+=year_dex; capacity_addition_dex++;
+					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
+					print.print("		Year=" + year + "\n");
+					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
+					print.print("		}" + "\n");
+					
+				}
+				
+				capacity=facility_size[separations_facilities_built]; separations_facilities_built++;
+				
+			}
+
+		}
+
+		for (schedule_dex=0; schedule_dex<deployment_schedule.length; schedule_dex++) {
+			
+			year = 2050+(schedule_dex+5);
+			
+			if (deployment_schedule[schedule_dex]>0) {
+				
+				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+					year+=year_dex; capacity_addition_dex++;
+					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
+					print.print("		Year=" + (2030+year_dex) + "\n");
+					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
+					print.print("		}" + "\n");
+				}
+				
+				capacity+=facility_size[separations_facilities_built]; separations_facilities_built++;
+				
+			}
+			
+		}
+		
 	}
 
-}
+	
+} // VEGAS class
