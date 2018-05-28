@@ -3003,21 +3003,18 @@ public class VEGAS {
 											for (int dex_six=0; dex_six<dex; dex_six++) {
 												for (int dex_seven=0; dex_seven<dex; dex_seven++) {
 													for (int dex_eight=0; dex_eight<dex; dex_eight++) {
-														for (int dex_nine=0; dex_nine<dex; dex_nine++) {
 
-															capacity_deployment_schedule[count][0] = dex_zero;	/* 2050 */
-															capacity_deployment_schedule[count][1] = dex_one;	/* 2055 */
-															capacity_deployment_schedule[count][2] = dex_two;	/* 2060 */
-															capacity_deployment_schedule[count][3] = dex_three;	/* 2065 */
-															capacity_deployment_schedule[count][4] = dex_four;	/* 2070 */
-															capacity_deployment_schedule[count][5] = dex_five;	/* 2075 */
-															capacity_deployment_schedule[count][6] = dex_six;	/* 2080 */
-															capacity_deployment_schedule[count][7] = dex_seven;	/* 2085 */
-															capacity_deployment_schedule[count][8] = dex_eight;	/* 2090 */
-															capacity_deployment_schedule[count][9] = dex_nine;	/* 2095 */
+															capacity_deployment_schedule[count][0] = dex_zero;	/* 2055 */
+															capacity_deployment_schedule[count][1] = dex_one;	/* 2060 */
+															capacity_deployment_schedule[count][2] = dex_two;	/* 2065 */
+															capacity_deployment_schedule[count][3] = dex_three;	/* 2070 */
+															capacity_deployment_schedule[count][4] = dex_four;	/* 2075 */
+															capacity_deployment_schedule[count][5] = dex_five;	/* 2080 */
+															capacity_deployment_schedule[count][6] = dex_six;	/* 2085 */
+															capacity_deployment_schedule[count][7] = dex_seven;	/* 2090 */
+															capacity_deployment_schedule[count][8] = dex_eight;	/* 2095 */
 															count++;
 
-														}
 													}
 												}
 											}
@@ -3031,6 +3028,8 @@ public class VEGAS {
 					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
 					
 					boolean[] excess_capacity = new boolean[capacity_deployment_schedule.length];
+					double[] integrated_capacity = new double[capacity_deployment_schedule.length];
+					int[] optimal_deployment_schedule = new int[capacity_deployment_schedule[0].length];
 					
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
 
@@ -3041,9 +3040,63 @@ public class VEGAS {
 						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 						excess_capacity[dex]=underutilized;
 						
+						/* get the integrated capacity */
+
+						int separations_facilities_built=0;
+						double[] separations_capacity = new double[(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)];
+						double capacity=0.;
+						double capacity_addition=0.;
+						double[][] separations_facility_ramp_up = {{0.05, 0.1, 0.2, 0.4, 0.6, 1.}, 
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.},
+								{0.1, 0.3, 0.6, 1.}};
+						double[] facility_size = {800., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500.};
+						int year_dex=0;
+						int schedule_dex;
+						
+						if (first_reactor_build_decision==2 || first_reactor_build_decision==3) { 
+							year = 2034-START_YEAR;
+							for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+								separations_capacity[year+year_dex] = facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+							}
+							capacity=facility_size[separations_facilities_built]; separations_facilities_built++;
+						} else {
+							if (second_reactor_build_decision==2 || second_reactor_build_decision==3) {
+								year = 2044-START_YEAR;
+								for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+									separations_capacity[year+year_dex] = facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+								}
+								capacity=facility_size[separations_facilities_built]; separations_facilities_built++;
+							}
+						}
+
+						for (schedule_dex=0; schedule_dex<capacity_deployment_schedule[dex].length; schedule_dex++) {
+							year = (2054-START_YEAR)+(schedule_dex*5);
+							if (capacity_deployment_schedule[dex][schedule_dex]>0) {
+								for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+									capacity_addition = facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+									separations_capacity[year+year_dex] = capacity+capacity_addition;
+								}
+								capacity+=facility_size[separations_facilities_built]; separations_facilities_built++;
+							}
+						}
+						
+						for (year_dex=0; year_dex<END_YEAR-START_YEAR-NewReactorLifetime; year_dex++) {
+							if (separations_capacity[year_dex+1]<separations_capacity[year_dex]) {
+								separations_capacity[year_dex+1] = separations_capacity[year_dex];
+							}
+						}
+						
+						for (year_dex=0; year_dex<separations_capacity.length; year_dex++) integrated_capacity[dex]+=separations_capacity[year_dex];
+						
 					}
 					
-
 				} else if (!scope_reprocessing_capacity) {
 
 					// you'll have to pass this the deployment schedule
@@ -3617,7 +3670,7 @@ public class VEGAS {
 		print.print(value.toString());
 
 	}
-
+	
 	// TODO only expand based on sfr decisions.. 
 	public static void writeReprocessingCapacity(PrintWriter print, int first_reactor_build_decision, int second_reactor_build_decision, int final_reactor_build_decision, int[] deployment_schedule) {
 		
@@ -3635,9 +3688,8 @@ public class VEGAS {
 				{0.1, 0.3, 0.6, 1.},
 				{0.1, 0.3, 0.6, 1.},
 				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
 				{0.1, 0.3, 0.6, 1.}};
-		double[] facility_size = {800., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500.};
+		double[] facility_size = {800., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500.};
 		int year=0;
 		int year_dex=0;
 		int schedule_dex;
@@ -3651,7 +3703,7 @@ public class VEGAS {
 		
 		if (first_reactor_build_decision==2 || first_reactor_build_decision==3 ) {
 			
-			year=2030;
+			year=2034;
 			
 			for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
 				
@@ -3670,7 +3722,7 @@ public class VEGAS {
 
 			if (second_reactor_build_decision==2 || first_reactor_build_decision==3) {
 				
-				year=2040;
+				year=2044;
 				
 				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
 					
@@ -3691,7 +3743,7 @@ public class VEGAS {
 
 		for (schedule_dex=0; schedule_dex<deployment_schedule.length; schedule_dex++) {
 			
-			year = 2050+(schedule_dex*5);
+			year = 2054+(schedule_dex*5);
 			
 			if (deployment_schedule[schedule_dex]>0) {
 				
@@ -3711,6 +3763,5 @@ public class VEGAS {
 		}
 		
 	}
-
 	
 } // VEGAS class

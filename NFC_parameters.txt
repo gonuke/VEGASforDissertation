@@ -49,44 +49,28 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=0.
 		}
 	AddCapacity[1]={
-		Year=2030
+		Year=2034
 		Capacity=40.0
 		}
 	AddCapacity[2]={
-		Year=2031
+		Year=2035
 		Capacity=80.0
 		}
 	AddCapacity[3]={
-		Year=2032
+		Year=2036
 		Capacity=160.0
 		}
 	AddCapacity[4]={
-		Year=2033
+		Year=2037
 		Capacity=320.0
 		}
 	AddCapacity[5]={
-		Year=2034
+		Year=2038
 		Capacity=480.0
 		}
 	AddCapacity[6]={
-		Year=2035
+		Year=2039
 		Capacity=800.0
-		}
-	AddCapacity[7]={
-		Year=2095
-		Capacity=950.0
-		}
-	AddCapacity[8]={
-		Year=2096
-		Capacity=1250.0
-		}
-	AddCapacity[9]={
-		Year=2097
-		Capacity=1700.0
-		}
-	AddCapacity[10]={
-		Year=2098
-		Capacity=2300.0
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
