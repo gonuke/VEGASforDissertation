@@ -28,6 +28,7 @@ public class VEGAS {
 
 	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=true;
+	static boolean underutilized=false;
 	static int[] robustInts = {3,3,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
@@ -2257,6 +2258,7 @@ public class VEGAS {
 			}
 			if(UseScriptedReprocessOnDemand) if(!ScriptedReprocessOnDemand[i]) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 			if(!UseScriptedReprocessOnDemand) if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
+			if (capacity_by_feed_tier[0]!=9.e15) if (throughput_by_tier[0]<0.9*capacity_by_feed_tier[0]) underutilized=true;
 		}
 		return(true);   
 	}
@@ -2991,7 +2993,6 @@ public class VEGAS {
 					/* every 5 years between 2050 and 2100, not including 2100 yields 10 permutations */
 					int[][] capacity_deployment_schedule = new int[(int) Math.pow(2, 10)][10];
 					int dex=2;
-					System.out.print(capacity_deployment_schedule.length);
 					int count=0;
 					for (int dex_zero=0; dex_zero<dex; dex_zero++) {
 						for (int dex_one=0; dex_one<dex; dex_one++) {
@@ -3029,22 +3030,17 @@ public class VEGAS {
 
 					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
 					
+					boolean[] excess_capacity = new boolean[capacity_deployment_schedule.length];
+					
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
 
 						printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule[dex]);
 						printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-						year=2050;
-						System.out.print("Running the sim with reprocessing facilities built in ");
-						for (int deployment_dex=0; deployment_dex<capacity_deployment_schedule[dex].length; deployment_dex++) {
-							if (capacity_deployment_schedule[dex][deployment_dex]==1) {
-								System.out.print(year + " ");
-							}
-							year+=5;
-						}
-						System.out.print("." + "\n");
+						System.out.print("Running the sim with the separations capacity deployment schedule at index " + dex + "\n");
 						VEGAS mySim = new VEGAS();
 						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
-
+						excess_capacity[dex]=underutilized;
+						
 					}
 					
 

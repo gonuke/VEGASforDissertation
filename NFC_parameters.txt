@@ -73,47 +73,31 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=800.0
 		}
 	AddCapacity[7]={
-		Year=2090
+		Year=2095
 		Capacity=950.0
 		}
 	AddCapacity[8]={
-		Year=2091
+		Year=2096
 		Capacity=1250.0
 		}
 	AddCapacity[9]={
-		Year=2092
+		Year=2097
 		Capacity=1700.0
 		}
 	AddCapacity[10]={
-		Year=2093
-		Capacity=2300.0
-		}
-	AddCapacity[11]={
-		Year=2095
-		Capacity=2450.0
-		}
-	AddCapacity[12]={
-		Year=2096
-		Capacity=2750.0
-		}
-	AddCapacity[13]={
-		Year=2097
-		Capacity=3200.0
-		}
-	AddCapacity[14]={
 		Year=2098
-		Capacity=3800.0
+		Capacity=2300.0
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
 	AddCapacity[0]={
-		Year=2015
+		Year=2020
 		Capacity=0.
 		}
 	}
 ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 	AddCapacity[0]={
-		Year=2015
+		Year=2020
 		Capacity=100000.
 		}
 	}
