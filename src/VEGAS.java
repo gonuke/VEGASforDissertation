@@ -27,7 +27,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=false;
+	static boolean scope_reprocessing_capacity=true;
 	static boolean underutilized=false;
 	static int[] robustInts = {3,3,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
@@ -3108,7 +3108,7 @@ public class VEGAS {
 								}
 							}
 						}
-						if (waste_disposed>5.e6) excess_waste[dex]=true; else excess_waste[dex]=false;
+						if (waste_disposed>1.e7) excess_waste[dex]=true; else excess_waste[dex]=false;
 						
 					}
 					
@@ -3239,6 +3239,7 @@ public class VEGAS {
 					output_writer_wastequantities.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_wastequantities.print("year lwr_wastegenerated lwr_wastereprocessed_byyear lwr_wastereprocessed htgr_wastegenerated htgr_wastereprocessed_byyear htgr_wastereprocessed sfr_wastegenerated sfr_wastereprocessed_byyear sfr_wastereprocessed" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+					//for (year=0; year<END_YEAR-START_YEAR+1; year++) {
 						output_writer_wastequantities.print((year+START_YEAR) + " ");
 						for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 							output_writer_wastequantities.print((SFGenerated[n_rx][year]/1000) + " " + (SFReprocessedByReactor[n_rx][year]/1000) + " " + (SFReprocessed[n_rx][year]/1000) + " ");
