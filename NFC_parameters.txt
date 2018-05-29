@@ -18,7 +18,7 @@ TailsUEnrichment=0.25					# percent U-235 in U
 SeparatedActinideStorageCost=880		# $ / kg / yr
 SeparatedActinideVitDisposalCost=5000	# $ / kg
 SeparatedActinideRepositorySpace=10.0	# kg repository space used / kg actinide
-StartYear=2020							# integer
+StartYear=2018							# integer
 EndYear=2160							# integer
 AssessEquilibriumCostsAtYear=2050		# integer: equilibrium cost data will not be written if this is not in [StartYear,EndYear]
 											# choose a date late in the simulation when near-equilibrium behavior is expected
@@ -38,14 +38,14 @@ InitialCapacityData[0]={
 	Percentage=100.		# sum of percentages for initial capacity by type must add to 100.
 	}
 GrowthSpecified[0]={		# Use GrowthSpecified to define the demand for nuclear energy.
-	Year=2020		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
+	Year=2018		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
 	GrowthRate=2.3		# zero growth through 2010, then...
 	}
 
 ##### REPROCESSING PLANT CAPACITIES #####
 ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 	AddCapacity[0]={
-		Year=2015
+		Year=2018
 		Capacity=0.
 		}
 	AddCapacity[1]={
@@ -72,16 +72,64 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Year=2039
 		Capacity=800.0
 		}
+	AddCapacity[7]={
+		Year=2069
+		Capacity=950.0
+		}
+	AddCapacity[8]={
+		Year=2070
+		Capacity=1250.0
+		}
+	AddCapacity[9]={
+		Year=2071
+		Capacity=1700.0
+		}
+	AddCapacity[10]={
+		Year=2072
+		Capacity=2300.0
+		}
+	AddCapacity[11]={
+		Year=2074
+		Capacity=2450.0
+		}
+	AddCapacity[12]={
+		Year=2075
+		Capacity=2750.0
+		}
+	AddCapacity[13]={
+		Year=2076
+		Capacity=3200.0
+		}
+	AddCapacity[14]={
+		Year=2077
+		Capacity=3800.0
+		}
+	AddCapacity[15]={
+		Year=2079
+		Capacity=3950.0
+		}
+	AddCapacity[16]={
+		Year=2080
+		Capacity=4250.0
+		}
+	AddCapacity[17]={
+		Year=2081
+		Capacity=4700.0
+		}
+	AddCapacity[18]={
+		Year=2082
+		Capacity=5300.0
+		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
 	AddCapacity[0]={
-		Year=2020
+		Year=2018
 		Capacity=0.
 		}
 	}
 ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 	AddCapacity[0]={
-		Year=2020
+		Year=2018
 		Capacity=100000.
 		}
 	}
@@ -90,7 +138,7 @@ ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 ##### SCENARIO RULES #####
 ScenarioSet=true                # Change manual or dynamic building orders
 ScenarioRules[0]={
-	Year=2020 		  # first set of rules should always be imposed at Year <= StartYear
+	Year=2018 		  # first set of rules should always be imposed at Year <= StartYear
 	TryToBuild[0]={		  # VEGAS will meet nuclear energy demand by building the facility types given below
 		FacilityNumber=0   # This is referenced to the FacilityNumber in Reactor_parameters.txt
 		Percentage=100.	  # target percentage of new plant builds by net electric generation capacity

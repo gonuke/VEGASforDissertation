@@ -18,7 +18,7 @@ TailsUEnrichment=0.25					# percent U-235 in U
 SeparatedActinideStorageCost=880		# $ / kg / yr
 SeparatedActinideVitDisposalCost=5000	# $ / kg
 SeparatedActinideRepositorySpace=10.0	# kg repository space used / kg actinide
-StartYear=2020							# integer
+StartYear=2018							# integer
 EndYear=2160							# integer
 AssessEquilibriumCostsAtYear=2050		# integer: equilibrium cost data will not be written if this is not in [StartYear,EndYear]
 											# choose a date late in the simulation when near-equilibrium behavior is expected
@@ -38,7 +38,7 @@ InitialCapacityData[0]={
 	Percentage=100.		# sum of percentages for initial capacity by type must add to 100.
 	}
 GrowthSpecified[0]={		# Use GrowthSpecified to define the demand for nuclear energy.
-	Year=2020		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
+	Year=2018		# Demand growth may be specified by a fixed capacity target at a given year, or a (%/year) growth rate:
 	GrowthRate=2.3		# zero growth through 2010, then...
 	}
 
@@ -48,13 +48,13 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
 	AddCapacity[0]={
-		Year=2020
+		Year=2018
 		Capacity=0.
 		}
 	}
 ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 	AddCapacity[0]={
-		Year=2020
+		Year=2018
 		Capacity=100000.
 		}
 	}
@@ -63,7 +63,7 @@ ReprocessingCapacity[2]={		# tier 2 reprocessing capacity
 ##### SCENARIO RULES #####
 ScenarioSet=true                # Change manual or dynamic building orders
 ScenarioRules[0]={
-	Year=2020 		  # first set of rules should always be imposed at Year <= StartYear
+	Year=2018 		  # first set of rules should always be imposed at Year <= StartYear
 	TryToBuild[0]={		  # VEGAS will meet nuclear energy demand by building the facility types given below
 		FacilityNumber=0   # This is referenced to the FacilityNumber in Reactor_parameters.txt
 		Percentage=100.	  # target percentage of new plant builds by net electric generation capacity
