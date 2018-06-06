@@ -24,10 +24,11 @@ public class VEGAS {
 	static boolean ReprocessOnDemand;
 	static boolean ScriptReprocessOnDemand;
 	static boolean[] OnlyExistingDemand; // when this is true, use the installed capacity ONLY to fulfill demand from existing reactors; new demand will be zero since try to build is only for once through reactors
+	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=false;
+	static boolean scope_reprocessing_capacity=true;
 	static boolean underutilized=false;
 	static int[] robustInts = {2,2,0,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
@@ -289,6 +290,7 @@ public class VEGAS {
 		yearlyReactorCharge = new double[END_YEAR-START_YEAR+1]; // 9 units added to reach NOAK; with or without the capital subsidy
 		LeafValues = new double[ChosenReprocessingCost.length][DisposalCost.length][FirstReactorBuildDecision.length][ChosenCapitalSubsidy.length][SecondReactorBuildDecision.length][HTGRCapitalCost.length][SFRCapitalCost.length][FinalReactorBuildDecision.length][END_YEAR-START_YEAR+1][4];
 		OnlyExistingDemand = new boolean[END_YEAR-START_YEAR+1];
+		RecyclingThisYear = new boolean[END_YEAR-START_YEAR+1];
 
 	}
 
@@ -2039,27 +2041,9 @@ public class VEGAS {
 			}
 			
 			for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) {
+				RecyclingThisYear[year] = (uses_sep_actinides == true) ? true : false;
 				if (sfr_decisions==1) OnlyExistingDemand[year] = (uses_sep_actinides == true) ? true : false;
 			}
-			
-			
-			System.out.print("let's look at this");
-			
-//			if (scenario_set==0) {
-//
-//				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
-//					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
-//					if (uses_sep_actinides==true) break;
-//				}
-//				for (int year=0; year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ScriptedReprocessOnDemand[year] = (uses_sep_actinides == true) ? false : true;
-//			} else if (scenario_set>0 && scenario_set<FacilityPercentage.length) {
-//				for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
-//					if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
-//					if (uses_sep_actinides==true) break;
-//				}
-//				for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) ScriptedReprocessOnDemand[year] = (uses_sep_actinides == true) ? false : true;
-//
-//			}
 
 		}
 
@@ -2276,21 +2260,16 @@ public class VEGAS {
 					}
 				}
 			}
-//			if(UseScriptedReprocessOnDemand) if(!FulFillDemandWithIdleCapacity[i]) {
-//				if(throughput_by_tier[0] < capacity_by_feed_tier[0]) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
-//			}
 			
 			if (!ScriptReprocessOnDemand) {
 				if (!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 			} else if (ScriptReprocessOnDemand) {
-				if (!OnlyExistingDemand[year-START_YEAR]) {
+				if (!OnlyExistingDemand[year-START_YEAR] && RecyclingThisYear[year-START_YEAR]) {
 					throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 					if (capacity_by_feed_tier[0]!=9.e15) if (throughput_by_tier[0]<0.9*capacity_by_feed_tier[0]) underutilized=true;
 				}
 			}
-//			
-//			if(!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
-//			if (capacity_by_feed_tier[0]!=9.e15) if (throughput_by_tier[0]<0.9*capacity_by_feed_tier[0]) underutilized=true;
+
 		}
 		return(true);   
 	}
@@ -3762,16 +3741,7 @@ public class VEGAS {
 		double facility_capacity_addition=0.;
 		int facility_dex;
 		int capacity_addition_dex=1;
-		double[][] separations_facility_ramp_up = {{0.05, 0.1, 0.2, 0.4, 0.6, 1.}, 
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.},
-				{0.1, 0.3, 0.6, 1.}};
+		double[] separations_facility_ramp_up = {0.1, 0.3, 0.6, 1.};
 		double[] facility_size = {800., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500., 1500.};
 		int year=0;
 		int year_dex=0;
@@ -3788,9 +3758,9 @@ public class VEGAS {
 			
 			year=2034;
 			
-			for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+			for (year_dex=0; year_dex<separations_facility_ramp_up.length; year_dex++) {
 				
-				facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+				facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[year_dex];
 				print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
 				print.print("		Year=" + year + "\n");
 				print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
@@ -3798,14 +3768,6 @@ public class VEGAS {
 				year++; capacity_addition_dex++;
 				
 			}
-			
-//			if (second_reactor_build_decision==0 || second_reactor_build_decision==1) {
-//				print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
-//				print.print("		Year=" + year + "\n");
-//				print.print("		Capacity=" + 0. + "\n");
-//				print.print("		}" + "\n");
-//				capacity_addition_dex++;
-//			}
 			
 			capacity=facility_size[separations_facilities_built]; separations_facilities_built++;
 
@@ -3815,9 +3777,9 @@ public class VEGAS {
 				
 				year=2044;
 				
-				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
+				for (year_dex=0; year_dex<separations_facility_ramp_up.length; year_dex++) {
 					
-					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[year_dex];
 					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
 					print.print("		Year=" + year + "\n");
 					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
@@ -3838,8 +3800,8 @@ public class VEGAS {
 			
 			if (deployment_schedule[schedule_dex]>0) {
 				
-				for (year_dex=0; year_dex<separations_facility_ramp_up[separations_facilities_built].length; year_dex++) {
-					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[separations_facilities_built][year_dex];
+				for (year_dex=0; year_dex<separations_facility_ramp_up.length; year_dex++) {
+					facility_capacity_addition=facility_size[separations_facilities_built]*separations_facility_ramp_up[year_dex];
 					print.print("	AddCapacity[" + capacity_addition_dex + "]={" + "\n");
 					print.print("		Year=" + year + "\n");
 					print.print("		Capacity=" + (capacity+facility_capacity_addition) + "\n");
