@@ -130,7 +130,7 @@ ScenarioRules[3]={
 	Year=2054
 	TryToBuild[0]={
 		FacilityNumber=0
-		Percentage=0
+		Percentage=100
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
@@ -138,7 +138,7 @@ ScenarioRules[3]={
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=100
+		Percentage=0
 		}
 	}
 

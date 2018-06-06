@@ -29,7 +29,7 @@ public class VEGAS {
 	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=false;
 	static boolean underutilized=false;
-	static int[] robustInts = {2,2,2,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {2,2,0,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -2019,21 +2019,28 @@ public class VEGAS {
 		return(throughput_by_tier);
 	}
 
-	public void determineIdleCapacityUse() {
+	public void determineCapacityUtilization() {
 
 		boolean uses_sep_actinides=false;
+		int sfr_decisions=0;
+		// how to use only the demand needed for the first SFR decision?
+		// 
 
 		for (int scenario_set=0; scenario_set<FacilityPercentage.length; scenario_set++) {
 
+			uses_sep_actinides=false;
 			
 			for (int n_rx=0; n_rx<FacilityPercentage[scenario_set].length; n_rx++) {
 				
 				if (FacilityPercentage[scenario_set][n_rx]>0.) uses_sep_actinides = (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) ? true : false;
+				if (ALLOWED_TO_USE_SEP_ACTINIDES[FacilityHierarchy[scenario_set][n_rx]] == true) sfr_decisions++;
 				if (uses_sep_actinides==true) break;
 				
 			}
 			
-			for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) OnlyExistingDemand[year] = (uses_sep_actinides == true) ? false : true;
+			for (int year=(HierarchyByYear[scenario_set]-START_YEAR); year<(HierarchyByYear[scenario_set+1]-START_YEAR); year++) {
+				if (sfr_decisions==1) OnlyExistingDemand[year] = (uses_sep_actinides == true) ? true : false;
+			}
 			
 			
 			System.out.print("let's look at this");
@@ -2276,7 +2283,7 @@ public class VEGAS {
 			if (!ScriptReprocessOnDemand) {
 				if (!ReprocessOnDemand) throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 			} else if (ScriptReprocessOnDemand) {
-				if (!OnlyExistingDemand[year]) {
+				if (!OnlyExistingDemand[year-START_YEAR]) {
 					throughput_by_tier = allTheReprocessing(year, throughput_by_tier, capacity_by_feed_tier);
 					if (capacity_by_feed_tier[0]!=9.e15) if (throughput_by_tier[0]<0.9*capacity_by_feed_tier[0]) underutilized=true;
 				}
@@ -2821,7 +2828,7 @@ public class VEGAS {
 		setBuildOrders();
 		getMassConv();
 		assignGenerationCapacity(); 
-		if (ScriptReprocessOnDemand) determineIdleCapacityUse();
+		if (ScriptReprocessOnDemand) determineCapacityUtilization();
 		/* original VEGAS implementation */
 		//getReactorCharges();
 		while(!success) {
