@@ -30,7 +30,7 @@ public class VEGAS {
 	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {0,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -2201,7 +2201,7 @@ public class VEGAS {
 					
 				} 
 			}
-
+			
 			for(doing_tier=0; doing_tier<3; doing_tier++) {
 				for(j=0; j<REACTORNAMES.length;j++) {
 					if(BELONGS_TO_TIER[j]==doing_tier) {
@@ -3037,13 +3037,12 @@ public class VEGAS {
 						}
 					}
 
-					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
-					
-					boolean[] excess_capacity = new boolean[capacity_deployment_schedule.length];
+					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + " and final reactor build decision " + final_reactor_build_decision + "\n");
+
 					double[] integrated_capacity = new double[capacity_deployment_schedule.length];
 					boolean[] excess_waste = new boolean[capacity_deployment_schedule.length];
 					int[] optimal_deployment_schedule = new int[capacity_deployment_schedule[0].length];
-					double waste_disposed=0.;
+					double[] waste_disposed = new double[capacity_deployment_schedule.length];
 					
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
 
@@ -3051,13 +3050,14 @@ public class VEGAS {
 						printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 						System.out.print("Running the sim with the separations capacity deployment schedule " + (dex+1) + " of " + capacity_deployment_schedule.length + "\n");
 						VEGAS mySim = new VEGAS();
-						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 						//excess_capacity[dex]=underutilized;
 						
 						/* get the integrated capacity */
 
 						int separations_facilities_built=0;
 						double[] separations_capacity = new double[(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)];
+						double waste=0.;
 						double capacity=0.;
 						double capacity_addition=0.;
 						double[] separations_facility_ramp_up = {0.1, 0.3, 0.6, 1.};
@@ -3099,17 +3099,20 @@ public class VEGAS {
 						}
 						
 						for (year_dex=0; year_dex<separations_capacity.length; year_dex++) integrated_capacity[dex]+=separations_capacity[year_dex];
-						
-						waste_disposed=0.;
+
 						for (j=0; j<REACTORNAMES.length; j++) {
 							if (BELONGS_TO_TIER[j]==0) {
 								for (i=0; i<separations_capacity.length; i++) {
-									waste_disposed += SFGenerated[j][i]-SFReprocessed[j][i];
+									waste += SFGenerated[j][i]-SFReprocessed[j][i];
 								}
 							}
 						}
-						if (waste_disposed>1.e7) excess_waste[dex]=true; else excess_waste[dex]=false;
-						//System.out.print("Excess waste is " + excess_waste[dex] + " and the amount of waste disposed is " + waste_disposed + " tIHM." + "\n");
+						waste_disposed[dex] = waste;
+						if (waste_disposed[dex]>5.e6) excess_waste[dex]=true; else excess_waste[dex]=false;
+						if (excess_waste[dex]==false) {
+							System.out.print("stop");
+						}
+						//System.out.print("The waste disposed is " + waste + " with the integrated capacity " + integrated_capacity[dex] + "\n");
 						
 					}
 					
@@ -3143,7 +3146,7 @@ public class VEGAS {
 				} else if (!scope_reprocessing_capacity) {
 
 					// you'll have to pass this the deployment schedule
-					int[] capacity_deployment_schedule={1,1,1,1,1,1,0,0,0};
+					int[] capacity_deployment_schedule={0,0,0,0,0,1,0,1,1};
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 					System.out.print("Running the sim with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + ", final reactor build decision " + final_reactor_build_decision + "\n");

@@ -49,164 +49,84 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=0.
 		}
 	AddCapacity[1]={
-		Year=2034
+		Year=2069
 		Capacity=80.0
 		}
 	AddCapacity[2]={
-		Year=2035
+		Year=2070
 		Capacity=240.0
 		}
 	AddCapacity[3]={
-		Year=2036
+		Year=2071
 		Capacity=480.0
 		}
 	AddCapacity[4]={
-		Year=2037
+		Year=2072
 		Capacity=800.0
 		}
 	AddCapacity[5]={
-		Year=2054
+		Year=2074
 		Capacity=950.0
 		}
 	AddCapacity[6]={
-		Year=2055
+		Year=2075
 		Capacity=1250.0
 		}
 	AddCapacity[7]={
-		Year=2056
+		Year=2076
 		Capacity=1700.0
 		}
 	AddCapacity[8]={
-		Year=2057
+		Year=2077
 		Capacity=2300.0
 		}
 	AddCapacity[9]={
-		Year=2059
+		Year=2079
 		Capacity=2450.0
 		}
 	AddCapacity[10]={
-		Year=2060
+		Year=2080
 		Capacity=2750.0
 		}
 	AddCapacity[11]={
-		Year=2061
+		Year=2081
 		Capacity=3200.0
 		}
 	AddCapacity[12]={
-		Year=2062
+		Year=2082
 		Capacity=3800.0
 		}
 	AddCapacity[13]={
-		Year=2064
+		Year=2084
 		Capacity=3950.0
 		}
 	AddCapacity[14]={
-		Year=2065
+		Year=2085
 		Capacity=4250.0
 		}
 	AddCapacity[15]={
-		Year=2066
+		Year=2086
 		Capacity=4700.0
 		}
 	AddCapacity[16]={
-		Year=2067
+		Year=2087
 		Capacity=5300.0
 		}
 	AddCapacity[17]={
-		Year=2069
+		Year=2094
 		Capacity=5450.0
 		}
 	AddCapacity[18]={
-		Year=2070
+		Year=2095
 		Capacity=5750.0
 		}
 	AddCapacity[19]={
-		Year=2071
+		Year=2096
 		Capacity=6200.0
 		}
 	AddCapacity[20]={
-		Year=2072
-		Capacity=6800.0
-		}
-	AddCapacity[21]={
-		Year=2074
-		Capacity=6950.0
-		}
-	AddCapacity[22]={
-		Year=2075
-		Capacity=7250.0
-		}
-	AddCapacity[23]={
-		Year=2076
-		Capacity=7700.0
-		}
-	AddCapacity[24]={
-		Year=2077
-		Capacity=8300.0
-		}
-	AddCapacity[25]={
-		Year=2079
-		Capacity=8450.0
-		}
-	AddCapacity[26]={
-		Year=2080
-		Capacity=8750.0
-		}
-	AddCapacity[27]={
-		Year=2081
-		Capacity=9200.0
-		}
-	AddCapacity[28]={
-		Year=2082
-		Capacity=9800.0
-		}
-	AddCapacity[29]={
-		Year=2084
-		Capacity=9950.0
-		}
-	AddCapacity[30]={
-		Year=2085
-		Capacity=10250.0
-		}
-	AddCapacity[31]={
-		Year=2086
-		Capacity=10700.0
-		}
-	AddCapacity[32]={
-		Year=2087
-		Capacity=11300.0
-		}
-	AddCapacity[33]={
-		Year=2089
-		Capacity=11450.0
-		}
-	AddCapacity[34]={
-		Year=2090
-		Capacity=11750.0
-		}
-	AddCapacity[35]={
-		Year=2091
-		Capacity=12200.0
-		}
-	AddCapacity[36]={
-		Year=2092
-		Capacity=12800.0
-		}
-	AddCapacity[37]={
-		Year=2094
-		Capacity=12950.0
-		}
-	AddCapacity[38]={
-		Year=2095
-		Capacity=13250.0
-		}
-	AddCapacity[39]={
-		Year=2096
-		Capacity=13700.0
-		}
-	AddCapacity[40]={
 		Year=2097
-		Capacity=14300.0
+		Capacity=6800.0
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
@@ -236,7 +156,7 @@ ScenarioRules[1]={
 	Year=2034
 	TryToBuild[0]={
 		FacilityNumber=0
-		Percentage=0
+		Percentage=100
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
@@ -244,7 +164,7 @@ ScenarioRules[1]={
 		}
 	TryToBuild[2]={
 		FacilityNumber=2
-		Percentage=100
+		Percentage=0
 		}
 	}
 ScenarioRules[2]={
