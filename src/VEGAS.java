@@ -30,7 +30,7 @@ public class VEGAS {
 	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,1,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -3043,21 +3043,31 @@ public class VEGAS {
 					boolean[] excess_waste = new boolean[capacity_deployment_schedule.length];
 					int[] optimal_deployment_schedule = new int[capacity_deployment_schedule[0].length];
 					double[] waste_disposed = new double[capacity_deployment_schedule.length];
+					double waste=0.;
+					
+					/* Main decision making results */
+					File output_scope_target = new File(user_dir+File.separatorChar+"ScopeReprocessingCapacity.txt");
+					if(output_scope_target.exists()) output_scope_target.delete();
+					FileWriter output_scope_filewriter = new FileWriter(output_scope_target);
+					PrintWriter output_scope_writer = new PrintWriter(output_scope_filewriter);
 					
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
-
+					//for (dex=0; dex<16; dex++) { // for debugging
+					
+						System.gc();
+						
 						printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule[dex]);
 						printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-						System.out.print("Running the sim with the separations capacity deployment schedule " + (dex+1) + " of " + capacity_deployment_schedule.length + "\n");
+						System.out.print("Running the sim with the separations capacity deployment schedule " + (dex) + " of " + (capacity_deployment_schedule.length-1) + "\n");
 						VEGAS mySim = new VEGAS();
 						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-						//excess_capacity[dex]=underutilized;
 						
+						for (i=0; i<capacity_deployment_schedule[dex].length; i++) output_scope_writer.print(capacity_deployment_schedule[dex][i] + " ");
+												
 						/* get the integrated capacity */
 
 						int separations_facilities_built=0;
 						double[] separations_capacity = new double[(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)];
-						double waste=0.;
 						double capacity=0.;
 						double capacity_addition=0.;
 						double[] separations_facility_ramp_up = {0.1, 0.3, 0.6, 1.};
@@ -3098,8 +3108,10 @@ public class VEGAS {
 							}
 						}
 						
-						for (year_dex=0; year_dex<separations_capacity.length; year_dex++) integrated_capacity[dex]+=separations_capacity[year_dex];
-
+						for (year_dex=(2054-START_YEAR); year_dex<separations_capacity.length; year_dex++) integrated_capacity[dex]+=separations_capacity[year_dex];
+						output_scope_writer.print(integrated_capacity[dex] + " ");
+						
+						waste=0.;
 						for (j=0; j<REACTORNAMES.length; j++) {
 							if (BELONGS_TO_TIER[j]==0) {
 								for (i=0; i<separations_capacity.length; i++) {
@@ -3108,45 +3120,65 @@ public class VEGAS {
 							}
 						}
 						waste_disposed[dex] = waste;
-						if (waste_disposed[dex]>5.e6) excess_waste[dex]=true; else excess_waste[dex]=false;
-						if (excess_waste[dex]==false) {
-							System.out.print("stop");
+						output_scope_writer.print(waste + " \n");
+						
+						if (waste_disposed[dex]>1.e7) {
+							excess_waste[dex]=true;
+						} else {
+							excess_waste[dex]=false;
 						}
-						//System.out.print("The waste disposed is " + waste + " with the integrated capacity " + integrated_capacity[dex] + "\n");
 						
 					}
 					
 					double optimal_integrated_capacity=1.e9;
+					int best_so_far=0;
 					for (dex=0; dex<capacity_deployment_schedule.length; dex++) {
-						//if (!excess_capacity[dex] && !excess_waste[dex]) {
+					//for (dex=0; dex<16; dex++) {
 						if (!excess_waste[dex]) {
-							if (integrated_capacity[dex]<optimal_integrated_capacity) optimal_deployment_schedule=capacity_deployment_schedule[dex];
-							optimal_integrated_capacity = integrated_capacity[dex];
+							if (integrated_capacity[dex]<optimal_integrated_capacity) {
+								optimal_deployment_schedule = capacity_deployment_schedule[dex];
+								optimal_integrated_capacity = integrated_capacity[dex];
+								best_so_far=dex;
+							} else if (integrated_capacity[dex]==optimal_integrated_capacity) {
+								if (waste_disposed[dex]<waste_disposed[best_so_far]) {
+									optimal_deployment_schedule = capacity_deployment_schedule[dex];
+									optimal_integrated_capacity = integrated_capacity[dex];
+									best_so_far=dex;
+								}
+							}
 						}
 					}
 					
-					System.out.print("The optimal deployment schedule is ");
-					if (first_reactor_build_decision==2 || first_reactor_build_decision==3) {
-						System.out.print("800 tIHM/yr in 2034,");
-					} else {
-						if (second_reactor_build_decision==2 || second_reactor_build_decision==3) {
-							System.out.print("800 tIHM/yr in 2044,");
-						}
-					}
-					System.out.print("\n");
-					for (dex=0; dex<optimal_deployment_schedule.length; dex++) {
-						year = 2054+(dex*5);
-						if (optimal_deployment_schedule[dex]>0) {
-							System.out.print("1500 tIHM/yr in " + year + "\n");
-						} else {
-							System.out.print("0 tIHM/yr in " + year + "\n");
-						}
-					}
+					output_scope_writer.print("The transition strategy is " + first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + "\n");
+					output_scope_writer.print("The optimal deployment schedule is ");
+					for (dex=0; dex<optimal_deployment_schedule.length; dex++) output_scope_writer.print(optimal_deployment_schedule[dex] + " ");
+					
+					
+					output_scope_writer.close();
+					
+//					System.out.print("The optimal deployment schedule is ");
+//					if (first_reactor_build_decision==2 || first_reactor_build_decision==3) {
+//						System.out.print("800 tIHM/yr in 2034,");
+//					} else {
+//						if (second_reactor_build_decision==2 || second_reactor_build_decision==3) {
+//							System.out.print("800 tIHM/yr in 2044,");
+//						}
+//					}
+//					System.out.print("\n");
+//					for (dex=0; dex<optimal_deployment_schedule.length; dex++) {
+//						year = 2054+(dex*5);
+//						if (optimal_deployment_schedule[dex]>0) {
+//							System.out.print("1500 tIHM/yr in " + year + "\n");
+//						} else {
+//							System.out.print("0 tIHM/yr in " + year + "\n");
+//						}
+//					}
 
 				} else if (!scope_reprocessing_capacity) {
 
 					// you'll have to pass this the deployment schedule
-					int[] capacity_deployment_schedule={0,0,0,0,0,1,0,1,1};
+					double waste=0.;
+					int[] capacity_deployment_schedule={0,0,0,0,0,1,1,0,1};
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 					System.out.print("Running the sim with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + ", final reactor build decision " + final_reactor_build_decision + "\n");
@@ -3156,6 +3188,14 @@ public class VEGAS {
 					for (int metric_no=0; metric_no<metrics.length; metric_no++) {
 						for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 							metrics[metric_no] += LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][metric_no];
+						}
+					}
+					
+					for (j=0; j<REACTORNAMES.length; j++) {
+						if (BELONGS_TO_TIER[j]==0) {
+							for (i=0; i<(END_YEAR-START_YEAR+1-NewReactorLifetime); i++) {
+								waste += SFGenerated[j][i]-SFReprocessed[j][i];
+							}
 						}
 					}
 
