@@ -28,9 +28,9 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=true;
+	static boolean scope_reprocessing_capacity=false;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,1,2,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {2,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -70,7 +70,7 @@ public class VEGAS {
 	static boolean[] RX_PROTOTYPE;
 
 	static int[] facilitiesAddedSoFar;
-	static int[][] reactorRampUp = {{100000}, {1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
+	static int[][] reactorRampUp = {{0}, {1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
 	static double[] yearlyReactorCharge;
 
 	static double[][] DisposedAmount; /* Cumulative amount disposed [1-SNF; 2-HLW][year] */
@@ -979,14 +979,17 @@ public class VEGAS {
 		}
 
 	}
+
 	
 	
 	public void orderPrototypeReactors() {
 
-		int i,j;
+		int i,j,k,n_rx;
 		int facility_to_use, hierarchy_to_use=0;
 		int n_replace_with_year, n_replace_with_type;
+		int replace_with_type;
 		boolean demand_satisfied=false;
+		boolean replace_rx_found=false;
 		boolean[] tried_this_one = {false, false, false};
 
 		for(i=0; i<END_YEAR-START_YEAR+1; i++) {  
@@ -994,20 +997,27 @@ public class VEGAS {
 
 				facility_to_use = j;
 				demand_satisfied = false;
-				for(int k=0; k<tried_this_one.length; k++) tried_this_one[k] = false;
+				for(k=0; k<tried_this_one.length; k++) tried_this_one[k] = false;
 
 				if(RX_PROTOTYPE[j]) {
 
-					if (overBuiltPrototype(i, j)) { // can delete this one
+					if (overBuiltPrototype(i, j)) { 
 
 						subtractOverBuiltFacilities(i, j);
 
 						/* find what year we're in, and use the appropriate Try To Build scenario rules */
 						if(i+START_YEAR > HierarchyByYear[hierarchy_to_use+1]) hierarchy_to_use++;
-
+//
+//						replace_with_type = findTheNextOne(i,j,hierarchy_to_use);
+//						demand_satisfied = addReplacementFacilities(i, replace_with_type);
+//						tried_this_one[replace_with_type] = true;
+//								
+						// this next block should be taken care of by findTheNextOne
 						/* go through the build order array */
-						for (int k=0; k<BuildOrder[hierarchy_to_use].length; k++) { 
-							if (BuildOrder[hierarchy_to_use][k]!=facility_to_use && tried_this_one[BuildOrder[hierarchy_to_use][k]]==false) {
+						for (k=0; k<BuildOrder[hierarchy_to_use].length; k++) { 
+
+							if (BuildOrder[hierarchy_to_use][k]!=facility_to_use && tried_this_one[BuildOrder[hierarchy_to_use][k]]==false) { // change buildorder[hierarchy_to_use][k] to replace_with_type
+
 								demand_satisfied = addReplacementFacilities(i, BuildOrder[hierarchy_to_use][k]);
 								if (demand_satisfied) break;
 								tried_this_one[BuildOrder[hierarchy_to_use][k]] = true;
@@ -1018,21 +1028,26 @@ public class VEGAS {
 						/* go through the facility's replace with type list */
 						if (!demand_satisfied) {
 
+							
 							facility_to_use = j;
 
-							for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+							//for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) { // iterate over the length of replacewithtype
 
-								for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
-									if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
-								}
+							for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
+								if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
+							}
 
+							for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+								
 								if (tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]==false) demand_satisfied = addReplacementFacilities(i, ReplaceWithType[facility_to_use][n_replace_with_year]);
 								tried_this_one[ReplaceWithType[facility_to_use][n_replace_with_year]]=true;
+								if (!demand_satisfied) facility_to_use = ReplaceWithType[ReplaceWithType[facility_to_use][n_replace_with_year]][n_replace_with_year];
 								if (demand_satisfied) break;
 
 								facility_to_use = ReplaceWithType[facility_to_use][n_replace_with_year];
 
 							}
+							//}
 
 						}
 
@@ -1504,6 +1519,7 @@ public class VEGAS {
 		YearDemandSpecified[YearDemandSpecified.length-1]=END_YEAR+1;
 		specifiedGenCap[0]=InitialGenCap;
 		growthRate[0]=0.;
+		// this is strange.. why not call loadReactorParameters with loadNFCParameters in VEGAS class declaraction?
 		loadReactorParameters();
 		for(int i=0; i<number_of_demand_specifiers; i++) {              
 			setDemandSpecifiers(nfc_file_parser.getSub("GrowthSpecified",i),i+1);
