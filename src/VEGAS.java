@@ -29,8 +29,9 @@ public class VEGAS {
 
 	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=false;
+	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {2,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -70,7 +71,6 @@ public class VEGAS {
 	static boolean[] RX_PROTOTYPE;
 
 	static int[] facilitiesAddedSoFar;
-	static int[][] reactorRampUp = {{0}, {1,1,1,1,1,1,1,1,1,1}, {1,1,1,1,1,1,1,1,1,1}};
 	static double[] yearlyReactorCharge;
 
 	static double[][] DisposedAmount; /* Cumulative amount disposed [1-SNF; 2-HLW][year] */
@@ -859,7 +859,8 @@ public class VEGAS {
 				yearSFReprocessed[i][j]=END_YEAR+1;
 			}
 		}
-		dynamicallyAllocateCapacity();
+		if (!limit_prototypes) dynamicallyAllocateCapacity();
+		if (limit_prototypes) dynamicallyAllocateLimitedCapacity();
 	}
 
 	public void dynamicallyAllocateCapacity() {
@@ -956,6 +957,167 @@ public class VEGAS {
 				} else break;
 
 			}
+		}
+
+		/* The indexing over years is wrong I think, but scenario manual isn't used */
+
+		for(j=0; j<REACTORNAMES.length; j++) { 
+			for (i=0; i<END_YEAR-START_YEAR+1; i++) {
+				SFGenerated[j][i]=genCap[j][i]*capacityToMass(j);
+				totalEnergyGenerated+=genCap[j][i]*365.*AVAILABILITY[j];
+				frontEndCharges+=augmentFrontEndChargesnp(genCap[j][i],j,i);
+				reactorCharges+=augmentReactorCharges(genCap[j][i],j);
+			}
+		}
+
+
+		if(ScenarioManual==false){ /* for Estonians */ 
+			for(j=0; j<REACTORNAMES.length; j++) { 
+				for (i=0; i<END_YEAR-START_YEAR+1; i++) {
+					NatUraniumUse[j][i]=SFGenerated[j][i]*FRONTENDMASS[j][0];       //initial NU use estimations based on TryToBuild
+				}
+			}
+		}
+
+	}
+	
+	public void dynamicallyAllocateLimitedCapacity() {
+
+		int i,j=0;
+		int facility_to_use;
+
+		genCap[0][0]=0.;
+		frontEndCharges=0.;
+		backEndCharges=0.;
+		totalEnergyGenerated=0.;
+		for(i=0; i<InitialGenerators.length; i++) {
+			genCap[InitialGenerators[i]][0]=InitialGenCap*InitialFractions[i];
+		}
+		for(i=1; i<YearInitialFleetStartsRetiring-START_YEAR+1; i++) { // up to the year before the initial fleet starts retiring
+			for(j=0; j<InitialGenerators.length; j++) {
+				genCap[InitialGenerators[j]][i]=genCap[InitialGenerators[j]][i-1]; // the initial fleet keeps generating
+			}
+		}
+		for(i=YearInitialFleetStartsRetiring-START_YEAR+1; i<YearInitialFleetFinishesRetiring-START_YEAR+1; i++) { // in the retiring years
+			for(j=0; j<InitialGenerators.length; j++) {
+				genCap[InitialGenerators[j]][i]=genCap[InitialGenerators[j]][i-1]-InitialGenCap*InitialFractions[j]/(YearInitialFleetFinishesRetiring-YearInitialFleetStartsRetiring);
+				//added[InitialGenerators[j]][i] = (int) ((genCap[InitialGenerators[j]][i]-genCap[InitialGenerators[j]][i-1])/PLANT_SIZE[InitialGenerators[j]]);
+			}
+		}
+		for(j=0; j<REACTORNAMES.length; j++) {
+			for(i=0; i<END_YEAR-START_YEAR+1; i++) {
+				totalGenCap[i]+=genCap[j][i];
+			} 
+		}  
+
+		// add new facilities beginning in YearInitialFleetStartsRetiring
+		double added_this_year=0.;
+		double current_demand_growth=0.;
+		double current_capacity_target=0.;
+		double annual_increment=0.;
+		int growth_to_use=0, hierarchy_to_use=0;
+		int count=0;
+		targetGenCap[0]=InitialGenCap;
+		
+		
+		/* sets the target generating capacity for year i */
+		for(i=1; i<END_YEAR-START_YEAR+1; i++) {
+
+			if(i+START_YEAR > YearDemandSpecified[growth_to_use]) {
+				growth_to_use++;
+				while(i+START_YEAR > YearDemandSpecified[growth_to_use]) growth_to_use++;
+				if(specifiedGenCap[growth_to_use] > 0.) {
+					annual_increment=(specifiedGenCap[growth_to_use]-targetGenCap[i-1])/(double)(YearDemandSpecified[growth_to_use+1]-i-START_YEAR+1);
+				}
+				else {
+					annual_increment=0.;
+					current_demand_growth=growthRate[growth_to_use-1];
+				}
+			}
+
+			if(annual_increment == 0.) {
+				targetGenCap[i]=targetGenCap[i-1]*(1.+current_demand_growth/100.);
+			} else {
+				targetGenCap[i]=targetGenCap[i-1]+annual_increment;
+			}
+
+		}
+
+
+		int[] ramp_up = {1,1,1,1,1,1,1,1,1,1};
+		boolean[] overbuilt = {false, false, false};
+		int k, n_rx;
+		int[] build_decision = {0,robustInts[0],robustInts[1],robustInts[2]};
+		int[][] build_order = {{0}, {1,0}, {2,0}, {2,1,0}};
+		int[] ramp_up_year = {0,0,0};;
+		
+		/* allocates the capacity for year i (off-set by 1 year since initial generating capacity defined */
+		for(i=1; i<END_YEAR-START_YEAR+1; i++) {
+
+			if(ScenarioManual==false) SetRulesBasedOnCycles(i);	// Set building order dynamically 
+
+			if(i+START_YEAR > HierarchyByYear[hierarchy_to_use+1]) {	// Building order year hierarchy
+				hierarchy_to_use++;
+				count=0;
+			}
+			//k=build_decision[hierarchy_to_use];
+			//System.out.print("it's year " + (i+START_YEAR) + " and it's hierarchy " + hierarchy_to_use + " and the build decision is " + k + "\n");
+			// get the build decision --> the build decision is build_decision[hierarchy_to_use]
+			
+			for (k=0; k<ReplaceWithType[2].length; k++) {
+				if (i>=YearReplaceWithTypeSpecified[2][k]-START_YEAR) break;
+			}
+//			for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
+//				if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
+//			}
+			
+
+			while(totalGenCap[i]<targetGenCap[i]) {
+
+				/* change building orders dynamically */
+				if(ScenarioManual==false) setBuildOrders();                    
+
+				if(count>=BuildOrder[hierarchy_to_use].length) count=0;
+				facility_to_use=BuildOrder[hierarchy_to_use][count];
+				
+				for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
+				
+				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+					for (k=0; k<i; k++) {
+						if (facilitiesAdded[n_rx][i] > 0) ramp_up_year[n_rx]++;
+					}
+				}
+				
+				
+				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+					if (RX_PROTOTYPE[n_rx]==true) {
+						if (ramp_up_year[n_rx]<=ramp_up.length) {
+							if (facilitiesAdded[n_rx][i]>=ramp_up[ramp_up_year[n_rx]]) {
+								overbuilt[n_rx] = true;
+							}
+						}
+					}
+				}
+				
+				
+				if (RX_PROTOTYPE[facility_to_use]==true) {
+					
+				}
+
+				if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) { /* need to compare the different facility to use plant size to the genCap difference */
+
+					count++;
+					facilitiesAdded[facility_to_use][i]++; 
+
+					for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
+						genCap[facility_to_use][j]+=PLANT_SIZE[facility_to_use];
+						totalGenCap[j]+=PLANT_SIZE[facility_to_use]; 
+					}
+
+				} else break;
+
+			} // done assigning reactors to fulfill demand in year i
+			
 		}
 
 		/* The indexing over years is wrong I think, but scenario manual isn't used */
@@ -2831,7 +2993,7 @@ public class VEGAS {
 			if(bug) 
 				if (verbose) System.out.println("VEGAS Executing...");
 			setLegacySFStockpile();
-			orderPrototypeReactors();
+			//orderPrototypeReactors();
 			getPuDemand();
 			getMADemand();
 			success=reprocessSF();
