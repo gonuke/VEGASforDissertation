@@ -1049,7 +1049,8 @@ public class VEGAS {
 		int k, n_rx;
 		int[] build_decision = {0,robustInts[0],robustInts[1],robustInts[2]};
 		int[][] build_order = {{0}, {1,0}, {2,0}, {2,1,0}};
-		int[] ramp_up_year = {0,0,0};;
+		int[] ramp_up_year = {0,0,0};
+		//int prototype c
 		
 		/* allocates the capacity for year i (off-set by 1 year since initial generating capacity defined */
 		for(i=1; i<END_YEAR-START_YEAR+1; i++) {
@@ -1064,6 +1065,9 @@ public class VEGAS {
 			//System.out.print("it's year " + (i+START_YEAR) + " and it's hierarchy " + hierarchy_to_use + " and the build decision is " + k + "\n");
 			// get the build decision --> the build decision is build_decision[hierarchy_to_use]
 			
+			if(count>=BuildOrder[hierarchy_to_use].length) count=0;
+			facility_to_use=BuildOrder[hierarchy_to_use][count];
+			
 			for (k=0; k<ReplaceWithType[2].length; k++) {
 				if (i>=YearReplaceWithTypeSpecified[2][k]-START_YEAR) break;
 			}
@@ -1071,6 +1075,7 @@ public class VEGAS {
 //				if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
 //			}
 			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
+			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 			
 
 			while(totalGenCap[i]<targetGenCap[i]) {
@@ -1078,8 +1083,8 @@ public class VEGAS {
 				/* change building orders dynamically */
 				if(ScenarioManual==false) setBuildOrders();                    
 
-				if(count>=BuildOrder[hierarchy_to_use].length) count=0;
-				facility_to_use=BuildOrder[hierarchy_to_use][count];
+//				if(count>=BuildOrder[hierarchy_to_use].length) count=0;
+//				facility_to_use=BuildOrder[hierarchy_to_use][count];
 				
 				for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 				
@@ -1099,9 +1104,9 @@ public class VEGAS {
 					}
 				}
 				
-				if (i+START_YEAR>=2035) {
-					System.out.print("stop here");
-				}
+//				if (i+START_YEAR>=2045) {
+//					System.out.print("stop here");
+//				}
 				
 				if (overbuilt[facility_to_use]==true) {
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy_to_use]].length; n_rx++) {
@@ -1112,6 +1117,12 @@ public class VEGAS {
 					}
 				}
 				
+//				
+//					if (i+START_YEAR ==2046) {
+//						System.out.print("really really here");
+//					}
+//				
+//				
 
 				if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) { /* need to compare the different facility to use plant size to the genCap difference */
 
