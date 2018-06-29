@@ -1084,7 +1084,7 @@ public class VEGAS {
 				for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 				
 				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-					for (k=0; k<i; k++) {
+					for (k=0; k<i+1; k++) {
 						if (facilitiesAdded[n_rx][k] > 0) ramp_up_year[n_rx]++;
 					}
 				}
