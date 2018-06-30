@@ -1061,30 +1061,17 @@ public class VEGAS {
 				hierarchy_to_use++;
 				count=0;
 			}
-			//k=build_decision[hierarchy_to_use];
-			//System.out.print("it's year " + (i+START_YEAR) + " and it's hierarchy " + hierarchy_to_use + " and the build decision is " + k + "\n");
-			// get the build decision --> the build decision is build_decision[hierarchy_to_use]
 			
 			if(count>=BuildOrder[hierarchy_to_use].length) count=0;
 			facility_to_use=BuildOrder[hierarchy_to_use][count];
 			
-			for (k=0; k<ReplaceWithType[2].length; k++) {
-				if (i>=YearReplaceWithTypeSpecified[2][k]-START_YEAR) break;
-			}
-//			for (n_replace_with_year=0; n_replace_with_year<ReplaceWithType[facility_to_use].length; n_replace_with_year++) {
-//				if (i >= YearReplaceWithTypeSpecified[facility_to_use][n_replace_with_year]-START_YEAR) break;
-//			}
 			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
 			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 			
-
 			while(totalGenCap[i]<targetGenCap[i]) {
 
 				/* change building orders dynamically */
-				if(ScenarioManual==false) setBuildOrders();                    
-
-//				if(count>=BuildOrder[hierarchy_to_use].length) count=0;
-//				facility_to_use=BuildOrder[hierarchy_to_use][count];
+				if(ScenarioManual==false) setBuildOrders();                
 				
 				for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 				
@@ -1104,10 +1091,6 @@ public class VEGAS {
 					}
 				}
 				
-//				if (i+START_YEAR>=2045) {
-//					System.out.print("stop here");
-//				}
-				
 				if (overbuilt[facility_to_use]==true) {
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy_to_use]].length; n_rx++) {
 						if (overbuilt[n_rx]==false) {
@@ -1116,13 +1099,6 @@ public class VEGAS {
 						}
 					}
 				}
-				
-//				
-//					if (i+START_YEAR ==2046) {
-//						System.out.print("really really here");
-//					}
-//				
-//				
 
 				if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) { /* need to compare the different facility to use plant size to the genCap difference */
 
@@ -2445,7 +2421,10 @@ public class VEGAS {
 									}
 								}
 								if (tilt==true) {
-									if (!switch_capacity) modifyCapacity(j,i+START_YEAR);
+									if (!switch_capacity) {
+										if (!limit_prototypes) modifyCapacity(j,i+START_YEAR);
+										if (limit_prototypes) modifyCapacityWithLimit(j,i+START_YEAR);
+									}
 									tilt=false;
 									return(false);
 								}
@@ -2555,6 +2534,124 @@ public class VEGAS {
 				//if(added_one) break;
 			}
 			if(added_one) break;
+		} 
+
+		frontEndCharges=0.;
+		reactorCharges=0.;
+		for(j=0; j<REACTORNAMES.length; j++) {
+			for(i=0; i<END_YEAR-START_YEAR+1; i++) {
+				//totalGenCap[i]+=genCap[j][i];
+				SFGenerated[j][i]=genCap[j][i]*capacityToMass(j);
+				totalEnergyGenerated=genCap[j][i]*365.*AVAILABILITY[j];
+				NatUraniumUse[j][i]=SFGenerated[j][i]*FRONTENDMASS[j][0];        // Natural Uranium use by reactor type and year
+			} 
+		}
+	}
+	
+	public void modifyCapacityWithLimit(int reactor_type, int year) { /* function called if reprocessing throughput by tier > capacity by tier */
+
+		int year_counter,type_to_replace_with=0,i,j,k,n_rx;
+		boolean success=false;
+		int[][] build_order = {{0}, {1,0}, {2,0}, {2,1,0}};
+		int[] build_decision = {robustInts[0], robustInts[1], robustInts[2]};
+		int[] ramp_up = {1,1,1,1,1,1,1,1,1,1};
+		int[] ramp_up_year = {0,0,0};
+		boolean[] overbuilt =  {false, false, false};
+		int hierarchy=0;
+
+		type_to_replace_with=19;
+		year_counter=year;
+		
+		while(!success) {
+			
+			if(year_counter-START_YEAR < 0) {
+				if (verbose) System.out.println("It's start year, "+year_counter+", rx type "+reactor_type); 
+				success=true;
+			}
+			
+			/* remove the material balance violating reactor */
+			if(facilitiesAdded[reactor_type][year_counter-START_YEAR]>0) {
+				success=true;
+				facilitiesAdded[reactor_type][year_counter-START_YEAR]--;
+				if(bug) 
+					if (verbose) System.out.println("Removed "+REACTORNAMES[reactor_type]+" commissioned in "+year_counter);
+				for(j=year_counter-START_YEAR; j<Math.min(END_YEAR-START_YEAR+1,year_counter-START_YEAR+NewReactorLifetime); j++) {
+					genCap[reactor_type][j]-=PLANT_SIZE[reactor_type];
+					totalGenCap[j]-=PLANT_SIZE[reactor_type];
+					frontEndCharges-=augmentFrontEndChargesnp(PLANT_SIZE[reactor_type],reactor_type,j);
+					reactorCharges-=augmentReactorCharges(PLANT_SIZE[reactor_type],reactor_type);
+				}
+			}
+			else year_counter--;
+		}
+		
+		
+		boolean added_one=false;
+		for(i=year_counter-START_YEAR; i<END_YEAR-START_YEAR+1; i++) {
+			
+			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
+			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k]++;
+			
+			type_to_replace_with=0;
+			for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+				if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) {
+					type_to_replace_with=ReplaceWithType[reactor_type][j];
+				}
+				if (year_counter > HierarchyByYear[hierarchy+1]) hierarchy++;
+			}
+			
+			
+			// find the type to replace with
+			
+			while(totalGenCap[i]<targetGenCap[i]) {
+				
+				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+					for (k=0; k<i+1; k++) {
+						if (facilitiesAdded[n_rx][k] > 0) ramp_up_year[n_rx]++;
+					}
+				}
+				
+				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+					if (RX_PROTOTYPE[n_rx]==true) {
+						if (ramp_up_year[n_rx]>0 && ramp_up_year[n_rx]<=ramp_up.length) {
+							if (facilitiesAdded[n_rx][i]>=ramp_up[ramp_up_year[n_rx]-1]) {
+								overbuilt[n_rx] = true;
+							}
+						}
+					}
+				}
+				
+				if (overbuilt[type_to_replace_with]==true) {
+					System.out.print("it's year " + (i+START_YEAR) + " and j is " + j + "\n");
+					for (n_rx=0; n_rx<build_order[build_decision[hierarchy]].length; n_rx++) {
+						if (overbuilt[n_rx]==false) {
+							type_to_replace_with = n_rx;
+							break;
+						}
+					}
+				}
+				
+				
+				if(PLANT_SIZE[type_to_replace_with] < 0.8*(targetGenCap[i]-totalGenCap[i])) {
+					if(bug) 
+						if (verbose) System.out.println("Replaced with "+REACTORNAMES[type_to_replace_with]+" in "+(i+START_YEAR));
+					facilitiesAdded[type_to_replace_with][i]++;
+					for(j=i; j<Math.min(END_YEAR-START_YEAR+1,i+NewReactorLifetime); j++) {
+						genCap[type_to_replace_with][j]+=PLANT_SIZE[type_to_replace_with];
+						totalGenCap[j]+=PLANT_SIZE[type_to_replace_with];
+						frontEndCharges+=augmentFrontEndChargesnp(PLANT_SIZE[type_to_replace_with],type_to_replace_with,j);   ////////////////not sure: i or j?
+						reactorCharges+=augmentReactorCharges(PLANT_SIZE[type_to_replace_with],type_to_replace_with);
+					}
+					added_one=true;
+				}
+				else break;
+				//if(added_one) break;
+			}
+			
+			
+			// try commenting this out and see what happens
+			if(added_one) break;
+			
 		} 
 
 		frontEndCharges=0.;
@@ -3377,6 +3474,9 @@ public class VEGAS {
 					// you'll have to pass this the deployment schedule
 					double waste=0.;
 					int[] capacity_deployment_schedule={0,0,0,0,0,1,1,0,1};
+					robustInts[0] = first_reactor_build_decision;
+					robustInts[1] = second_reactor_build_decision;
+					robustInts[2] = final_reactor_build_decision;
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 					System.out.print("Running the sim with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + ", final reactor build decision " + final_reactor_build_decision + "\n");
