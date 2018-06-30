@@ -2585,6 +2585,12 @@ public class VEGAS {
 			else year_counter--;
 		}
 		
+		type_to_replace_with=0;
+		for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
+			if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) {
+				type_to_replace_with=ReplaceWithType[reactor_type][j];
+			}
+		}
 		
 		boolean added_one=false;
 		for(i=year_counter-START_YEAR; i<END_YEAR-START_YEAR+1; i++) {
@@ -2592,14 +2598,9 @@ public class VEGAS {
 			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
 			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k]++;
 			
-			type_to_replace_with=0;
-			for (j=0; j<YearReplaceWithTypeSpecified[reactor_type].length; j++) {
-				if (year_counter>=YearReplaceWithTypeSpecified[reactor_type][j]) {
-					type_to_replace_with=ReplaceWithType[reactor_type][j];
-				}
-				if (year_counter > HierarchyByYear[hierarchy+1]) hierarchy++;
+			if (year_counter > HierarchyByYear[hierarchy+1]) {
+				hierarchy++;
 			}
-			
 			
 			// find the type to replace with
 			
@@ -2622,10 +2623,10 @@ public class VEGAS {
 				}
 				
 				if (overbuilt[type_to_replace_with]==true) {
-					System.out.print("it's year " + (i+START_YEAR) + " and j is " + j + "\n");
+					System.out.print("it's year " + (i+START_YEAR) + " and hierarchy is " + hierarchy + "\n");
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy]].length; n_rx++) {
-						if (overbuilt[n_rx]==false) {
-							type_to_replace_with = n_rx;
+						if (overbuilt[build_order[build_decision[hierarchy]][n_rx]]==false && build_order[build_decision[hierarchy]][n_rx]!=reactor_type) {
+							type_to_replace_with = build_order[build_decision[hierarchy]][n_rx];
 							break;
 						}
 					}
