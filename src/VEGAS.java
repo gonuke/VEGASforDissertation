@@ -31,7 +31,7 @@ public class VEGAS {
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {2,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {2,2,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -2595,6 +2595,7 @@ public class VEGAS {
 		boolean added_one=false;
 		for(i=year_counter-START_YEAR; i<END_YEAR-START_YEAR+1; i++) {
 			
+			hierarchy=0;
 			if (year_counter > HierarchyByYear[hierarchy+1]) {
 				hierarchy++;
 			}
@@ -2621,14 +2622,8 @@ public class VEGAS {
 						}
 					}
 				}
-				
-				if (year_counter<2057 && facilitiesAdded[1][i]>=1) {
-					System.out.print("it's year " + year_counter + " and the number of type 1 facilities added is " + facilitiesAdded[1][i] + "\n");
-					System.out.print(" and the ramp_up_year is " + ramp_up_year[1] + "\n");
-				}
 
 				if (overbuilt[type_to_replace_with]==true) {
-					//System.out.print("it's year " + (i+START_YEAR) + " and hierarchy is " + hierarchy + "\n");
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy]].length; n_rx++) {
 						if (overbuilt[build_order[build_decision[hierarchy]][n_rx]]==false && build_order[build_decision[hierarchy]][n_rx]!=reactor_type) {
 							type_to_replace_with = build_order[build_decision[hierarchy]][n_rx];
