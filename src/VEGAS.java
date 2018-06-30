@@ -1093,8 +1093,8 @@ public class VEGAS {
 				
 				if (overbuilt[facility_to_use]==true) {
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy_to_use]].length; n_rx++) {
-						if (overbuilt[n_rx]==false) {
-							facility_to_use = n_rx;
+						if (overbuilt[build_order[build_decision[hierarchy_to_use]][n_rx]]==false) {
+							facility_to_use = build_order[build_decision[hierarchy_to_use]][n_rx];
 							break;
 						}
 					}
@@ -2595,9 +2595,6 @@ public class VEGAS {
 		boolean added_one=false;
 		for(i=year_counter-START_YEAR; i<END_YEAR-START_YEAR+1; i++) {
 			
-			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
-			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k]++;
-			
 			if (year_counter > HierarchyByYear[hierarchy+1]) {
 				hierarchy++;
 			}
@@ -2605,6 +2602,9 @@ public class VEGAS {
 			// find the type to replace with
 			
 			while(totalGenCap[i]<targetGenCap[i]) {
+				
+				for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
+				for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k]=0;
 				
 				for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 					for (k=0; k<i+1; k++) {
@@ -2622,8 +2622,13 @@ public class VEGAS {
 					}
 				}
 				
+				if (year_counter<2057 && facilitiesAdded[1][i]>=1) {
+					System.out.print("it's year " + year_counter + " and the number of type 1 facilities added is " + facilitiesAdded[1][i] + "\n");
+					System.out.print(" and the ramp_up_year is " + ramp_up_year[1] + "\n");
+				}
+
 				if (overbuilt[type_to_replace_with]==true) {
-					System.out.print("it's year " + (i+START_YEAR) + " and hierarchy is " + hierarchy + "\n");
+					//System.out.print("it's year " + (i+START_YEAR) + " and hierarchy is " + hierarchy + "\n");
 					for (n_rx=0; n_rx<build_order[build_decision[hierarchy]].length; n_rx++) {
 						if (overbuilt[build_order[build_decision[hierarchy]][n_rx]]==false && build_order[build_decision[hierarchy]][n_rx]!=reactor_type) {
 							type_to_replace_with = build_order[build_decision[hierarchy]][n_rx];
