@@ -1,2 +1,2 @@
 first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost g_lcoe decay_heat proliferation_resistance u_lcoe
-2 2 3 1 0 1 1 1 6.843263708297046E11 5.8187452455112144E7 29.967750034602425 9.277884040368516E12
+0 2 2 1 0 1 1 1 7.907953708825789E11 8866529.559369162 30.866029040502365 9.267719083920033E12

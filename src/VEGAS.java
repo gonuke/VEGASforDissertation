@@ -28,10 +28,10 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=false;
+	static boolean scope_reprocessing_capacity=true;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {2,2,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -3418,7 +3418,7 @@ public class VEGAS {
 						waste_disposed[dex] = waste;
 						output_scope_writer.print(waste + " \n");
 						
-						if (waste_disposed[dex]>1.e7) {
+						if (waste_disposed[dex]>(1.e7*1.05)) {
 							excess_waste[dex]=true;
 						} else {
 							excess_waste[dex]=false;
