@@ -49,36 +49,52 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=0.
 		}
 	AddCapacity[1]={
-		Year=2044
+		Year=2079
 		Capacity=80.0
 		}
 	AddCapacity[2]={
-		Year=2045
+		Year=2080
 		Capacity=240.0
 		}
 	AddCapacity[3]={
-		Year=2046
+		Year=2081
 		Capacity=480.0
 		}
 	AddCapacity[4]={
-		Year=2047
+		Year=2082
 		Capacity=800.0
 		}
 	AddCapacity[5]={
-		Year=2094
+		Year=2084
 		Capacity=950.0
 		}
 	AddCapacity[6]={
-		Year=2095
+		Year=2085
 		Capacity=1250.0
 		}
 	AddCapacity[7]={
-		Year=2096
+		Year=2086
 		Capacity=1700.0
 		}
 	AddCapacity[8]={
-		Year=2097
+		Year=2087
 		Capacity=2300.0
+		}
+	AddCapacity[9]={
+		Year=2094
+		Capacity=2450.0
+		}
+	AddCapacity[10]={
+		Year=2095
+		Capacity=2750.0
+		}
+	AddCapacity[11]={
+		Year=2096
+		Capacity=3200.0
+		}
+	AddCapacity[12]={
+		Year=2097
+		Capacity=3800.0
 		}
 	}
 ReprocessingCapacity[1]={		# tier 1 reprocessing capacity
@@ -108,11 +124,11 @@ ScenarioRules[1]={
 	Year=2034
 	TryToBuild[0]={
 		FacilityNumber=0
-		Percentage=100
+		Percentage=0
 		}
 	TryToBuild[1]={
 		FacilityNumber=1
-		Percentage=0
+		Percentage=100
 		}
 	TryToBuild[2]={
 		FacilityNumber=2

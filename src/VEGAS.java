@@ -28,10 +28,10 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=true;
+	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {1,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -2411,8 +2411,9 @@ public class VEGAS {
 									throughput_by_tier=traverseReprocessHierarchy(year,j,pu_demand,ma_demand,is_for_real,capacity_by_feed_tier);
 									//if(throughput_by_tier[0]>2100.e3) System.out.println("PROBLEM! "+throughput_by_tier[0]+" "+is_for_real+" "+pu_demand);
 								}
-
+								tilt=false;
 								for (int k=0; k<NumberOfTiers; k++) {
+									System.out.print("here");
 									if (throughput_by_tier[k]>capacity_by_feed_tier[k]) { 
 
 										if (verbose) System.out.println("Over reprocessing tier "+k+"! Year: "+year+" Capacity: "+capacity_by_feed_tier[k]+" Demand: "+throughput_by_tier[k]);
