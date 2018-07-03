@@ -13,7 +13,7 @@ public class DMInputs {
 	};
 
 	static double[] ChosenReprocessingCost = {903,1120,1339};
-	static double[][] DisposalCostOutcomes = {{265,1377},{550,5500},{801,6880}};
+	static double[][] DisposalCostOutcomes = {{44,229},{135,1160},{191,1910},{265,1377},{550,5500},{801,6880}};
 	
 	static double LWRCapitalCost = 2000;
 	static double[] HTGRCapitalCost = {1800, 2100, 2400};
@@ -21,12 +21,8 @@ public class DMInputs {
 	static double[] SFRCapitalCost = {1600, 2000, 2400};
 	static double[] sfr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
 	
-//	static double[][] CapitalSubsidy = {{2000,0,0},{0,1000,1000},{0,2000,0},{0,0,2000}};
 	static double[][] ChosenCapitalSubsidy = {{200,0,0},{0,200,0},{0,0,200},{0,100,100}};
 	static int CapitalSubsidyYear = 2045;
-//	static double[][] CapitalSubsidy = {{0,0,0}};
-//	static int[] G_StageTwoStrategies = {0,1,2,3};
-//	static int[] G_StageTwoStrategies = {0};
 	
 	static double[][] decay_heat = { // [reactor type][actinides, fission products]
 		{1.849E+03, 1.322E+03},

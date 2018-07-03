@@ -28,7 +28,7 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=false;
-	static boolean scope_reprocessing_capacity=true;
+	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
 	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
@@ -3208,8 +3208,8 @@ public class VEGAS {
 
 								for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
-								System.out.print("... chosen reprocessing cost " + chosen_reprocessing_cost + ", chosen capital subsidy " + chosen_capital_subsidy + "\n");
-								System.out.print("... " + waste_disposal_cost + " waste disposal cost, " + htgr_capital_cost + " htgr capital cost, and " + sfr_capital_cost + "sfr capital cost" + "\n");
+								if (verbose) System.out.print("... chosen reprocessing cost " + chosen_reprocessing_cost + ", chosen capital subsidy " + chosen_capital_subsidy + "\n");
+								if (verbose) System.out.print("... " + waste_disposal_cost + " waste disposal cost, " + htgr_capital_cost + " htgr capital cost, and " + sfr_capital_cost + " sfr capital cost" + "\n");
 
 								LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision] = yearlyAnnualReports();
 
@@ -3219,7 +3219,7 @@ public class VEGAS {
 									}
 								}
 
-								System.out.print("The metrics are " + metrics[0] + " for G's LCOE, " + metrics[1] + " for the decay heat, " + metrics[2] + " for the proliferation resistance, and " + metrics[3] + " for U's LCOE." + "\n");
+								if (verbose) System.out.print("The metrics are " + metrics[0] + " for G's LCOE, " + metrics[1] + " for the decay heat, " + metrics[2] + " for the proliferation resistance, and " + metrics[3] + " for U's LCOE." + "\n");
 
 								for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
@@ -3608,6 +3608,16 @@ public class VEGAS {
 
 			} else if (!only_one) {
 
+				int simulations=0;
+				for (i=0; i<FirstReactorBuildDecision.length; i++) {
+					for (j=0; j<SecondReactorBuildDecision.length; j++) {
+						for (k=0; k<FinalReactorBuildDecision[FirstReactorBuildDecision[i]][SecondReactorBuildDecision[j]].length; k++) {
+							simulations++;
+						}
+					}
+				}
+				
+				
 				File output_target = new File(user_dir+File.separatorChar+"DecisionMakingResults.txt");
 
 				if(output_target.exists()) output_target.delete();
@@ -3617,20 +3627,29 @@ public class VEGAS {
 				output_writer.print("decision_one decision_two decision_three reprocessing_cost capital_subsidy disposal_cost htgr_cost sfr_cost g_lcoe heat_load nonprolif u_lcoe");
 				output_writer.print("\n");
 
+				int sim_counter=1; 
+				String[] decisions = {"LWRs", "HTGRs", "SFRs and LWRs", "SFRs and HTGRs"};
 				for (first_reactor_build_decision=0; first_reactor_build_decision<FirstReactorBuildDecision.length; first_reactor_build_decision++) {
 					for (second_reactor_build_decision=0; second_reactor_build_decision<SecondReactorBuildDecision.length; second_reactor_build_decision++) {
 						for (final_reactor_build_decision=0; final_reactor_build_decision<FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision].length; final_reactor_build_decision++) {
 							// you'll have to pass this the deployment schedule
 							//printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 							
+							robustInts[0] = FirstReactorBuildDecision[first_reactor_build_decision];
+							robustInts[1] = SecondReactorBuildDecision[second_reactor_build_decision];
+							robustInts[2] = FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision];
+							
 							int[] capacity_deployment_schedule=new int[9];
 							
-							capacity_deployment_schedule = getCapacityDeploymentSchedule(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
+							capacity_deployment_schedule = getCapacityDeploymentSchedule(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 							
 							printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 							
 							printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
-							System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
+							//System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
+							
+							System.out.print("Running simulation " + sim_counter + " of " + simulations + ". Building " + decisions[FirstReactorBuildDecision[first_reactor_build_decision]] + " in 2035, " + decisions[SecondReactorBuildDecision[second_reactor_build_decision]] + " in 2045, and then " + decisions[FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]] + " in 2055 till 2100." + "\n");
+							sim_counter++;
 							VEGAS mySim = new VEGAS();
 							mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
