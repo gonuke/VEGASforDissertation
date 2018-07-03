@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=false;
+	static boolean only_one=false;
+	static boolean scope_reprocessing_capacity=true;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {2,2,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -42,7 +42,7 @@ public class VEGAS {
 	 * 6 = htgr capital cost outcome
 	 * 7 = sfr capital cost outcome
 	 */
-
+	
 	static double[] ChosenReprocessingCost = DMInputs.getChosenReprocessingCost();
 	static double[][] ChosenCapitalSubsidy = DMInputs.getChosenCapitalSubsidy();
 	static int CapitalSubsidyYear = DMInputs.getCapitalSubsidyYear();
@@ -3474,10 +3474,14 @@ public class VEGAS {
 
 					// you'll have to pass this the deployment schedule
 					double waste=0.;
-					int[] capacity_deployment_schedule={0,0,0,0,0,1,1,0,1};
 					robustInts[0] = first_reactor_build_decision;
 					robustInts[1] = second_reactor_build_decision;
 					robustInts[2] = final_reactor_build_decision;
+					
+					int[] capacity_deployment_schedule=new int[9];
+					
+					capacity_deployment_schedule = getCapacityDeploymentSchedule(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
+					
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 					System.out.print("Running the sim with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + ", final reactor build decision " + final_reactor_build_decision + "\n");
@@ -3618,6 +3622,13 @@ public class VEGAS {
 						for (final_reactor_build_decision=0; final_reactor_build_decision<FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision].length; final_reactor_build_decision++) {
 							// you'll have to pass this the deployment schedule
 							//printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
+							
+							int[] capacity_deployment_schedule=new int[9];
+							
+							capacity_deployment_schedule = getCapacityDeploymentSchedule(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
+							
+							printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
+							
 							printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 							System.out.print("Running the sim with first reactor build decision " + FirstReactorBuildDecision[first_reactor_build_decision] + ", second reactor build decision " + SecondReactorBuildDecision[second_reactor_build_decision] + " and final reactor build decision " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + "\n");
 							VEGAS mySim = new VEGAS();
@@ -4140,6 +4151,120 @@ public class VEGAS {
 			
 		}
 		
+	}
+	
+	public static int[] getCapacityDeploymentSchedule(int first, int second, int last) {
+		
+		int k;
+		int[] schedule = new int[9];
+		
+		if (first == 0) {
+			
+			if (second == 2) {
+				
+				if (last == 2) {
+					schedule[4] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				}
+				
+			} else if (second == 3) {
+				
+				if (last == 2 || last == 3) {
+					for (k=4; k<9; k++) schedule[k] = 1;
+				}
+				
+			}
+			
+		} else if (first == 1) {
+			
+			if (second == 2) {
+				
+				if (last == 2) {
+					schedule[4] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				} else if (last == 3) {
+					for (k=5; k<9; k++) schedule[k] = 1;
+				}
+				
+			} else if (second == 3) {
+				
+				if (last == 2 || last == 3) {
+					for (k=4; k<9; k++) schedule[k] = 1;
+				}
+				
+			}
+			
+		} else if (first == 2) {
+			
+			if (second == 0) {
+				if (last == 2) {
+					schedule[3] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				}
+			} else if (second == 1) {
+				if (last == 2) {
+					schedule[3] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				} else if (last == 3) {
+					for (k=5; k<9; k++) schedule[k] = 1;
+				}
+			} else if (second == 2) {
+				if (last == 2) {
+					schedule[5] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				}
+			} else if (second == 3) {
+				if (last == 2) {
+					schedule[5] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				} else if (last == 3) {
+					for (k=5; k<9; k++) schedule[k] = 1;
+				}
+			}
+			
+		} else if (first == 3) {
+			if (second == 0) {
+				if (last == 2) {
+					schedule[3] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				} else if (last == 3) {
+					for (k=5; k<9; k++) schedule[k] = 1;
+				}
+			} else if (second == 1) {
+				if (last == 2) {
+					for (k=6; k<9; k++) schedule[k] = 1;
+				} else if (last == 3) {
+					schedule[3] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				}
+			} else if (second == 2) {
+				if (last == 2) {
+					schedule[5] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				} else if (last == 3) {
+					for (k=5; k<9; k++) schedule[k] = 1;
+				}
+			} else if (second == 3) {
+				if (last == 2) {
+					for (k=6; k<9; k++) schedule[k] = 1;
+				} else if (last == 3) {
+					schedule[5] = 1;
+					schedule[7] = 1;
+					schedule[8] = 1;
+				}
+			}
+		}
+		
+		return(schedule);
 	}
 	
 } // VEGAS class
