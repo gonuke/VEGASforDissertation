@@ -1,24 +1,24 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) 1/3, (double) 1/3, (double) 1/3};
-	static double[] UCriterionWeights = {(double) 1};
+	static double[] GCriterionWeights = {(double) 1/5, (double) 2/5, (double) 2/5};
+	static double[] UCriterionWeights = {(double) 0, (double) (0), (double) (1)};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
-	static double[][] DisposalCostProbabilities = {
-		{(double) 1/3, (double) 1/3, (double) 1/3},
-		{(double) 4/9, (double) 3/9, (double) 2/9},
-		{(double) 5/9, (double) 4/9, (double) 1/9}
-	};
 
 	static double[] ChosenReprocessingCost = {903,1120,1339};
 	static double[][] DisposalCostOutcomes = {{44,229},{135,1160},{191,1910},{265,1377},{550,5500},{801,6880}};
+	static double[][] DisposalCostProbabilities = {
+		{(double) 0, (double) 0, (double) 0, (double) 1/3, (double) 1/3, (double) 1/3},
+		{(double) 0, (double) 1/20, (double) 2/20, (double) 5/20, (double) 7/20, (double) 5/20},
+		{(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}
+	};
 	
 	static double LWRCapitalCost = 2000;
-	static double[] HTGRCapitalCost = {1800, 2100, 2400};
+	static double[] HTGRCapitalCost = {1800, 2400, 3000};
 	static double[] htgr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
-	static double[] SFRCapitalCost = {1600, 2000, 2400};
+	static double[] SFRCapitalCost = {1500, 1750, 2700};
 	static double[] sfr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
 	
 	static double[][] ChosenCapitalSubsidy = {{200,0,0},{0,200,0},{0,0,200},{0,100,100}};
@@ -40,6 +40,7 @@ public class DMInputs {
 		{0.3698,1,0.2603,0.3603,1,1,0.3698},
 		{0.3524,1,0.2514,0.3591,1,1,0.3699}
 	};
+	// snf storage; snf transport; reprocessing; snf disposal; hlw vitrification; hlw storage; hlw transport
 	
 	public static void main(String args[]) {
 		

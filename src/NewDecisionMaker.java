@@ -282,7 +282,7 @@ public class NewDecisionMaker {
 	public double get_u_weight_leafvalue(double[] values) {
 		double weighted_value=0.;
 		for (int i=0; i<u_weights.length; i++) {
-			weighted_value += u_weights[i]*values[i+g_weights.length];
+			weighted_value += u_weights[i]*values[i];
 		}
 		return(weighted_value);
 	}
@@ -881,5 +881,37 @@ public class NewDecisionMaker {
 		}
 		System.out.print("Finished printing hedging strategy results");
 	}
+	
+	public void printPerfectInformationStrategies() {
+		
+		int[] hedge_row = new int[10];
+		int g_stage_one;
+		int dispcost_outcome;
+		int u_stage_one, u_one_htgr_outcome, u_one_sfr_outcome;
+		int g_stage_two;
+		int u_stage_two, u_two_htgr_outcome, u_two_sfr_outcome;
+		int u_stage_three;
+		int i, j, k;
 
-};
+		try {
+
+			String user_dir = System.getProperty("user.dir");
+			File output_target = new File(user_dir+File.separatorChar+"PerfectInformationStrategyResults.txt");
+
+			if(output_target.exists()) output_target.delete();
+			FileWriter output_filewriter = new FileWriter(output_target);
+			PrintWriter output_writer = new PrintWriter(output_filewriter);
+
+			output_writer.print("reprocessing_cost waste_disposal_cost reactor_build htgr_outcome sfr_outcome capital_subsidy reactor_build htgr_outcome sfr_outcome reactor_build");
+			output_writer.print("\n");
+			
+			//for (i=0; i<)
+
+		} catch (IOException e) {
+			System.out.print("Error writing Hedging Strategy results");
+		}
+
+	}
+
+	
+}

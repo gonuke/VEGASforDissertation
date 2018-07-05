@@ -10,7 +10,7 @@ DischargeBurnup					50			120			73
 ThermalEfficiency				33			50			40
 RecirculatingPower				2			2			2
 Availability					90			90			90
-CapitalCost						2000		2750		2750
+CapitalCost						2000		4500		4200
 AnnualFixedOM					70			0			0
 InputUEnrichment				4.21		15.5		0.25
 InputUMass						1			1			0.86100
@@ -26,7 +26,7 @@ BatchesPerCore					3			3			4
 UMiningAndMillingCost			D			D			0
 UF6ConversionCost				D			D			0
 EnrichmentCost					D			D			D
-FuelFabricationCost				D			1000		2400
+FuelFabricationCost				D			3000		2400
 TransportationToRXCost			D			D			D
 SFStorageCost					D			D			D
 SFTransportationCost			D			D			D

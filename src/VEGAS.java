@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=false;
+	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {1,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -1051,6 +1051,7 @@ public class VEGAS {
 		int[][] build_order = {{0}, {1,0}, {2,0}, {2,1,0}};
 		int[] ramp_up_year = {0,0,0};
 		//int prototype c
+		int htgr_decisions=0, sfr_decisions=0;
 		
 		/* allocates the capacity for year i (off-set by 1 year since initial generating capacity defined */
 		for(i=1; i<END_YEAR-START_YEAR+1; i++) {
@@ -1062,9 +1063,23 @@ public class VEGAS {
 				count=0;
 			}
 			
+			for (k=0; k<hierarchy_to_use+1; k++) {
+				if (build_decision[k]==2) {
+					sfr_decisions++;
+				} else if (build_decision[k]==3) {
+					htgr_decisions++;
+					sfr_decisions++;
+				}
+			}
+			
 			if(count>=BuildOrder[hierarchy_to_use].length) count=0;
 			facility_to_use=BuildOrder[hierarchy_to_use][count];
+//			
+//			if (i>=(2045-START_YEAR)) {
+//			System.out.print("ugh");
+//			}
 			
+			boolean this_year=true;
 			for (k=0; k<overbuilt.length; k++) overbuilt[k] = false;
 			for (k=0; k<ramp_up_year.length; k++) ramp_up_year[k] = 0;
 			
@@ -1099,6 +1114,21 @@ public class VEGAS {
 						}
 					}
 				}
+				
+				if (i>=(2045-START_YEAR) && this_year) {
+					System.out.print("check overbuilt");
+					this_year=false;
+				}
+				
+//				if (htgr_decisions==1 && sfr_decisions==1) {
+//					if (first!=facility_to_use = 1;
+//				}
+				
+				
+//				if (build_decision[hierarchy_to_use]==3 && first==true) {
+//					facility_to_use=1;
+//					first=false;
+//				}
 
 				if(PLANT_SIZE[facility_to_use] < 0.8*(targetGenCap[i]-totalGenCap[i])) { /* need to compare the different facility to use plant size to the genCap difference */
 
@@ -3451,24 +3481,6 @@ public class VEGAS {
 					
 					
 					output_scope_writer.close();
-					
-//					System.out.print("The optimal deployment schedule is ");
-//					if (first_reactor_build_decision==2 || first_reactor_build_decision==3) {
-//						System.out.print("800 tIHM/yr in 2034,");
-//					} else {
-//						if (second_reactor_build_decision==2 || second_reactor_build_decision==3) {
-//							System.out.print("800 tIHM/yr in 2044,");
-//						}
-//					}
-//					System.out.print("\n");
-//					for (dex=0; dex<optimal_deployment_schedule.length; dex++) {
-//						year = 2054+(dex*5);
-//						if (optimal_deployment_schedule[dex]>0) {
-//							System.out.print("1500 tIHM/yr in " + year + "\n");
-//						} else {
-//							System.out.print("0 tIHM/yr in " + year + "\n");
-//						}
-//					}
 
 				} else if (!scope_reprocessing_capacity) {
 
@@ -3481,6 +3493,7 @@ public class VEGAS {
 					int[] capacity_deployment_schedule=new int[9];
 					
 					capacity_deployment_schedule = getCapacityDeploymentSchedule(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
+					//int[] capacity_deployment_schedule = {1,1,1,0,0,0,1,1,1};
 					
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
@@ -4128,7 +4141,7 @@ public class VEGAS {
 
 		} else { // if the move to recycle doesn't happen in 2035
 
-			if (second_reactor_build_decision==2 || first_reactor_build_decision==3) {
+			if (second_reactor_build_decision==2 || second_reactor_build_decision==3) {
 				
 				year=2044;
 				
@@ -4147,7 +4160,7 @@ public class VEGAS {
 				
 			}
 
-		}
+		} // and if the recycle doesn't happen by 2045, then it can't start in 2055
 
 		for (schedule_dex=0; schedule_dex<deployment_schedule.length; schedule_dex++) {
 			
