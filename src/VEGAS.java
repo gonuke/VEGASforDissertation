@@ -28,10 +28,10 @@ public class VEGAS {
 	static boolean boar=true;
 
 	static boolean only_one=true;
-	static boolean scope_reprocessing_capacity=false;
+	static boolean scope_reprocessing_capacity=true;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {1,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -43,8 +43,8 @@ public class VEGAS {
 	 * 7 = sfr capital cost outcome
 	 */
 	
-	static double[] ChosenReprocessingCost = DMInputs.getChosenReprocessingCost();
-	static double[][] ChosenCapitalSubsidy = DMInputs.getChosenCapitalSubsidy();
+	static double[] ChosenReprocessingCost = DMInputs.getReprocessingCost();
+	static double[][] ChosenCapitalSubsidy = DMInputs.getCapitalSubsidy();
 	static int CapitalSubsidyYear = DMInputs.getCapitalSubsidyYear();
 
 	static double[][] DisposalCost = DMInputs.getDisposalCostOutcomes();
@@ -3097,9 +3097,11 @@ public class VEGAS {
 		int i,j,k,l,m,n;
 		int first_reactor_build_decision, second_reactor_build_decision, final_reactor_build_decision;
 		int waste_disposal_cost, sfr_capital_cost, htgr_capital_cost;
-		int chosen_reprocessing_cost, chosen_capital_subsidy;
+		int reprocessing_cost, chosen_capital_subsidy;
 		int year;
 		double[] metrics = new double[4];
+
+		String[] strategies = {"LWRs", "HTGRs", "SFRs recycling LWR fuel", "SFRs recycling HTGR fuel"};
 
 
 		try {
@@ -3123,12 +3125,11 @@ public class VEGAS {
 				first_reactor_build_decision = robustInts[0];
 				second_reactor_build_decision = robustInts[1];
 				final_reactor_build_decision = robustInts[2];
-				chosen_reprocessing_cost = robustInts[3];
+				reprocessing_cost = robustInts[3];
 				chosen_capital_subsidy = robustInts[4];
 				waste_disposal_cost = robustInts[5];
 				sfr_capital_cost = robustInts[6];
 				htgr_capital_cost = robustInts[7];
-
 				
 				/* ##### SCOPE THE REPROCESSING CAPACITY ##### */
 				if (scope_reprocessing_capacity) {
@@ -3168,7 +3169,7 @@ public class VEGAS {
 						}
 					}
 
-					System.out.print("Scoping the reprocessing capacity deployment schedules with first reactor build decision " + first_reactor_build_decision + ", second reactor build decision " + second_reactor_build_decision + " and final reactor build decision " + final_reactor_build_decision + "\n");
+					System.out.print("Scoping the reprocessing capacity deployment schedules with " + strategies[first_reactor_build_decision] + " in 2035, " + strategies[second_reactor_build_decision] + ", and " + strategies[final_reactor_build_decision] + " in 2055 till 2100." + "\n");
 
 					double[] integrated_capacity = new double[capacity_deployment_schedule.length];
 					boolean[] excess_waste = new boolean[capacity_deployment_schedule.length];
@@ -3188,7 +3189,7 @@ public class VEGAS {
 						
 						printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule[dex]);
 						printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-						System.out.print("Running the sim with the separations capacity deployment schedule " + (dex) + " of " + (capacity_deployment_schedule.length-1) + "\n");
+						System.out.print("Running the sim with the capacity deployment schedule " + (dex+1) + " of " + (capacity_deployment_schedule.length) + "\n");
 						VEGAS mySim = new VEGAS();
 						mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
 						
@@ -3278,13 +3279,15 @@ public class VEGAS {
 						}
 					}
 					
-					String[] strategies = {"LWRs", "HTGRs", "SFRs recycling LWR fuel", "SFRs recycling HTGR fuel"};
-					
 					output_scope_writer.print("The transition strategy is " + strategies[first_reactor_build_decision] + " in 2035, " + strategies[second_reactor_build_decision] + " in 2045, and " + strategies[final_reactor_build_decision] + " in 2055 till 2100." + "\n");
 					output_scope_writer.print("The optimal deployment schedule is ");
 					for (dex=0; dex<optimal_deployment_schedule.length-2; dex++) output_scope_writer.print(optimal_deployment_schedule[dex] + " in " + (2055+5*dex) + " ");
 					output_scope_writer.print(optimal_deployment_schedule[optimal_deployment_schedule.length-2] + " in " + (2055+5*(optimal_deployment_schedule.length-2)) + ", and ");
 					output_scope_writer.print(optimal_deployment_schedule[optimal_deployment_schedule.length-1] + " in " + (2055+5*(optimal_deployment_schedule.length-1)) + "." + "\n");
+					output_scope_writer.print("(" + first_reactor_build_decision + "," + second_reactor_build_decision + "," + final_reactor_build_decision + ")");
+					output_scope_writer.print("(");
+					for (dex=0; dex<optimal_deployment_schedule.length-1; dex++) output_scope_writer.print(optimal_deployment_schedule[dex] + ",");
+					output_scope_writer.print(optimal_deployment_schedule[optimal_deployment_schedule.length-1]+ ")" + "\n");
 					
 					
 					output_scope_writer.close();
@@ -3303,8 +3306,7 @@ public class VEGAS {
 					
 					printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
 					printReactorParamFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision);
-					
-					String[] strategies = {"LWRs", "HTGRs", "SFRs recycling LWR fuel", "SFRs recycling HTGR fuel"};			
+							
 					System.out.print("Running the sim with " + strategies[first_reactor_build_decision] + " in 2035, " + strategies[second_reactor_build_decision] + " in 2045, and " + strategies[final_reactor_build_decision] + " in 2055 till 2100." + "\n");
 					
 					
@@ -3313,7 +3315,7 @@ public class VEGAS {
 
 					for (int metric_no=0; metric_no<metrics.length; metric_no++) {
 						for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-							metrics[metric_no] += LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][metric_no];
+							metrics[metric_no] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][metric_no];
 						}
 					}
 					
@@ -3333,7 +3335,7 @@ public class VEGAS {
 					PrintWriter output_writer = new PrintWriter(output_filewriter);
 					output_writer.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost g_lcoe decay_heat proliferation_resistance u_lcoe");
 					output_writer.print("\n");
-					output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + " " + metrics[3] + "\n");
+					output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + " " + metrics[3] + "\n");
 					output_writer.close();
 
 
@@ -3342,10 +3344,10 @@ public class VEGAS {
 					FileWriter output_filewriter_glcoe = new FileWriter(output_target_glcoe);
 					PrintWriter output_writer_glcoe = new PrintWriter(output_filewriter_glcoe);
 					output_writer_glcoe.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost ");
-					output_writer_glcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_glcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_glcoe.print("year glcoe" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						output_writer_glcoe.print((year+START_YEAR) + " " + LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][0]);
+						output_writer_glcoe.print((year+START_YEAR) + " " + LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][0]);
 						output_writer_glcoe.print("\n");
 					}
 					output_writer_glcoe.close();
@@ -3356,10 +3358,10 @@ public class VEGAS {
 					FileWriter output_filewriter_decayheat = new FileWriter(output_target_decayheat);
 					PrintWriter output_writer_decayheat = new PrintWriter(output_filewriter_decayheat);
 					output_writer_decayheat.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost ");
-					output_writer_decayheat.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_decayheat.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_decayheat.print("year decayheat" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						output_writer_decayheat.print((year+START_YEAR) + " " + LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][1]);
+						output_writer_decayheat.print((year+START_YEAR) + " " + LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][1]);
 						output_writer_decayheat.print("\n");
 					}
 					output_writer_decayheat.close();
@@ -3370,10 +3372,10 @@ public class VEGAS {
 					FileWriter output_filewriter_proliferationresistance = new FileWriter(output_target_proliferationresistance);
 					PrintWriter output_writer_proliferationresistance = new PrintWriter(output_filewriter_proliferationresistance);
 					output_writer_proliferationresistance.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost ");
-					output_writer_proliferationresistance.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_proliferationresistance.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_proliferationresistance.print("year proliferationresistance" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						output_writer_proliferationresistance.print((year+START_YEAR) + " " + LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2]);
+						output_writer_proliferationresistance.print((year+START_YEAR) + " " + LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2]);
 						output_writer_proliferationresistance.print("\n");
 					}
 					output_writer_proliferationresistance.close();
@@ -3385,10 +3387,10 @@ public class VEGAS {
 					FileWriter output_filewriter_ulcoe = new FileWriter(output_target_ulcoe);
 					PrintWriter output_writer_ulcoe = new PrintWriter(output_filewriter_ulcoe);
 					output_writer_ulcoe.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost ");
-					output_writer_ulcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_ulcoe.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_ulcoe.print("year ulcoe" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						output_writer_ulcoe.print(year + " " + LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][3]);
+						output_writer_ulcoe.print(year + " " + LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][3]);
 						output_writer_ulcoe.print("\n");
 					}
 					output_writer_ulcoe.close();
@@ -3399,7 +3401,7 @@ public class VEGAS {
 					FileWriter output_filewriter_wastequantities = new FileWriter(output_target_wastequantities);
 					PrintWriter output_writer_wastequantities = new PrintWriter(output_filewriter_wastequantities);
 					output_writer_wastequantities.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost " + "\n");
-					output_writer_wastequantities.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_wastequantities.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_wastequantities.print("year lwr_wastegenerated lwr_wastereprocessed_byyear lwr_wastereprocessed htgr_wastegenerated htgr_wastereprocessed_byyear htgr_wastereprocessed sfr_wastegenerated sfr_wastereprocessed_byyear sfr_wastereprocessed" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 					//for (year=0; year<END_YEAR-START_YEAR+1; year++) {
@@ -3418,7 +3420,7 @@ public class VEGAS {
 					FileWriter output_filewriter_generationcapacity = new FileWriter(output_target_generationcapacity);
 					PrintWriter output_writer_generationcapacity = new PrintWriter(output_filewriter_generationcapacity);
 					output_writer_generationcapacity.print("first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost " + "\n");
-					output_writer_generationcapacity.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
+					output_writer_generationcapacity.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_generationcapacity.print("year lwr_gencap htgr_gencap sfr_gencap" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 						output_writer_generationcapacity.print((year+START_YEAR) + " ");
@@ -3474,12 +3476,12 @@ public class VEGAS {
 							
 							printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
-							System.out.print("Running simulation " + sim_counter + " of " + simulations + ". Building " + decisions[FirstReactorBuildDecision[first_reactor_build_decision]] + " in 2035, " + decisions[SecondReactorBuildDecision[second_reactor_build_decision]] + " in 2045, and then " + decisions[FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]] + " in 2055 till 2100." + "\n");
+							System.out.print("Running simulation " + sim_counter + " of " + simulations + ". Building " + strategies[FirstReactorBuildDecision[first_reactor_build_decision]] + " in 2035, " + strategies[SecondReactorBuildDecision[second_reactor_build_decision]] + " in 2045, and then " + strategies[FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]] + " in 2055 till 2100." + "\n");
 							sim_counter++;
 							VEGAS mySim = new VEGAS();
 							mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
-							for (chosen_reprocessing_cost=0; chosen_reprocessing_cost<ChosenReprocessingCost.length; chosen_reprocessing_cost++) {
+							for (reprocessing_cost=0; reprocessing_cost<ChosenReprocessingCost.length; reprocessing_cost++) {
 								for (waste_disposal_cost=0; waste_disposal_cost<DisposalCost.length; waste_disposal_cost++) {
 									for (chosen_capital_subsidy=0; chosen_capital_subsidy<ChosenCapitalSubsidy.length; chosen_capital_subsidy++) {
 										for (htgr_capital_cost=0; htgr_capital_cost<HTGRCapitalCost.length; htgr_capital_cost++) {
@@ -3493,10 +3495,10 @@ public class VEGAS {
 												for (int metric_no=0; metric_no<metrics.length; metric_no++) metrics[metric_no]=0.;
 												for (int metric_no=0; metric_no<metrics.length; metric_no++)  {
 													for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-														metrics[metric_no] += LeafValues[chosen_reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][metric_no];		
+														metrics[metric_no] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][metric_no];		
 													}
 												}
-												output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + " " + chosen_reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + " " + metrics[3] + "\n");
+												output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + " " + metrics[3] + "\n");
 											}
 										}
 									}

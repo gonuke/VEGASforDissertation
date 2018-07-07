@@ -14,6 +14,14 @@ public class DMInputs {
 		{(double) 0, (double) 1/20, (double) 2/20, (double) 5/20, (double) 7/20, (double) 5/20},
 		{(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}
 	};
+	// correlate the disposal cost and reprocessing cost probabilities
+	static double[][][] RandD= {
+		
+		{ {(double) 0, (double) 0, (double) 0, (double) 1/3, (double) 1/3, (double) 1/3}, {(double) 1/3, (double) 1/3, (double) 1/3} },
+		{ {(double) 0, (double) 1/20, (double) 2/20, (double) 5/20, (double) 7/20, (double) 5/20}, {(double) 2/4, (double) 1/4, (double) 1/4} },
+		{ {(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}, {(double) 2/3, (double) 1/6, (double) 1/6} }
+		
+	};
 	
 	static double LWRCapitalCost = 2000;
 	static double[] HTGRCapitalCost = {1800, 2400, 3000};
@@ -46,10 +54,10 @@ public class DMInputs {
 		
 	}
 	
-	public static double[] getGWeights() {return(GCriterionWeights);}
-	public static double[] getUWeights() {return(UCriterionWeights);}
+	public static double[] getGWeighting() {return(GCriterionWeights);}
+	public static double[] getUWeighting() {return(UCriterionWeights);}
 	
-	public static double[] getChosenReprocessingCost() {return(ChosenReprocessingCost);}
+	public static double[] getReprocessingCost() {return(ChosenReprocessingCost);}
 	
 	public static double[][] getDisposalCostOutcomes() {return(DisposalCostOutcomes);}
 	public static double[][] getDisposalCostProbabilities() {return(DisposalCostProbabilities);}
@@ -61,12 +69,14 @@ public class DMInputs {
 	public static double[] getHTGRCapCostProb() {return(htgr_capcost_probability);}
 	public static double[] getSFRCapCostProb() {return(sfr_capcost_probability);}
 	
-	public static double[][] getChosenCapitalSubsidy() {return(ChosenCapitalSubsidy);}
+	public static double[][] getCapitalSubsidy() {return(ChosenCapitalSubsidy);}
 	public static int getCapitalSubsidyYear() {return(CapitalSubsidyYear);}
 	
 	public static double[][] getDecayHeat() {return(decay_heat);}
 	
 	public static double[][] getFEProliferationMetric() {return(FrontEndProliferation);}
 	public static double[][] getBEProliferationMetric() {return(BackEndProliferation);}
+	
+	public static double[][][] getRandD() {return(RandD);}
 	
 }
