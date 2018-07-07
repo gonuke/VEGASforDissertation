@@ -215,15 +215,22 @@ public class DecisionMaker {
 		for (u_o=0; u_o<u_one.length; u_o++) {
 			for (u_tw=0; u_tw<u_two.length; u_tw++) {
 				for (u_th=0; u_th<u_three.length; u_th++) {
-					for (g_o=0; g_o<g_one.length; g_o++) {
-						for (g_tw=0; g_tw<g_two.length; g_tw++) {
-							
+					for (g_tw=0; g_tw<g_two.length; g_tw++) {
+						for (rep=0; rep<rep_cost.length; rep++) {
+							for (disp=0; disp<disp_cost.length; disp++) {
+								for (htgr=0; htgr<htgr_cost.length; htgr++) {
+									for (sfr=0; sfr<sfr_cost.length; sfr++) {
+										
+									}
+								}
+							}
 						}
+
 					}
 				}
 			}
 		}
-		
+
 	}
 	
 //	public void normalizeData() {

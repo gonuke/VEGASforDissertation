@@ -4006,111 +4006,50 @@ public class VEGAS {
 		int[] schedule = new int[9];
 		
 		if (first == 0) {
-			
-			if (second == 2) {
-				
-				if (last == 2) {
-					schedule[4] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				}
-				
-			} else if (second == 3) {
-				
-				if (last == 2 || last == 3) {
-					for (k=4; k<9; k++) schedule[k] = 1;
-				}
-				
+			if (second == 2) if (last == 2) schedule[5] = 1; schedule[7] = 1; schedule[8] = 1;
+			if (second == 3) {
+				if (last == 2) schedule[5] = 1; schedule[7] = 1; schedule[8] = 1;
+				if (last == 3) for (k=5; k<schedule.length; k++) schedule[k] = 1;
 			}
-			
 		} else if (first == 1) {
-			
 			if (second == 2) {
-				
-				if (last == 2) {
-					schedule[4] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				} else if (last == 3) {
-					for (k=5; k<9; k++) schedule[k] = 1;
-				}
-				
-			} else if (second == 3) {
-				
-				if (last == 2 || last == 3) {
-					for (k=4; k<9; k++) schedule[k] = 1;
-				}
-				
+				if (last == 2) schedule[5] = 1; schedule[7] = 1; schedule[8] = 1;
+				if (last == 3) for (k=5; k<schedule.length; k++) schedule[k] = 1;
 			}
-			
+			if (second == 3) {
+				if (last == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+				if (last == 3) schedule[4] = 1; schedule[7] = 1; schedule[8] = 1;
+			}
 		} else if (first == 2) {
-			
-			if (second == 0) {
-				if (last == 2) {
-					schedule[3] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				}
-			} else if (second == 1) {
-				if (last == 2) {
-					schedule[3] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				} else if (last == 3) {
-					for (k=5; k<9; k++) schedule[k] = 1;
-				}
-			} else if (second == 2) {
-				if (last == 2) {
-					schedule[5] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				}
-			} else if (second == 3) {
-				if (last == 2) {
-					schedule[5] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				} else if (last == 3) {
-					for (k=5; k<9; k++) schedule[k] = 1;
-				}
+			if (second == 0) if (last == 2) schedule[4] = 1; schedule[7] = 1; schedule[8] = 1;
+			if (second == 1) {
+				if (last == 2) schedule[4] = 1; schedule[7] = 1; schedule[8] = 1;
+				if (last == 3) for (k=5; k<schedule.length; k++) schedule[k] = 1;
 			}
-			
+			if (second == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+			if (second == 3) {
+				if (last == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+				if (last == 3) schedule[3] = 1; schedule[7] = 1; schedule[8] = 1;
+			}
 		} else if (first == 3) {
 			if (second == 0) {
-				if (last == 2) {
-					schedule[3] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				} else if (last == 3) {
-					for (k=5; k<9; k++) schedule[k] = 1;
-				}
-			} else if (second == 1) {
-				if (last == 2) {
-					for (k=6; k<9; k++) schedule[k] = 1;
-				} else if (last == 3) {
-					schedule[3] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				}
-			} else if (second == 2) {
-				if (last == 2) {
-					schedule[5] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				} else if (last == 3) {
-					for (k=5; k<9; k++) schedule[k] = 1;
-				}
-			} else if (second == 3) {
-				if (last == 2) {
-					for (k=6; k<9; k++) schedule[k] = 1;
-				} else if (last == 3) {
-					schedule[5] = 1;
-					schedule[7] = 1;
-					schedule[8] = 1;
-				}
+				if (last == 2) schedule[4] = 1; schedule[7] = 1; schedule[8] = 1;
+				if (last == 3) for (k=5; k<schedule.length; k++) schedule[k] = 1;
+			}
+			if (second == 1) {
+				if (last == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+				if (last == 3) schedule[4] = 1; schedule[7] = 1; schedule[8] = 1;
+			}
+			if (second == 2) {
+				if (last == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+				if (last == 3) schedule[3] = 1; schedule[7] = 1; schedule[8] = 1;
+			}
+			if (second == 3) {
+				if (last == 2) for (k=6; k<schedule.length; k++) schedule[k] = 1;
+				if (last == 3) schedule[5] = 1; schedule[7] = 1; schedule[8] = 1;
 			}
 		}
-		
+
 		return(schedule);
 	}
 	
