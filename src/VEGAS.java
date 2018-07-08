@@ -3331,12 +3331,10 @@ public class VEGAS {
 					}
 					
 					// Nuclear Security Measure
-					double n_yr=0.;
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						metrics[1] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2];
-						n_yr += 1.;
+						metrics[2] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2];
 					}
-					metrics[1] /= n_yr;
+					metrics[2] /= (END_YEAR-START_YEAR+1-NewReactorLifetime);
 					
 					for (j=0; j<REACTORNAMES.length; j++) {
 						if (BELONGS_TO_TIER[j]==0) {
@@ -3490,32 +3488,33 @@ public class VEGAS {
 												 * 1 = Decay Heat
 												 * 2 = Avg Nuclear Security Measure
 												 */
-//												for (int metric_no=0; metric_no<metrics.length; metric_no++) metrics[metric_no]=0.;
-//												for (int metric_no=0; metric_no<metrics.length; metric_no++)  {
-//													for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-//														metrics[metric_no] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][metric_no];		
-//													}
+												for (int metric_no=0; metric_no<metrics.length; metric_no++) metrics[metric_no]=0.;
+												for (int metric_no=0; metric_no<metrics.length; metric_no++)  {
+													for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+														metrics[metric_no] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][metric_no];		
+													}
+												}
+//												for (int metric_no=0; metric_no<metrics.length; metric_no++) metrics[metric_no] = 0.;
+//												
+//												double energy=0.;
+//												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+//													energy=0.;
+//													for (j=0; j<REACTORNAMES.length; j++) energy+=genCap[j][year]*365*AVAILABILITY[j];
+//													metrics[0] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][0]*energy;
 //												}
-												
-												double energy=0.;
-												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-													energy=0.;
-													for (j=0; j<REACTORNAMES.length; j++) energy+=genCap[j][year]*365*AVAILABILITY[j];
-													metrics[0] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][0]*energy;
-												}
-												
-												// Decay Heat
-												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-													metrics[1] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][1];
-												}
-												
-												// Nuclear Security Measure
-												double n_yr=0.;
-												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-													metrics[1] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2];
-													n_yr += 1.;
-												}
-												metrics[1] /= n_yr;
+//												
+//												// Decay Heat
+//												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+//													metrics[1] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][1];
+//												}
+//												
+//												// Nuclear Security Measure
+//												double n_yr=0.;
+//												for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+//													metrics[2] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2];
+//													n_yr += 1.;
+//												}
+//												metrics[2] /= n_yr;
 												
 												output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + "\n");
 											}
