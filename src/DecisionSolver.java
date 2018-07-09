@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 
 
 
-public class DecisionMaker {
+public class DecisionSolver {
 
 	/* decision criteria weighting */
 	static double[] u_weight = DMInputs.getUWeighting();
@@ -77,7 +77,8 @@ public class DecisionMaker {
 	static int[][][] g_one_pi;
 	
 	//static int
-	static int[][][][][] u_two_hedge;
+	static int[][][][][][] u_two_hedge;
+	static int[][] u_one_hedge;
 	
 //	/* For perfect information strategies */
 
@@ -110,7 +111,7 @@ public class DecisionMaker {
 	
 	
 	
-	public DecisionMaker() {
+	public DecisionSolver() {
 		
 	}
 	
@@ -139,7 +140,9 @@ public class DecisionMaker {
 		u_one_pi = new int[g_one.length][disp_cost.length][htgr_cost.length][sfr_cost.length];
 		g_one_pi = new int[disp_cost.length][htgr_cost.length][sfr_cost.length];
 		
-		u_two_hedge = new int[g_one.length][disp_cost.length][u_one.length][htgr_cost.length][sfr_cost.length];
+		/* if the htgr or sfr cost is (rx_cost.length+1) then it means the previous stage didn't yield information about the cost */
+		u_two_hedge = new int[g_one.length][disp_cost.length][u_one.length][g_two.length][htgr_cost.length+1][sfr_cost.length+1];
+		u_one_hedge = new int[g_one.length][disp_cost.length];
 		
 	}
 	
@@ -395,22 +398,9 @@ public class DecisionMaker {
 		int g_o, g_tw;
 		int u_o, u_tw, u_th;
 		int disp, htgr, sfr;
-		
-		int[][][] rx_cost_one = { 
-				{{3},{3}},
-				{{0,1,2},{3}},
-				{{3},{0,1,2}},
-				{{0,1,2},{0,1,2}}
-		};
-		
-		int[][][][] rx_cost_two = {
-			
-			/* u_two decision 0	*/ { {{3},{3}}, {{0,1,2},{3}}, {{3}, {0,1,2}} },
-			/* u_two decision 1	*/ { { {0,1,2},{3} }, { {0,1,2},{} }, {}, {} },
-			/* u_two decision 2	*/ { },
-			/* u_two decision 3 */	{ }
-				
-		};
+
+		double chance=0.;
+		double val=0.;
 		
 		int[][] one_info = {
 			{0,0,0}, {0,1,0}, {0,0,1}, {0,1,1}
@@ -428,87 +418,141 @@ public class DecisionMaker {
 		
 		/* Get U's stage two hedging strategy (knowing G's stage one and two plays; U's stage one play; Nature's moves so far) */
 		for (g_o=0; g_o<g_one.length; g_o++) {
-			for (u_o=0; u_o<u_one.length; u_o++) {
-				for (g_tw=0; g_tw<g_two.length; g_tw++) {
-					for (disp=0; disp<disp_cost.length; disp++) {
-						double[] temp = new double[u_two.length];
-						for (u_tw=0; u_tw<u_two.length; u_tw++) {
-							
-							if (two_info[u_o])
-							
-							
-							
+			for (disp=0; disp<disp_cost.length; disp++) {
+				for (u_o=0; u_o<u_one.length; u_o++) {
+					for (g_tw=0; g_tw<g_two.length; g_tw++) {
+						
+						if (one_info[u_o][1]==0 && one_info[u_o][2]==0) {
+							double[] temp_double = new double[u_two.length];
+							for (u_tw=0; u_tw<u_two.length; u_tw++) {
+								for (htgr=0; htgr<htgr_cost.length; htgr++) {
+									for (sfr=0; sfr<sfr_cost.length; sfr++) {
+										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+										chance = htgr_prob[htgr]*sfr_prob[sfr];
+										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										temp_double[u_tw] += chance*val;
+									}
+								}
+							}
+							u_two_hedge[g_o][disp][u_o][g_tw][htgr_cost.length+1][sfr_cost.length+1] = u_two[getIndexOfMax(temp_double)];
 						}
+						
+						if (one_info[u_o][1]==1 && one_info[u_o][2]==0) {
+							double[] temp_double = new double[u_two.length];
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								for (u_tw=0; u_tw<u_two.length; u_tw++) {
+									for (sfr=0; sfr<sfr_cost.length; sfr++) {
+										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+										chance = htgr_prob[htgr]*sfr_prob[sfr];
+										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										temp_double[u_tw] += chance*val;
+									}
+								}
+								u_two_hedge[g_o][disp][u_o][g_tw][htgr][sfr_cost.length+1] = u_two[getIndexOfMax(temp_double)];
+							}
+						}
+						
+						if (one_info[u_o][1]==0 && one_info[u_o][2]==1) {
+							double[] temp_double = new double[u_two.length];
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								for (u_tw=0; u_tw<u_two.length; u_tw++) {
+									for (htgr=0; htgr<htgr_cost.length; htgr++) {
+										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+										chance = htgr_prob[htgr]*sfr_prob[sfr];
+										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										temp_double[u_tw] += chance*val;
+									}
+								}
+								u_two_hedge[g_o][disp][u_o][g_tw][htgr_cost.length+1][sfr] = u_two[getIndexOfMax(temp_double)];
+							}
+						}
+						
+						if (one_info[u_o][1]==1 && one_info[u_o][2]==1) {
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								for (sfr=0; sfr<sfr_cost.length; sfr++) {
+									u_two_hedge[g_o][disp][u_o][g_tw][htgr][sfr] = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
+								}
+							}
+						}
+							
 					}
 				}
 			}
 		}
+
+		/* Get G's stage two hedging strategy (knowing G's stage one play; U's stage one play; Nature's moves so far) */
+		for (g_o=0; g_o<g_one.length; g_o++) {
+			
+		}
 		
-		
+
 //		for (u_stage_one=0; u_stage_one<u_one_strategy.length; u_stage_one++) {
 //			for (g_stage_one=0; g_stage_one<g_one_strategy.length; g_stage_one++) {
-//				for (g_stage_two=0; g_stage_two<g_two_strategy.length; g_stage_two++) {
-//					for (dispcost_outcome=0; dispcost_outcome<n_dispcost_outcome; dispcost_outcome++) {
-//						if (u_one_gainedinfo[u_stage_one][1]==0 && u_one_gainedinfo[u_stage_one][2]==0) {
-//							u_one_htgr_outcome = 3;
-//							u_one_sfr_outcome = 3;
-//							double[] temp_double = new double[u_two_strategy.length];
+//				for (dispcost_outcome=0; dispcost_outcome<n_dispcost_outcome; dispcost_outcome++) {
+//					if (u_one_gainedinfo[u_stage_one][1]==0 && u_one_gainedinfo[u_stage_one][2]==0) {
+//						u_one_htgr_outcome = 3;
+//						u_one_sfr_outcome = 3;
+//						double[] temp_double = new double[g_two_strategy.length];
+//						double chance = 0;
+//						double obj_function = 0;
+//						for (g_stage_two=0; g_stage_two<g_two_strategy.length; g_stage_two++) {
+//							u_stage_two = u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two];
+//							for (u_two_htgr_outcome=0; u_two_htgr_outcome<n_htgr_capcost; u_two_htgr_outcome++) {
+//								for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
+//									u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome];
+//									chance = htgr_capcost_probability[u_two_htgr_outcome]*sfr_capcost_probability[u_two_sfr_outcome];
+//									obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome]);
+//									temp_double[g_stage_two] += chance*obj_function;
+//								}
+//							}
+//						}
+//						g_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome] = g_two_strategy[getIndexOfMax(temp_double)];
+//					} else if (u_one_gainedinfo[u_stage_one][1]==1 && u_one_gainedinfo[u_stage_one][2]==0) {
+//						u_one_sfr_outcome = 3;
+//						for (u_one_htgr_outcome=0; u_one_htgr_outcome<n_htgr_capcost; u_one_htgr_outcome++) {
+//							double[] temp_double = new double[g_two_strategy.length];
 //							double chance = 0;
 //							double obj_function = 0;
-//							for (u_stage_two=0; u_stage_two<u_two_strategy.length; u_stage_two++) {
+//							for (g_stage_two=0; g_stage_two<g_two_strategy.length; g_stage_two++) {
+//								u_stage_two = u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two];
+//								for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
+//									u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome];
+//									chance = sfr_capcost_probability[u_two_sfr_outcome];
+//									obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome]);
+//									temp_double[g_stage_two] += chance*obj_function;
+//								}
+//							}
+//							g_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome] = g_two_strategy[getIndexOfMax(temp_double)];
+//						}
+//					} else if (u_one_gainedinfo[u_stage_one][1]==0 && u_one_gainedinfo[u_stage_one][2]==1) {
+//						u_one_htgr_outcome = 3;
+//						for (u_one_sfr_outcome=0; u_one_sfr_outcome<n_sfr_capcost; u_one_sfr_outcome++) {
+//							double[] temp_double = new double[g_two_strategy.length];
+//							double chance = 0;
+//							double obj_function = 0;
+//							for (g_stage_two=0; g_stage_two<g_two_strategy.length; g_stage_two++) {
+//								u_stage_two = u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two];
 //								for (u_two_htgr_outcome=0; u_two_htgr_outcome<n_htgr_capcost; u_two_htgr_outcome++) {
-//									for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
-//										u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome];
-//										chance = htgr_capcost_probability[u_two_htgr_outcome]*sfr_capcost_probability[u_two_sfr_outcome];
-//										obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_two_sfr_outcome]);
-//										temp_double[u_stage_two] += chance*obj_function;
-//									}
+//									u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome];
+//									chance = htgr_capcost_probability[u_two_htgr_outcome];
+//									obj_function = get_g_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_sfr_outcome][u_two_htgr_outcome]);
+//									temp_double[g_stage_two] += chance*obj_function;
 //								}
 //							}
-//							u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = u_two_strategy[getIndexOfMax(temp_double)];
-//						} else if (u_one_gainedinfo[u_stage_one][1]==1 && u_one_gainedinfo[u_stage_one][2]==0) {
-//							u_one_sfr_outcome = 3;
-//							for (u_one_htgr_outcome=0; u_one_htgr_outcome<n_htgr_capcost; u_one_htgr_outcome++) {
-//								double[] temp_double = new double[u_two_strategy.length];
-//								double chance = 0;
-//								double obj_function = 0;
-//								for (u_stage_two=0; u_stage_two<u_two_strategy.length; u_stage_two++) {
-//									for (u_two_sfr_outcome=0; u_two_sfr_outcome<n_sfr_capcost; u_two_sfr_outcome++) {
-//										u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome];
-//										chance = sfr_capcost_probability[u_two_sfr_outcome];
-//										obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_two_sfr_outcome]);
-//										temp_double[u_stage_two] += chance*obj_function;
-//									}
-//								}
-//								u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = u_two_strategy[getIndexOfMax(temp_double)];
-//							}
-//						} else if (u_one_gainedinfo[u_stage_one][1]==0 && u_one_gainedinfo[u_stage_one][2]==1) {
-//							u_one_htgr_outcome = 3;
+//							g_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome] = g_two_strategy[getIndexOfMax(temp_double)];
+//						}
+//					} else if (u_one_gainedinfo[u_stage_one][1]==1 && u_one_gainedinfo[u_stage_one][2]==1) {
+//						for (u_one_htgr_outcome=0; u_one_htgr_outcome<n_htgr_capcost; u_one_htgr_outcome++) {
 //							for (u_one_sfr_outcome=0; u_one_sfr_outcome<n_sfr_capcost; u_one_sfr_outcome++) {
-//								double[] temp_double = new double[u_two_strategy.length];
-//								double chance = 0;
-//								double obj_function = 0;
-//								for (u_stage_two=0; u_stage_two<u_two_strategy.length; u_stage_two++) {
-//									for (u_two_htgr_outcome=0; u_two_htgr_outcome<n_sfr_capcost; u_two_htgr_outcome++) {
-//										u_stage_three = u_three_perfectinfo[u_stage_one][u_stage_two][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome];
-//										chance = htgr_capcost_probability[u_two_htgr_outcome];
-//										obj_function = get_u_weight_leafvalue(leaf_values[u_stage_one][u_stage_two][u_stage_three][g_stage_one][g_stage_two][dispcost_outcome][u_two_htgr_outcome][u_one_sfr_outcome]);
-//										temp_double[u_stage_two] += chance*obj_function;
-//									}
-//								}
-//								u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = u_two_strategy[getIndexOfMax(temp_double)];
-//							}
-//						} else if (u_one_gainedinfo[u_stage_one][1]==1 && u_one_gainedinfo[u_stage_one][2]==1) {
-//							for (u_one_htgr_outcome=0; u_one_htgr_outcome<n_htgr_capcost; u_one_htgr_outcome++) {
-//								for (u_one_sfr_outcome=0; u_one_sfr_outcome<n_sfr_capcost; u_one_sfr_outcome++) {
-//									u_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome][g_stage_two] = u_two_perfectinfo[u_stage_one][g_stage_one][g_stage_two][dispcost_outcome][u_one_htgr_outcome][u_one_sfr_outcome];
-//								}
+//								g_two_hedge[g_stage_one][dispcost_outcome][u_stage_one][u_one_htgr_outcome][u_one_sfr_outcome] = g_two_perfectinfo[u_stage_one][g_stage_one][dispcost_outcome][u_one_htgr_outcome][u_one_sfr_outcome];
 //							}
 //						}
 //					}
 //				}
 //			}
 //		}
+
+
 		
 		
 	}
