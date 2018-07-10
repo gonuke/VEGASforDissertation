@@ -3536,6 +3536,7 @@ public class VEGAS {
 				}
 
 				output_writer.close();
+				System.out.print("Simulation complete");
 
 			}
 

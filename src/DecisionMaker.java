@@ -101,6 +101,8 @@ public class DecisionMaker {
 		decide.getHedgingStrategies();
 		/* print the hedging strategy results */
 		decide.printHedgingStrategies();
+		/* print the perfect information strategies */
+		decide.printPerfectInformationStrategies();
 	}	
 	
 	public void dimensionArrays() {
@@ -922,7 +924,63 @@ public class DecisionMaker {
 		} catch (IOException e) {
 			System.out.print("Error writing Hedging Strategy results");
 		}
-		System.out.print("Finished printing hedging strategy results");
+		System.out.print("Finished printing hedging strategy results" + "\n");
+	}
+	
+	public void printPerfectInformationStrategies() {
+		
+		int[] strategy = new int[8];
+		/* 0: g_one; 1: disp; 2: u_one; 3: htgr_one; 4: sfr_one; 5: g_two; 6: u_two; 7: htgr_two; 8: sfr_two; 9: u_three */
+		int g_o;
+		int disp;
+		int u_o, u_tw, u_th, htgr, sfr;
+		int g_tw;
+		boolean recycle=false;
+		boolean htgr_only=false;
+		
+		try {
+
+			String user_dir = System.getProperty("user.dir");
+			File output_target = new File(user_dir+File.separatorChar+"PerfectInformationStrategies.txt");
+
+			if(output_target.exists()) output_target.delete();
+			FileWriter output_filewriter = new FileWriter(output_target);
+			PrintWriter output_writer = new PrintWriter(output_filewriter);
+			
+			output_writer.print("disp_cost htgr_cost sfr_cost u_first u_second u_last g_one g_two_sub");
+			output_writer.print("\n");
+
+			for (disp=0; disp<disp_cost.length; disp++) {
+				strategy[0] = disp;
+				for (htgr=0; htgr<htgr_cost.length; htgr++) {
+					strategy[1] = htgr;
+					for (sfr=0; sfr<sfr_cost.length; sfr++) {
+						strategy[2] = sfr;
+						g_o = g_one_pi[disp][htgr][sfr];
+						u_o = u_one_pi[g_o][disp][htgr][sfr]; 
+						g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
+						u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr]; 
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+						
+//						if (u_o==2 || u_o==3) recycle=true; 
+//						if (u_tw==2 || u_o==3) recycle=true;
+//						if (u_o==0 || u_o==2) {
+//							if (u_tw==0 || u_tw==2) htgr_only=true;
+//						}
+						
+						strategy[3] = u_o; strategy[4] = u_tw; strategy[5] = u_th; strategy[6] = g_o; strategy[7] = g_tw;
+						for (int k=0; k<strategy.length-1; k++) output_writer.print(strategy[k] + " ");
+						output_writer.print(strategy[7] + "\n");
+						
+					}
+				}
+			}
+			output_writer.close();
+
+		} catch (IOException e) {
+			System.out.print("Error writing Perfect Information strategies");
+		}
+		System.out.print("Finished printing Perfect Information strategies" + "\n");
 	}
 	
 	public double getVal(double[] weight, double[] vals) {
@@ -938,7 +996,6 @@ public class DecisionMaker {
 		for (int i=0; i<vals.length; i++) {
 			if (vals[i]>best_val) best_val = vals[i]; best = i;
 		}
-		//for (int i=0; i<vals.length; i++) if (vals[i]==best_val) equal=true; best=5;
 		return(best);
 	}
 	
