@@ -828,6 +828,9 @@ public class VEGAS {
 					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10) {
 						capital_cost -= capital_subsidy[n_rx];
 						facilitiesAddedAfterSubsidy[n_rx]++;
+//						if (n_rx==1 && capital_subsidy[1]!=0) {
+//							System.out.print("here");
+//						}
 					}
 					for (j=i; j<i+NewReactorLifetime; j++) {
 						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;

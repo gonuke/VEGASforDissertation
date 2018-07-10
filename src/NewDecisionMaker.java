@@ -32,7 +32,7 @@ public class NewDecisionMaker {
 	/* Player U's profile */
 
 	/* U's objective function weights */
-	static double[] u_weights = DMInputs.getUWeights();
+	static double[] u_weights = DMInputs.getUWeighting();
 	/* U's try to build reactor scenarios */
 	static int[] u_one_strategy = {0,1,2,3};
 	static int[] u_two_strategy = {0,1,2,3};
@@ -46,12 +46,12 @@ public class NewDecisionMaker {
 
 	/* Player G's profile */
 	/* G's objective function weights */
-	static double[] g_weights = DMInputs.getGWeights();
+	static double[] g_weights = DMInputs.getGWeighting();
 	/* G's R&D options */
-	static double[] chosen_reprocessing_cost = DMInputs.getChosenReprocessingCost();
+	static double[] chosen_reprocessing_cost = DMInputs.getReprocessingCost();
 	static int[] g_one_strategy;
 	/* G's policy incentives: indexes over the possible capital subsidies offered  */
-	static double[][] chosen_capital_subsidy = DMInputs.getChosenCapitalSubsidy();
+	static double[][] chosen_capital_subsidy = DMInputs.getCapitalSubsidy();
 	static int[] g_two_strategy;
 	/* End */
 
@@ -155,7 +155,7 @@ public class NewDecisionMaker {
 		StringTokenizer st;
 		int i,j;
 		int[] leafInt = {0,0,0,0,0,0,0,0};
-		double[] dummy_double = {0,0,0,0};
+		double[] dummy_double = {0,0,0};
 
 		try {
 

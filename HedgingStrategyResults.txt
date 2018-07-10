@@ -1,55 +1,55 @@
-g_one_rep disp_cost u_first htgr_one sfr_one g_two_sub u_second htgr_two sfr_two u_last
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	mega cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	super cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	even cheaper disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	cheap disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	medium disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	cheap htgr	high sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	medium htgr	high sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	cheap sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	medium sfr	HTGRs and SFRs
-cheap reprocess	high disposal	HTGRs and SFRs	cheap htgr	cheap sfr	LWR subsidy	LWRs	high htgr	high sfr	HTGRs and SFRs
+reprocessing_cost waste_disposal_cost reactor_build htgr_outcome sfr_outcome capital_subsidy reactor_build htgr_outcome sfr_outcome reactor_build
+0 0 3 0 0 0 3 0 0 2
+0 0 3 0 1 0 3 0 1 2
+0 0 3 0 2 0 3 0 2 2
+0 0 3 1 0 0 3 1 0 2
+0 0 3 1 1 0 3 1 1 2
+0 0 3 1 2 0 3 1 2 2
+0 0 3 2 0 0 3 2 0 2
+0 0 3 2 1 0 3 2 1 2
+0 0 3 2 2 0 3 2 2 2
+0 1 3 0 0 0 3 0 0 2
+0 1 3 0 1 0 3 0 1 2
+0 1 3 0 2 0 3 0 2 2
+0 1 3 1 0 0 3 1 0 2
+0 1 3 1 1 0 3 1 1 2
+0 1 3 1 2 0 3 1 2 2
+0 1 3 2 0 0 3 2 0 2
+0 1 3 2 1 0 3 2 1 2
+0 1 3 2 2 0 3 2 2 2
+0 2 3 0 0 0 3 0 0 2
+0 2 3 0 1 0 3 0 1 2
+0 2 3 0 2 0 3 0 2 2
+0 2 3 1 0 0 3 1 0 2
+0 2 3 1 1 0 3 1 1 2
+0 2 3 1 2 0 3 1 2 2
+0 2 3 2 0 0 3 2 0 2
+0 2 3 2 1 0 3 2 1 2
+0 2 3 2 2 0 3 2 2 2
+0 3 3 0 0 0 3 0 0 2
+0 3 3 0 1 0 3 0 1 2
+0 3 3 0 2 0 3 0 2 2
+0 3 3 1 0 0 3 1 0 2
+0 3 3 1 1 0 3 1 1 2
+0 3 3 1 2 0 3 1 2 2
+0 3 3 2 0 0 3 2 0 2
+0 3 3 2 1 0 3 2 1 2
+0 3 3 2 2 0 3 2 2 2
+0 4 3 0 0 0 3 0 0 2
+0 4 3 0 1 0 3 0 1 2
+0 4 3 0 2 0 3 0 2 2
+0 4 3 1 0 0 3 1 0 2
+0 4 3 1 1 0 3 1 1 2
+0 4 3 1 2 0 3 1 2 2
+0 4 3 2 0 0 3 2 0 2
+0 4 3 2 1 0 3 2 1 2
+0 4 3 2 2 0 3 2 2 2
+0 5 3 0 0 0 3 0 0 2
+0 5 3 0 1 0 3 0 1 2
+0 5 3 0 2 0 3 0 2 2
+0 5 3 1 0 0 3 1 0 2
+0 5 3 1 1 0 3 1 1 2
+0 5 3 1 2 0 3 1 2 2
+0 5 3 2 0 0 3 2 0 2
+0 5 3 2 1 0 3 2 1 2
+0 5 3 2 2 0 3 2 2 2
