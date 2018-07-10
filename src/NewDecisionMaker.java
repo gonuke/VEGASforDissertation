@@ -51,7 +51,7 @@ public class NewDecisionMaker {
 	static double[] chosen_reprocessing_cost = DMInputs.getReprocessingCost();
 	static int[] g_one_strategy;
 	/* G's policy incentives: indexes over the possible capital subsidies offered  */
-	static double[][] chosen_capital_subsidy = DMInputs.getCapitalSubsidy();
+	static int[][] chosen_capital_subsidy = DMInputs.getCapitalSubsidy();
 	static int[] g_two_strategy;
 	/* End */
 

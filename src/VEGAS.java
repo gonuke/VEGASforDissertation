@@ -44,7 +44,8 @@ public class VEGAS {
 	 */
 	
 	static double[] ChosenReprocessingCost = DMInputs.getReprocessingCost();
-	static double[][] ChosenCapitalSubsidy = DMInputs.getCapitalSubsidy();
+	static int[][] CapitalSubsidy = DMInputs.getCapitalSubsidy();
+	static double Subsidy = DMInputs.getSubsidyAmount();
 	static int CapitalSubsidyYear = DMInputs.getCapitalSubsidyYear();
 
 	static double[][] DisposalCost = DMInputs.getDisposalCostOutcomes();
@@ -288,7 +289,7 @@ public class VEGAS {
 
 		facilitiesAddedSoFar = new int[REACTORNAMES.length];
 		yearlyReactorCharge = new double[END_YEAR-START_YEAR+1]; // 9 units added to reach NOAK; with or without the capital subsidy
-		LeafValues = new double[ChosenReprocessingCost.length][DisposalCost.length][FirstReactorBuildDecision.length][ChosenCapitalSubsidy.length][SecondReactorBuildDecision.length][HTGRCapitalCost.length][SFRCapitalCost.length][FinalReactorBuildDecision.length][END_YEAR-START_YEAR+1][3];
+		LeafValues = new double[ChosenReprocessingCost.length][DisposalCost.length][FirstReactorBuildDecision.length][CapitalSubsidy.length][SecondReactorBuildDecision.length][HTGRCapitalCost.length][SFRCapitalCost.length][FinalReactorBuildDecision.length][END_YEAR-START_YEAR+1][3];
 		OnlyExistingDemand = new boolean[END_YEAR-START_YEAR+1];
 		RecyclingThisYear = new boolean[END_YEAR-START_YEAR+1];
 
@@ -793,7 +794,7 @@ public class VEGAS {
 		}
 	}
 
-	public double[] getUnitReactorCharges(double[] capital_subsidy) {
+	public double[] getUnitReactorCharges(int[] capital_subsidy) {
 
 		int n_rx,i,j,k;
 		double learn=0, capital_cost;
@@ -803,7 +804,14 @@ public class VEGAS {
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
 		
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
-
+		double[] subsidy = {0,0,0};
+		double total_subsidy = Subsidy*10*PLANT_SIZE[2];
+		for (k=0; k<subsidy.length; k++) {
+			subsidy[k] = total_subsidy/PLANT_SIZE[k]/10;
+		}
+		//subsidy[0]=0;
+		
+		
 
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {
 
@@ -825,12 +833,9 @@ public class VEGAS {
 
 				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
 					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
-					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10) {
-						capital_cost -= capital_subsidy[n_rx];
+					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
+						capital_cost -= subsidy[n_rx];
 						facilitiesAddedAfterSubsidy[n_rx]++;
-//						if (n_rx==1 && capital_subsidy[1]!=0) {
-//							System.out.print("here");
-//						}
 					}
 					for (j=i; j<i+NewReactorLifetime; j++) {
 						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
@@ -2997,7 +3002,7 @@ public class VEGAS {
 			NOAKCapitalCost[1] = HTGRCapitalCost[htgr_capital_cost];
 			NOAKCapitalCost[2] = SFRCapitalCost[sfr_capital_cost];
 
-			yearlyReactorCharge = getUnitReactorCharges(ChosenCapitalSubsidy[chosen_capital_subsidy]);
+			yearlyReactorCharge = getUnitReactorCharges(CapitalSubsidy[chosen_capital_subsidy]);
 
 			for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
@@ -3026,7 +3031,7 @@ public class VEGAS {
 				for (waste_disposal_cost=0; waste_disposal_cost<DisposalCost.length; waste_disposal_cost++) {
 					for (sfr_capital_cost=0; sfr_capital_cost<SFRCapitalCost.length; sfr_capital_cost++) {
 						for (htgr_capital_cost=0; htgr_capital_cost<HTGRCapitalCost.length; htgr_capital_cost++) {
-							for (chosen_capital_subsidy=0; chosen_capital_subsidy<ChosenCapitalSubsidy.length; chosen_capital_subsidy++) {
+							for (chosen_capital_subsidy=0; chosen_capital_subsidy<CapitalSubsidy.length; chosen_capital_subsidy++) {
 
 								DEFAULTBECOST[2] = ChosenReprocessingCost[reprocessing_cost];
 								DEFAULTBECOST[3] = DisposalCost[waste_disposal_cost][0];
@@ -3044,7 +3049,7 @@ public class VEGAS {
 								NOAKCapitalCost[1] = HTGRCapitalCost[htgr_capital_cost];
 								NOAKCapitalCost[2] = SFRCapitalCost[sfr_capital_cost];
 
-								yearlyReactorCharge = getUnitReactorCharges(ChosenCapitalSubsidy[chosen_capital_subsidy]);
+								yearlyReactorCharge = getUnitReactorCharges(CapitalSubsidy[chosen_capital_subsidy]);
 
 								for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
@@ -3483,7 +3488,7 @@ public class VEGAS {
 
 							for (reprocessing_cost=0; reprocessing_cost<ChosenReprocessingCost.length; reprocessing_cost++) {
 								for (waste_disposal_cost=0; waste_disposal_cost<DisposalCost.length; waste_disposal_cost++) {
-									for (chosen_capital_subsidy=0; chosen_capital_subsidy<ChosenCapitalSubsidy.length; chosen_capital_subsidy++) {
+									for (chosen_capital_subsidy=0; chosen_capital_subsidy<CapitalSubsidy.length; chosen_capital_subsidy++) {
 										for (htgr_capital_cost=0; htgr_capital_cost<HTGRCapitalCost.length; htgr_capital_cost++) {
 											for (sfr_capital_cost=0; sfr_capital_cost<SFRCapitalCost.length; sfr_capital_cost++) {
 												/* metric number:

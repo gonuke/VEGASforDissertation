@@ -1,8 +1,8 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) 0, (double) 1, (double) 0};
-	static double[] UCriterionWeights = {(double) 0, (double) (1), (double) (0)};
+	static double[] GCriterionWeights = {(double) (1), (double) (0), (double) (0)};
+	static double[] UCriterionWeights = {(double) 1, (double) 0, (double) (0)};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
@@ -16,15 +16,16 @@ public class DMInputs {
 		{(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}
 	};
 	
-	static double LWRCapitalCost = 42000;
+	static double LWRCapitalCost = 2000;
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
 	static double[] HTGRCapitalCost = {2700, 3000, 3500};
-	static double[] htgr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
+	static double[] htgr_capcost_probability = {(double) 0, (double) 0, (double) 1};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
 	static double[] SFRCapitalCost = {2700, 3000, 4000};
-	static double[] sfr_capcost_probability = {(double) 1/4, (double) 1/2, (double) 1/4};
+	static double[] sfr_capcost_probability = {(double) 0, (double) 0, (double) 1};
 	
-	static double[][] ChosenCapitalSubsidy = {{200,0,0},{0,200,0},{0,0,200},{0,100,100}};
+	static int[][] CapitalSubsidy = {{1,0,0},{0,1,0},{0,0,1},{0,1,1}};
+	static double SubsidyAmount = 200;
 	static int CapitalSubsidyYear = 2045;
 	
 	static double[][] decay_heat = { // [reactor type][actinides, fission products]
@@ -64,7 +65,8 @@ public class DMInputs {
 	public static double[] getHTGRCapCostProb() {return(htgr_capcost_probability);}
 	public static double[] getSFRCapCostProb() {return(sfr_capcost_probability);}
 	
-	public static double[][] getCapitalSubsidy() {return(ChosenCapitalSubsidy);}
+	public static int[][] getCapitalSubsidy() {return(CapitalSubsidy);}
+	public static double getSubsidyAmount() {return(SubsidyAmount);}
 	public static int getCapitalSubsidyYear() {return(CapitalSubsidyYear);}
 	
 	public static double[][] getDecayHeat() {return(decay_heat);}
