@@ -9,18 +9,11 @@ public class DMInputs {
 
 	static double[] ChosenReprocessingCost = {903,1120,1339};
 	static double[][] DisposalCostOutcomes = {{44,229},{135,1160},{191,1910},{265,1377},{550,5500},{801,6880}};
+	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
 	static double[][] DisposalCostProbabilities = {
 		{(double) 0, (double) 0, (double) 0, (double) 1/3, (double) 1/3, (double) 1/3},
 		{(double) 0, (double) 1/20, (double) 2/20, (double) 5/20, (double) 7/20, (double) 5/20},
 		{(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}
-	};
-	// correlate the disposal cost and reprocessing cost probabilities
-	static double[][][] RandD= {
-		
-		{ {(double) 0, (double) 0, (double) 0, (double) 1/3, (double) 1/3, (double) 1/3}, {(double) 1/3, (double) 1/3, (double) 1/3} },
-		{ {(double) 0, (double) 1/20, (double) 2/20, (double) 5/20, (double) 7/20, (double) 5/20}, {(double) 2/4, (double) 1/4, (double) 1/4} },
-		{ {(double) 1/20, (double) 2/20, (double) 3/20, (double) 6/20, (double) 8/20, (double) 0}, {(double) 2/3, (double) 1/6, (double) 1/6} }
-		
 	};
 	
 	static double LWRCapitalCost = 2000;
@@ -76,7 +69,5 @@ public class DMInputs {
 	
 	public static double[][] getFEProliferationMetric() {return(FrontEndProliferation);}
 	public static double[][] getBEProliferationMetric() {return(BackEndProliferation);}
-	
-	public static double[][][] getRandD() {return(RandD);}
 	
 }

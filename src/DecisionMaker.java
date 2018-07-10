@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
 /*
@@ -62,7 +64,7 @@ public class DecisionMaker {
 	};
 	
 	/* probabilities */
-	static double[][][] randd_prob = DMInputs.getRandD();
+	static double[][] disp_prob = DMInputs.getDisposalCostProbabilities();
 	static int[] htgr_cost = new int[DMInputs.getHTGRCapitalCost().length];
 	static double[] htgr_prob = DMInputs.getHTGRCapCostProb();
 	static int[] sfr_cost = new int[DMInputs.getSFRCapitalCost().length];
@@ -94,11 +96,11 @@ public class DecisionMaker {
 		decide.loadData();
 		decide.normalizeData();
 		/* get the perfect info strategies based on that info */
-		//decide.getPerfectInformationStrategies();
+		decide.getPerfectInformationStrategies();
 		/* get the hedging strategies */
-		//decide.getHedgingStrategies();
+		decide.getHedgingStrategies();
 		/* print the hedging strategy results */
-		//decide.printHedgingStrategies();
+		decide.printHedgingStrategies();
 	}	
 	
 	public void dimensionArrays() {
@@ -343,7 +345,7 @@ public class DecisionMaker {
 					val = 0.;
 					for (g_o=0; g_o<g_one.length; g_o++) {
 						u_o = u_one_pi[g_o][disp][htgr][sfr];
-						g_tw = g_two_pi[g_o][u_o][disp][htgr][sfr];
+						g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 						u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
 						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 						val = getVal(g_weight, Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
@@ -520,14 +522,36 @@ public class DecisionMaker {
 					if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { /* LWR; two_info can take values of {0,0,0}, {0,1,0}, {0,0,1}, {0,1,1} */
 						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-						
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0];
 							temp_double[u_o] += getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
 						}
-						
-						if (two_info[u_o])
-						
+						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
+								chance = htgr_prob[htgr];
+								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+								temp_double[u_o] += chance*val;
+							}
+						}
+						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
+								chance = sfr_prob[sfr];
+								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+								temp_double[u_o] += chance*val;
+							}
+						}
+						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==1) { /* two_info {0,1,1} */
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								for (sfr=0; sfr<sfr_cost.length; sfr++) {
+									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+									chance = htgr_prob[htgr]*sfr_prob[sfr];
+									val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									temp_double[u_o] += chance*val;
+								}
+							}
+						}
 					}
 
 					if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { /* HTGR; two_info can only take values of {0,0,0} and {0,0,1} */
@@ -589,10 +613,258 @@ public class DecisionMaker {
 				u_one_hedge[g_o][disp] = u_one[getIndexOfMax(temp_double)];
 			}
 		}
-
-
 		
+		/* Get G's stage one hedging strategy */
+		double[] temp_double = new double[g_one.length];
+		for (g_o=0; g_o<g_one.length; g_o++) {
+			
+			for (disp=0; disp<disp_cost.length; disp++) {
+				u_o = u_one_hedge[g_o][disp];
+
+				if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { /* LWR; two_info can take values of {0,0,0}, {0,1,0}, {0,0,1}, {0,1,1} */
+					g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
+					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0];
+						chance = disp_prob[g_o][disp];
+						val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
+						temp_double[g_o] += chance*val;
+					}
+					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+						for (htgr=0; htgr<htgr_cost.length; htgr++) {
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
+							chance = disp_prob[g_o][disp]*htgr_prob[htgr];
+							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+							temp_double[g_o] += chance*val;
+						}
+					}
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
+							chance = disp_prob[g_o][disp]*sfr_prob[sfr];
+							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+							temp_double[g_o] += chance*val;
+						}
+					}
+					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==1) { /* two_info {0,1,1} */
+						for (htgr=0; htgr<htgr_cost.length; htgr++) {
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								temp_double[g_o] += chance*val;
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { /* HTGR; two_info can only take values of {0,0,0} and {0,0,1} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length];
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw];
+						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
+							chance = disp_prob[g_o][disp]*htgr_prob[htgr];
+							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+							temp_double[g_o] += chance*val;
+						}
+						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								temp_double[g_o] += chance*val;
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==0 && one_info[u_o][2]==1) { /* SFR recyling LWR fuel; two_info can only take values of {0,0,0} and {0,1,0} */
+					for (sfr=0; sfr<sfr_cost.length; sfr++) {
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr];
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; 
+						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
+							chance = disp_prob[g_o][disp]*sfr_prob[sfr];
+							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+							temp_double[g_o] += chance*val;
+						}
+						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								temp_double[g_o] += chance*val;
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==1 && one_info[u_o][2]==1) { /* SFR recycling HTGR fuel; two_info can only take values of {0,0,0} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr];
+							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
+							chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+							temp_double[g_o] += chance*val;
+						}
+					}
+				}
+			
+			}
+			g_one_hedge = g_one[getIndexOfMax(temp_double)];
+
+		}
+
+	}
+	
+	public void printHedgingStrategies() {
 		
+		int[] hedge = new int[10];
+		/* 0: g_one; 1: disp; 2: u_one; 3: htgr_one; 4: sfr_one; 5: g_two; 6: u_two; 7: htgr_two; 8: sfr_two; 9: u_three */
+		int g_o;
+		int disp;
+		int u_o, u_tw, u_th, htgr, sfr;
+		int g_tw;
+		
+		String[] g_one_print = {"cheap reprocess", "medium reprocess", "high reprocess"};
+		String[] disp_print = {"mega cheap disposal", "super cheap disposal", "even cheaper disposal", "cheap disposal", "medium disposal", "high disposal"};
+		String[] u_print = {"LWRs", "HTGRs", "LWRs and SFRs", "HTGRs and SFRs"};
+		String[] htgr_cost_print = {"cheap htgr", "medium htgr", "high htgr", "unkwown htgr"};
+		String[] sfr_cost_print = {"cheap sfr", "medium sfr", "high sfr", "unknown sfr"};
+		String[] g_two_print = {"LWR subsidy", "HTGR subsidy", "SFR subsidy", "HTGR and SFR subsidy"};
+		
+		int[][] one_info = {
+				{0,0,0}, {0,1,0}, {0,0,1}, {0,1,1}
+		};
+
+		int[][][] two_info = {
+				// u_stage_one = 0 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,1,0},{0,0,1},{0,1,1}},
+				// u_stage_one = 1 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,0,0},{0,0,1},{0,0,1}},
+				// u_stage_one = 2 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,1,0},{0,0,0},{0,1,0}},
+				// u_stage_one = 3 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,0,0},{0,0,0},{0,0,0}}
+		};
+		
+		try {
+
+			String user_dir = System.getProperty("user.dir");
+			File output_target = new File(user_dir+File.separatorChar+"HedgingStrategyResults.txt");
+
+			if(output_target.exists()) output_target.delete();
+			FileWriter output_filewriter = new FileWriter(output_target);
+			PrintWriter output_writer = new PrintWriter(output_filewriter);
+			
+			output_writer.print("g_one_rep disp_cost u_first htgr_one sfr_one g_two_sub u_second htgr_two sfr_two u_last");
+			output_writer.print("\n");
+			
+			g_o = g_one_hedge; hedge[0] = g_one_hedge;
+			
+			for (disp=0; disp<disp_cost.length; disp++) {
+				hedge[1] = disp;
+				u_o = u_one_hedge[g_o][disp]; hedge[2] = u_o;
+				
+				
+				if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { /* LWR; two_info can take values of {0,0,0}, {0,1,0}, {0,0,1}, {0,1,1} */
+					hedge[3] = htgr_cost.length; hedge[4] = sfr_cost.length;
+					g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length]; hedge[5] = g_tw;
+					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; hedge[6] = u_tw;
+					
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+						hedge[7] = htgr_cost.length; hedge[8] = sfr_cost.length;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0]; hedge[9] = u_th;
+					}
+					output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+					
+					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+						for (htgr=0; htgr<htgr_cost.length; htgr++) {
+							hedge[7] = htgr; hedge[8] = sfr_cost.length;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; hedge[9] = u_th;
+							output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+						}
+					}
+					
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							hedge[7] = htgr_cost.length; hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; hedge[9] = u_th;
+							output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+						}
+					}
+					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==1) { /* two_info {0,1,1} */
+						for (htgr=0; htgr<htgr_cost.length; htgr++) {
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								hedge[7] = htgr; hedge[8] = sfr;
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+								output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { /* HTGR; two_info can only take values of {0,0,0} and {0,0,1} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						hedge[3] = htgr; hedge[4] = sfr_cost.length;
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length]; hedge[5] = g_tw;
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; hedge[6] = u_tw;
+						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+							hedge[7] = htgr; hedge[8] = sfr_cost.length;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; hedge[9] = u_th;
+							output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+						}
+						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+								hedge[7] = htgr; hedge[8] = sfr;
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+								output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==0 && one_info[u_o][2]==1) { /* SFR recyling LWR fuel; two_info can only take values of {0,0,0} and {0,1,0} */
+					for (sfr=0; sfr<sfr_cost.length; sfr++) {
+						hedge[3] = htgr_cost.length; hedge[4] = sfr;
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; hedge[5] = g_tw;
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; hedge[6] = u_tw;
+						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+							hedge[7] = htgr_cost.length; hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; hedge[9] = u_th;
+							output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+						}
+						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+								hedge[7] = htgr; hedge[8] = sfr;
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+								output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+							}
+						}
+					}
+				}
+
+				if (one_info[u_o][1]==1 && one_info[u_o][2]==1) { /* SFR recycling HTGR fuel; two_info can only take values of {0,0,0} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							hedge[7] = htgr; hedge[8] = sfr;
+							g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr];
+							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+							output_writer.print(g_one_print[hedge[0]] + "\t" + disp_print[hedge[1]] + "\t" + u_print[hedge[2]] + "\t" + htgr_cost_print[hedge[3]] + "\t" + sfr_cost_print[hedge[4]] + "\t" + g_two_print[hedge[5]] + "\t" + u_print[hedge[6]] + "\t" + htgr_cost_print[hedge[7]] + "\t" + sfr_cost_print[hedge[8]] + "\t" + u_print[hedge[9]] + "\n");
+						}
+					}
+				}
+			}
+			output_writer.close();
+
+		} catch (IOException e) {
+			System.out.print("Error writing Hedging Strategy results");
+		}
+		System.out.print("Finished printing hedging strategy results");
 	}
 	
 	public double getVal(double[] weight, double[] vals) {
