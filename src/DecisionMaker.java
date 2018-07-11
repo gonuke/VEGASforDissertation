@@ -15,6 +15,8 @@ import java.util.StringTokenizer;
 
 public class DecisionMaker {
 
+	static boolean fuck=false;
+	
 	/* decision criteria weighting */
 	static double[] u_weight = DMInputs.getUWeighting();
 	static double[] g_weight = DMInputs.getGWeighting();
@@ -98,9 +100,9 @@ public class DecisionMaker {
 		/* get the perfect info strategies based on that info */
 		decide.getPerfectInformationStrategies();
 		/* get the hedging strategies */
-		decide.getHedgingStrategies();
+		//decide.getHedgingStrategies();
 		/* print the hedging strategy results */
-		decide.printHedgingStrategies();
+		//decide.printHedgingStrategies();
 		/* print the perfect information strategies */
 		decide.printPerfectInformationStrategies();
 	}	
@@ -242,8 +244,9 @@ public class DecisionMaker {
 											norm_val[0] = 1 - (Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][0]-min_val[0])/diff_val[0];
 											norm_val[1] = 1 - (Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][1]-min_val[1])/diff_val[1];
 											norm_val[2] = (Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][2]-min_val[2])/diff_val[2];
-											Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr] = norm_val;
 											
+											for (int k=0; k<norm_val.length; k++) Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][k] = norm_val[k];
+
 											output_writer.print(u_o + " " + u_tw + " " + u_three[u_o][u_tw][u_th] + " ");
 											output_writer.print(g_o + " " + g_tw + " ");
 											output_writer.print(disp + " " + htgr + " " + sfr + " ");
@@ -273,6 +276,16 @@ public class DecisionMaker {
 		int i;
 		double val = 0.;
 		
+//		for (u_o=0; u_o<u_one.length; u_o++) {
+//			for (u_tw=0; u_tw<u_two.length; u_tw++) {
+//				for (u_th=0; u_th<u_three[u_o][u_tw].length; u_th++) {
+//					for (g_o=0; g_o<g_one.length; g_o++) {
+//						for (g_tw=0; g_tw<g_two.length; g_tw++) {
+//							for (disp=0; disp<disp_cost.length; disp++) {
+//								for (htgr=0; htgr<htgr_cost.length; htgr++) {
+//									for (sfr=0; sfr<sfr_cost.length; sfr++) {
+//		
+//		
 		/* Perfect Information Strategy for U's stage three play (given G's stage one and two plays; U's stage one and two plays; and all Nature's plays) */
 		for (u_o=0; u_o<u_one.length; u_o++) {
 			for (u_tw=0; u_tw<u_two.length; u_tw++) {
@@ -285,8 +298,17 @@ public class DecisionMaker {
 									for (u_th=0; u_th<u_three[u_o][u_tw].length; u_th++) {
 										val = getVal(u_weight, Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_th] = val;
+										if (u_o==3 && u_tw==3 && u_three[u_o][u_tw][u_th]==2) {
+											//System.out.print("The val is " + Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][1] + "\n");
+											System.out.print("The val is " + val + "\n");
+										}
 									}
+									if (u_o==3 && u_tw==3) fuck = true; else fuck = false;
 									u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr] = u_three[u_o][u_tw][getIndexOfMax(temp_double)];
+									if (u_o==3 && u_tw==3) {
+										System.out.print("the best is " + u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr] + "\n");
+										System.out.print("the index of max is " + getIndexOfMax(temp_double) + "\n");
+									}
 								}
 							}
 						}
@@ -294,6 +316,7 @@ public class DecisionMaker {
 				}
 			}
 		}
+		System.out.print("The val is " + Dat[3][3][2][0][0][0][0][0][1] + "\n");
 		
 		/* Perfect Information Strategy for U's stage two play (given G's stage one and two plays; U's stage one play; and all Nature's plays) */
 		for (u_o=0; u_o<u_one.length; u_o++) {
@@ -988,13 +1011,17 @@ public class DecisionMaker {
 		for (int i=0; i<vals.length; i++) val+=weight[i]*vals[i];
 		return(val);
 	}
+
 	
 	public int getIndexOfMax(double[] vals) {
 		int best=0;
-		double best_val=0;
+		double best_val=vals[0];
 		boolean equal=false;
 		for (int i=0; i<vals.length; i++) {
-			if (vals[i]>best_val) best_val = vals[i]; best = i;
+			if (vals[i]>best_val) {
+				best_val = vals[i]; 
+				best = i; 
+			}
 		}
 		return(best);
 	}
