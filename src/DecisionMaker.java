@@ -100,9 +100,9 @@ public class DecisionMaker {
 		/* get the perfect info strategies based on that info */
 		decide.getPerfectInformationStrategies();
 		/* get the hedging strategies */
-		//decide.getHedgingStrategies();
+		decide.getHedgingStrategies();
 		/* print the hedging strategy results */
-		//decide.printHedgingStrategies();
+		decide.printHedgingStrategies();
 		/* print the perfect information strategies */
 		decide.printPerfectInformationStrategies();
 	}	
@@ -276,16 +276,6 @@ public class DecisionMaker {
 		int i;
 		double val = 0.;
 		
-//		for (u_o=0; u_o<u_one.length; u_o++) {
-//			for (u_tw=0; u_tw<u_two.length; u_tw++) {
-//				for (u_th=0; u_th<u_three[u_o][u_tw].length; u_th++) {
-//					for (g_o=0; g_o<g_one.length; g_o++) {
-//						for (g_tw=0; g_tw<g_two.length; g_tw++) {
-//							for (disp=0; disp<disp_cost.length; disp++) {
-//								for (htgr=0; htgr<htgr_cost.length; htgr++) {
-//									for (sfr=0; sfr<sfr_cost.length; sfr++) {
-//		
-//		
 		/* Perfect Information Strategy for U's stage three play (given G's stage one and two plays; U's stage one and two plays; and all Nature's plays) */
 		for (u_o=0; u_o<u_one.length; u_o++) {
 			for (u_tw=0; u_tw<u_two.length; u_tw++) {
@@ -298,17 +288,8 @@ public class DecisionMaker {
 									for (u_th=0; u_th<u_three[u_o][u_tw].length; u_th++) {
 										val = getVal(u_weight, Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_th] = val;
-										if (u_o==3 && u_tw==3 && u_three[u_o][u_tw][u_th]==2) {
-											//System.out.print("The val is " + Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][1] + "\n");
-											System.out.print("The val is " + val + "\n");
-										}
 									}
-									if (u_o==3 && u_tw==3) fuck = true; else fuck = false;
 									u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr] = u_three[u_o][u_tw][getIndexOfMax(temp_double)];
-									if (u_o==3 && u_tw==3) {
-										System.out.print("the best is " + u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr] + "\n");
-										System.out.print("the index of max is " + getIndexOfMax(temp_double) + "\n");
-									}
 								}
 							}
 						}
@@ -316,7 +297,6 @@ public class DecisionMaker {
 				}
 			}
 		}
-		System.out.print("The val is " + Dat[3][3][2][0][0][0][0][0][1] + "\n");
 		
 		/* Perfect Information Strategy for U's stage two play (given G's stage one and two plays; U's stage one play; and all Nature's plays) */
 		for (u_o=0; u_o<u_one.length; u_o++) {
@@ -627,7 +607,7 @@ public class DecisionMaker {
 							if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
 								chance = sfr_prob[sfr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][0][sfr]);
+								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
 								temp_double[u_o] += chance*val;
 							}
 							if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */

@@ -1,8 +1,8 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) (0), (double) (1), (double) (0)};
-	static double[] UCriterionWeights = {(double) 0, (double) 1, (double) (0)};
+	static double[] GCriterionWeights = {(double) (0), (double) (0), (double) (1)};
+	static double[] UCriterionWeights = {(double) (0), (double) (0), (double) (1)};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
@@ -34,17 +34,18 @@ public class DMInputs {
 		{9.360E+03, 2.789E+03}
 	};
 	
+	/* mining; conversion; enrichment; fuel fab; transport */
 	static double[][] FrontEndProliferation = {
 		{0.4123,0.4123,0.0656,0.4189,1},
 		{0.4123,0.4123,0.0131,0.4160,1},
 		{0.4123,0.4123,1,0.2476,1}
 	};
+	/* snf storage; snf transport; reprocess; snf disposal; hlw vitrification; hlw storage; hlw disposal */
 	static double[][] BackEndProliferation = {
 		{0.3585,1,0.2466,0.3446,1,1,0.3699},
 		{0.3698,1,0.2603,0.3603,1,1,0.3698},
 		{0.3524,1,0.2514,0.3591,1,1,0.3699}
 	};
-	// snf storage; snf transport; reprocessing; snf disposal; hlw vitrification; hlw storage; hlw transport
 	
 	public static void main(String args[]) {
 		
