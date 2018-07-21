@@ -43,17 +43,20 @@ public class DMInputs {
 	/* didn't calculate transport */
 	/* mining; conversion; enrichment; fuel fab; transport */
 	static double[][] FrontEndProliferation = {
-		{0.4123,0.4123,0.0656,0.4189,1},
-		{0.4123,0.4123,0.0131,0.4160,1},
-		{0.4123,0.4123,1,0.2476,1}
+		{0.7912,0.7912,0.7880,0.8069,1},
+		{0.7912,0.7912,0.7815,0.7999,1},
+		{0.7910,0.7910,1,0.5752,1}
 	};
 	/* didn't calculate snf transport; hlw vitrification; hlw storage
 	/* snf storage; snf transport; reprocess; snf disposal; hlw vitrification; hlw storage; hlw disposal */
 	static double[][] BackEndProliferation = {
-		{0.3585,1,0.2466,0.3446,1,1,0.3699},
-		{0.3698,1,0.2603,0.3603,1,1,0.3698},
-		{0.3524,1,0.2514,0.3591,1,1,0.3699}
+		{0.8536,1,0.5830,0.8253,1,1,0.9189},
+		{0.8805,1,0.6171,0.8579,1,1,0.9394},
+		{0.8154,1,0.5768,0.8172,1,1,0.9167}
 	};
+	
+	public static boolean[] calcFrontEndNP = {true, true, true, true, false};
+	public static boolean[] calcBackEndNP = {true, false, true, true, false, false, false};
 	
 	public static void main(String args[]) {
 		

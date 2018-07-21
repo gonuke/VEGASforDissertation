@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=false;
-	static boolean scope_reprocessing_capacity=true;
+	static boolean only_one=true;
+	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,2,2,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -1814,14 +1814,18 @@ public class VEGAS {
 	/* added by Birdy for proliferation metric calculation */
 	public double getFrontEndProliferation(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
-		for(int i=0; i<FRONTENDTECH.length; i++) proliferation_resistance+=FRONTENDMASS[reactor_type][i]*front_end_proliferationresistance[reactor_type][i];
+		for(int i=0; i<FRONTENDTECH.length; i++) {
+			if (front_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=FRONTENDMASS[reactor_type][i]*front_end_proliferationresistance[reactor_type][i];
+		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
 	}
 
 	public double getFrontEndMass(int reactor_type, double capacity) {
 		double mass=0.;
-		for(int i=0; i<FRONTENDTECH.length; i++) mass+=FRONTENDMASS[reactor_type][i];
+		for(int i=0; i<FRONTENDTECH.length; i++) {
+			if (front_end_proliferationresistance[reactor_type][i]!=0) mass+=FRONTENDMASS[reactor_type][i];
+		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
 	}
@@ -2611,14 +2615,18 @@ public class VEGAS {
 	/* added by Birdy for proliferation metric calculation */
 	public double getBackEndDDProliferationResistance(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
-		for(int i=0; i<BACKENDTECH.length; i++) proliferation_resistance+=BACKENDMASS_DD[i]*back_end_proliferationresistance[reactor_type][i];
+		for(int i=0; i<BACKENDTECH.length; i++) {
+			if (back_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=BACKENDMASS_DD[i]*back_end_proliferationresistance[reactor_type][i];
+		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
 	}
 
 	public double getBackEndDDMass(int reactor_type, double capacity) {
 		double mass=0.;
-		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS_DD[i];
+		for(int i=0; i<BACKENDTECH.length; i++) {
+			if (back_end_proliferationresistance[reactor_type][i]!=0) mass+=BACKENDMASS_DD[i];
+		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
 	}
@@ -2738,14 +2746,18 @@ public class VEGAS {
 	/* added by Birdy for proliferation metric calculation */
 	public double getBackEndRepProliferationResistance(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
-		for(int i=0; i<BACKENDTECH.length; i++) proliferation_resistance+=BACKENDMASS[reactor_type][i]*back_end_proliferationresistance[reactor_type][i];
+		for(int i=0; i<BACKENDTECH.length; i++) {
+			if (back_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=BACKENDMASS[reactor_type][i]*back_end_proliferationresistance[reactor_type][i];
+		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
 	}
 
 	public double getBackEndRepMass(int reactor_type, double capacity) {
 		double mass=0.;
-		for(int i=0; i<BACKENDTECH.length; i++) mass+=BACKENDMASS[reactor_type][i];
+		for(int i=0; i<BACKENDTECH.length; i++) {
+			if (back_end_proliferationresistance[reactor_type][i]!=0) mass+=BACKENDMASS[reactor_type][i];
+		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
 	}
@@ -3636,7 +3648,7 @@ public class VEGAS {
 		/* for DecisionMaking */
 		/* Proliferation metric for G */
 		double[] proliferation_resistance=new double[END_YEAR-START_YEAR+1];
-		double[] mass_throughput=new double[END_YEAR-START_YEAR+1];
+		double[] mass_throughput=new double[END_YEAR-START_YEAR+1]; // only for processes where static proliferation resistance is measured
 		/* COE metric for G and U */
 		double[] coe=new double[END_YEAR-START_YEAR+1];
 		/* Waste disposal metric for G */
