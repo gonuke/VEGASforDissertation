@@ -31,7 +31,7 @@ public class VEGAS {
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,3,3,1,0,1,1,1,1}; /* TODO */
+	static int[] robustInts = {0,3,0,1,0,1,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -67,7 +67,9 @@ public class VEGAS {
 
 	static double[][] decay_heat = DMInputs.getDecayHeat();
 	static double[][] front_end_proliferationresistance = DMInputs.getFEProliferationMetric();
+	static boolean[] calc_frontend_pr = DMInputs.getCalcFEPR();
 	static double[][] back_end_proliferationresistance = DMInputs.getBEProliferationMetric();
+	static boolean[] calc_backend_pr = DMInputs.getCalcBEPR();
 
 	static boolean[] RX_PROTOTYPE;
 
@@ -1815,7 +1817,7 @@ public class VEGAS {
 	public double getFrontEndProliferation(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
 		for(int i=0; i<FRONTENDTECH.length; i++) {
-			if (front_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=FRONTENDMASS[reactor_type][i]*front_end_proliferationresistance[reactor_type][i];
+			if (calc_frontend_pr[i]) proliferation_resistance+=FRONTENDMASS[reactor_type][i]*front_end_proliferationresistance[reactor_type][i];
 		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
@@ -1824,7 +1826,7 @@ public class VEGAS {
 	public double getFrontEndMass(int reactor_type, double capacity) {
 		double mass=0.;
 		for(int i=0; i<FRONTENDTECH.length; i++) {
-			if (front_end_proliferationresistance[reactor_type][i]!=0) mass+=FRONTENDMASS[reactor_type][i];
+			if (calc_frontend_pr[i]) mass+=FRONTENDMASS[reactor_type][i];
 		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
@@ -2616,7 +2618,7 @@ public class VEGAS {
 	public double getBackEndDDProliferationResistance(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
 		for(int i=0; i<BACKENDTECH.length; i++) {
-			if (back_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=BACKENDMASS_DD[i]*back_end_proliferationresistance[reactor_type][i];
+			if (calc_backend_pr[i]) proliferation_resistance+=BACKENDMASS_DD[i]*back_end_proliferationresistance[reactor_type][i];
 		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
@@ -2625,7 +2627,7 @@ public class VEGAS {
 	public double getBackEndDDMass(int reactor_type, double capacity) {
 		double mass=0.;
 		for(int i=0; i<BACKENDTECH.length; i++) {
-			if (back_end_proliferationresistance[reactor_type][i]!=0) mass+=BACKENDMASS_DD[i];
+			if (calc_backend_pr[i]) mass+=BACKENDMASS_DD[i];
 		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
@@ -2747,7 +2749,7 @@ public class VEGAS {
 	public double getBackEndRepProliferationResistance(int reactor_type, double capacity) {
 		double proliferation_resistance=0.;
 		for(int i=0; i<BACKENDTECH.length; i++) {
-			if (back_end_proliferationresistance[reactor_type][i]!=0) proliferation_resistance+=BACKENDMASS[reactor_type][i]*back_end_proliferationresistance[reactor_type][i];
+			if (calc_backend_pr[i]) proliferation_resistance+=BACKENDMASS[reactor_type][i]*back_end_proliferationresistance[reactor_type][i];
 		}
 		proliferation_resistance=proliferation_resistance*capacity*capacityToMass(reactor_type);
 		return(proliferation_resistance);
@@ -2756,7 +2758,7 @@ public class VEGAS {
 	public double getBackEndRepMass(int reactor_type, double capacity) {
 		double mass=0.;
 		for(int i=0; i<BACKENDTECH.length; i++) {
-			if (back_end_proliferationresistance[reactor_type][i]!=0) mass+=BACKENDMASS[reactor_type][i];
+			if (calc_backend_pr[i]) mass+=BACKENDMASS[reactor_type][i];
 		}
 		mass=mass*capacity*capacityToMass(reactor_type);
 		return(mass);
@@ -3387,6 +3389,7 @@ public class VEGAS {
 						output_writer_lcoe.print("\n");
 					}
 					output_writer_lcoe.close();
+					System.out.print("Finished printing LCOE output data file. 'YearlyLCOE.txt'" + "\n");
 
 					/* Decay Heat */
 					File output_target_decayheat = new File(user_dir+File.separatorChar+"YearlyDecayHeat.txt");
@@ -3401,6 +3404,7 @@ public class VEGAS {
 						output_writer_decayheat.print("\n");
 					}
 					output_writer_decayheat.close();
+					System.out.print("Finished printing decay heat output data file. 'YearlyDecayHeat.txt'" + "\n");
 
 					/* Proliferation Resistance */
 					File output_target_proliferationresistance = new File(user_dir+File.separatorChar+"YearlyNuclearSecurityMeasure.txt");
@@ -3415,6 +3419,7 @@ public class VEGAS {
 						output_writer_proliferationresistance.print("\n");
 					}
 					output_writer_proliferationresistance.close();
+					System.out.print("Finished printing nuclear security measure output data file. 'YearlyNuclearSecurityMeasure.txt'" + "\n");
 
 					/* characterizing the waste generated and waste reprocessed */
 					File output_target_wastequantities = new File(user_dir+File.separatorChar+"WasteQuantities.txt");
@@ -3433,7 +3438,7 @@ public class VEGAS {
 						output_writer_wastequantities.print("\n");
 					}
 					output_writer_wastequantities.close();
-					System.out.print("Finished print waste quantities output data file." + "\n");
+					System.out.print("Finished printing waste quantities output data file. 'WasteQuantities.txt'" + "\n");
 
 					File output_target_generationcapacity = new File(user_dir+File.separatorChar+"GeneratingCapacity.txt");
 					if (output_target_generationcapacity.exists()) output_target_generationcapacity.delete();
@@ -3449,7 +3454,7 @@ public class VEGAS {
 						}
 						output_writer_generationcapacity.print("\n");
 					}
-					output_writer_generationcapacity.close(); System.out.print("Finished printing generating capacity output data." + "\n");
+					output_writer_generationcapacity.close(); System.out.print("Finished printing generating capacity output data. 'GeneratingCapacity.txt'" + "\n");
 
 				}
 				

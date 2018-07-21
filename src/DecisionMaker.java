@@ -933,14 +933,7 @@ public class DecisionMaker {
 						u_o = u_one_pi[g_o][disp][htgr][sfr]; 
 						g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 						u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr]; 
-						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
-						
-//						if (u_o==2 || u_o==3) recycle=true; 
-//						if (u_tw==2 || u_o==3) recycle=true;
-//						if (u_o==0 || u_o==2) {
-//							if (u_tw==0 || u_tw==2) htgr_only=true;
-//						}
-						
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];	
 						strategy[3] = u_o; strategy[4] = u_tw; strategy[5] = u_th; strategy[6] = g_o; strategy[7] = g_tw;
 						for (int k=0; k<strategy.length-1; k++) output_writer.print(strategy[k] + " ");
 						output_writer.print(strategy[7] + "\n");
