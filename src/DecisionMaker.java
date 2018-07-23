@@ -73,6 +73,7 @@ public class DecisionMaker {
 	static double[] sfr_prob = DMInputs.getSFRCapCostProb();
 	
 	static double[][][][][][][][][] Dat;
+	static double[][][][][][][][][] NormDat;
 	
 	static int[][][][][][][] u_three_pi;
 	static int[][][][][][] u_two_pi;
@@ -111,6 +112,7 @@ public class DecisionMaker {
 		
 		Dat = new double [u_one.length][u_one.length][u_one.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length][3];
 		/* u_one, u_two and u_three have the same max length */
+		NormDat = new double [u_one.length][u_one.length][u_one.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length][3];
 		
 		u_three_pi = new int[u_one.length][u_two.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length];
 		u_two_pi = new int[u_one.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length];
@@ -245,7 +247,7 @@ public class DecisionMaker {
 											norm_val[1] = 1 - (Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][1]-min_val[1])/diff_val[1];
 											norm_val[2] = (Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][2]-min_val[2])/diff_val[2];
 											
-											for (int k=0; k<norm_val.length; k++) Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][k] = norm_val[k];
+											for (int k=0; k<norm_val.length; k++) NormDat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr][k] = norm_val[k];
 
 											output_writer.print(u_o + " " + u_tw + " " + u_three[u_o][u_tw][u_th] + " ");
 											output_writer.print(g_o + " " + g_tw + " ");
@@ -286,7 +288,7 @@ public class DecisionMaker {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									double[] temp_double = new double[u_three[u_o][u_tw].length];
 									for (u_th=0; u_th<u_three[u_o][u_tw].length; u_th++) {
-										val = getVal(u_weight, Dat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr]);
+										val = getVal(u_weight, NormDat[u_o][u_tw][u_three[u_o][u_tw][u_th]][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_th] = val;
 									}
 									u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr] = u_three[u_o][u_tw][getIndexOfMax(temp_double)];
@@ -310,7 +312,7 @@ public class DecisionMaker {
 								val = 0.;
 								for (u_tw=0; u_tw<u_two.length; u_tw++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
-									val = getVal(u_weight, Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(u_weight, NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[u_tw] = val;
 								}
 								u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr] = u_two[getIndexOfMax(temp_double)];
@@ -332,7 +334,7 @@ public class DecisionMaker {
 							for (g_tw=0; g_tw<g_two.length; g_tw++) {
 								u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
-								val = getVal(g_weight, Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								val = getVal(g_weight, NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 								temp_double[g_tw] = val;
 							}
 							g_two_pi[u_o][g_o][disp][htgr][sfr] = g_two[getIndexOfMax(temp_double)];
@@ -353,7 +355,7 @@ public class DecisionMaker {
 							g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 							u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
-							val = getVal(u_weight, Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+							val = getVal(u_weight, NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 							temp_double[u_o] = val;
 						}
 						u_one_pi[g_o][disp][htgr][sfr] = u_one[getIndexOfMax(temp_double)];
@@ -373,7 +375,7 @@ public class DecisionMaker {
 						g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 						u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
 						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
-						val = getVal(g_weight, Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+						val = getVal(g_weight, NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 						temp_double[g_o] = val;
 					}
 					g_one_pi[disp][htgr][sfr] = g_one[getIndexOfMax(temp_double)];
@@ -410,17 +412,17 @@ public class DecisionMaker {
 		/* Get U's stage two hedging strategy (knowing G's stage one and two plays; U's stage one play; Nature's moves so far) */
 		for (g_o=0; g_o<g_one.length; g_o++) {
 			for (disp=0; disp<disp_cost.length; disp++) {
-				for (g_tw=0; g_tw<g_two.length; g_tw++) {
-					for (u_o=0; u_o<u_one.length; u_o++) {
+				for (u_o=0; u_o<u_one.length; u_o++) {
+					for (g_tw=0; g_tw<g_two.length; g_tw++) {
 						
-						if (one_info[u_o][1]==0 && one_info[u_o][2]==0) {
+						if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { // no information; hedge against all costs
 							double[] temp_double = new double[u_two.length];
 							for (u_tw=0; u_tw<u_two.length; u_tw++) {
 								for (htgr=0; htgr<htgr_cost.length; htgr++) {
 									for (sfr=0; sfr<sfr_cost.length; sfr++) {
 										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 										chance = htgr_prob[htgr]*sfr_prob[sfr];
-										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
 									}
 								}
@@ -428,14 +430,14 @@ public class DecisionMaker {
 							u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw] = u_two[getIndexOfMax(temp_double)];
 						}
 						
-						if (one_info[u_o][1]==1 && one_info[u_o][2]==0) {
-							double[] temp_double = new double[u_two.length];
-							for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { 
+							for (htgr=0; htgr<htgr_cost.length; htgr++) { // known htgr cost; hedge against unknown sfr cost
+								double[] temp_double = new double[u_two.length];
 								for (u_tw=0; u_tw<u_two.length; u_tw++) {
 									for (sfr=0; sfr<sfr_cost.length; sfr++) {
 										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 										chance = sfr_prob[sfr];
-										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
 									}
 								}
@@ -444,13 +446,13 @@ public class DecisionMaker {
 						}
 						
 						if (one_info[u_o][1]==0 && one_info[u_o][2]==1) {
-							double[] temp_double = new double[u_two.length];
-							for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							for (sfr=0; sfr<sfr_cost.length; sfr++) { // known sfr cost; hedge against unknown htgr cost
+								double[] temp_double = new double[u_two.length];
 								for (u_tw=0; u_tw<u_two.length; u_tw++) {
 									for (htgr=0; htgr<htgr_cost.length; htgr++) {
 										u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 										chance = htgr_prob[htgr];
-										val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
 									}
 								}
@@ -461,7 +463,7 @@ public class DecisionMaker {
 						if (one_info[u_o][1]==1 && one_info[u_o][2]==1) {
 							for (htgr=0; htgr<htgr_cost.length; htgr++) {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
-									u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw] = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
+									u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw] = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr]; // no hedge if information already known
 								}
 							}
 						}
@@ -484,7 +486,7 @@ public class DecisionMaker {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = htgr_prob[htgr]*sfr_prob[sfr];
-									val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[g_tw] += chance*val;
 								}
 							}
@@ -500,7 +502,7 @@ public class DecisionMaker {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = sfr_prob[sfr];
-									val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[g_tw] += chance*val;
 								}
 							}
@@ -516,7 +518,7 @@ public class DecisionMaker {
 								for (htgr=0; htgr<htgr_cost.length; htgr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = htgr_prob[htgr];
-									val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[g_tw] += chance*val;
 								}
 							}
@@ -549,13 +551,13 @@ public class DecisionMaker {
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0];
-							temp_double[u_o] += getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
+							temp_double[u_o] += getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
 						}
 						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 							for (htgr=0; htgr<htgr_cost.length; htgr++) {
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
 								chance = htgr_prob[htgr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+								val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
 								temp_double[u_o] += chance*val;
 							}
 						}
@@ -563,7 +565,7 @@ public class DecisionMaker {
 							for (sfr=0; sfr<sfr_cost.length; sfr++) {
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
 								chance = sfr_prob[sfr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+								val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
 								temp_double[u_o] += chance*val;
 							}
 						}
@@ -572,7 +574,7 @@ public class DecisionMaker {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = htgr_prob[htgr]*sfr_prob[sfr];
-									val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[u_o] += chance*val;
 								}
 							}
@@ -586,14 +588,14 @@ public class DecisionMaker {
 							if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
 								chance = htgr_prob[htgr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+								val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
 								temp_double[u_o] += chance*val;
 							}
 							if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = htgr_prob[htgr]*sfr_prob[sfr];
-									val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[u_o] += chance*val;
 								}
 							}
@@ -607,14 +609,14 @@ public class DecisionMaker {
 							if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
 								chance = sfr_prob[sfr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+								val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
 								temp_double[u_o] += chance*val;
 							}
 							if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 								for (htgr=0; htgr<htgr_cost.length; htgr++) {
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									chance = htgr_prob[htgr]*sfr_prob[sfr];
-									val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+									val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 									temp_double[u_o] += chance*val;
 								}
 							}
@@ -628,7 +630,7 @@ public class DecisionMaker {
 								u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 								chance = htgr_prob[htgr]*sfr_prob[sfr];
-								val = getVal(u_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 								temp_double[u_o] += chance*val;
 							}
 						}
@@ -652,14 +654,14 @@ public class DecisionMaker {
 					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0];
 						chance = disp_prob[g_o][disp];
-						val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
+						val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][0]);
 						temp_double[g_o] += chance*val;
 					}
 					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 						for (htgr=0; htgr<htgr_cost.length; htgr++) {
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
 							chance = disp_prob[g_o][disp]*htgr_prob[htgr];
-							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+							val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
 							temp_double[g_o] += chance*val;
 						}
 					}
@@ -667,7 +669,7 @@ public class DecisionMaker {
 						for (sfr=0; sfr<sfr_cost.length; sfr++) {
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
 							chance = disp_prob[g_o][disp]*sfr_prob[sfr];
-							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+							val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
 							temp_double[g_o] += chance*val;
 						}
 					}
@@ -676,7 +678,7 @@ public class DecisionMaker {
 							for (sfr=0; sfr<sfr_cost.length; sfr++) {
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
-								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 								temp_double[g_o] += chance*val;
 							}
 						}
@@ -690,14 +692,14 @@ public class DecisionMaker {
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0];
 							chance = disp_prob[g_o][disp]*htgr_prob[htgr];
-							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
+							val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][0]);
 							temp_double[g_o] += chance*val;
 						}
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
 							for (sfr=0; sfr<sfr_cost.length; sfr++) {
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
-								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 								temp_double[g_o] += chance*val;
 							}
 						}
@@ -711,14 +713,14 @@ public class DecisionMaker {
 						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr];
 							chance = disp_prob[g_o][disp]*sfr_prob[sfr];
-							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
+							val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][0][sfr]);
 							temp_double[g_o] += chance*val;
 						}
 						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 							for (htgr=0; htgr<htgr_cost.length; htgr++) {
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 								chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
-								val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+								val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 								temp_double[g_o] += chance*val;
 							}
 						}
@@ -732,7 +734,7 @@ public class DecisionMaker {
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 							chance = disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
-							val = getVal(g_weight,Dat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
+							val = getVal(g_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 							temp_double[g_o] += chance*val;
 						}
 					}
@@ -781,7 +783,8 @@ public class DecisionMaker {
 			output_writer.print("g_one_rep disp_cost u_first htgr_one sfr_one g_two_sub u_second htgr_two sfr_two u_last");
 			output_writer.print("\n");
 			
-			g_o = g_one_hedge; hedge[0] = g_one_hedge;
+			g_o = g_one_hedge; 
+			hedge[0] = g_one_hedge;
 			
 			for (disp=0; disp<disp_cost.length; disp++) {
 				hedge[1] = disp;
@@ -791,21 +794,28 @@ public class DecisionMaker {
 				
 				if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { /* LWR; two_info can take values of {0,0,0}, {0,1,0}, {0,0,1}, {0,1,1} */
 					
-					hedge[3] = htgr_cost.length; hedge[4] = sfr_cost.length;
-					g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length]; hedge[5] = g_tw;
-					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; hedge[6] = u_tw;
+					hedge[3] = htgr_cost.length; 
+					hedge[4] = sfr_cost.length;
+					g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length]; 
+					hedge[5] = g_tw;
+					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; 
+					hedge[6] = u_tw;
 					
 					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
-						hedge[7] = htgr_cost.length; hedge[8] = sfr_cost.length;
-						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0]; hedge[9] = u_th;
+						hedge[7] = htgr_cost.length; 
+						hedge[8] = sfr_cost.length;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0]; 
+						hedge[9] = u_th;
 					}
 					for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 					output_writer.print(hedge[9] + "\n");
 					
 					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 						for (htgr=0; htgr<htgr_cost.length; htgr++) {
-							hedge[7] = htgr; hedge[8] = sfr_cost.length;
-							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; hedge[9] = u_th;
+							hedge[7] = htgr; 
+							hedge[8] = sfr_cost.length;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; 
+							hedge[9] = u_th;
 							for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 							output_writer.print(hedge[9] + "\n");
 						}
@@ -813,8 +823,10 @@ public class DecisionMaker {
 					
 					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
 						for (sfr=0; sfr<sfr_cost.length; sfr++) {
-							hedge[7] = htgr_cost.length; hedge[8] = sfr;
-							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; hedge[9] = u_th;
+							hedge[7] = htgr_cost.length; 
+							hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; 
+							hedge[9] = u_th;
 							for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 							output_writer.print(hedge[9] + "\n");
 						}
@@ -822,8 +834,10 @@ public class DecisionMaker {
 					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==1) { /* two_info {0,1,1} */
 						for (htgr=0; htgr<htgr_cost.length; htgr++) {
 							for (sfr=0; sfr<sfr_cost.length; sfr++) {
-								hedge[7] = htgr; hedge[8] = sfr;
-								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+								hedge[7] = htgr; 
+								hedge[8] = sfr;
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+								hedge[9] = u_th;
 								for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 								output_writer.print(hedge[9] + "\n");
 							}
@@ -833,19 +847,26 @@ public class DecisionMaker {
 
 				if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { /* HTGR; two_info can only take values of {0,0,0} and {0,0,1} */
 					for (htgr=0; htgr<htgr_cost.length; htgr++) {
-						hedge[3] = htgr; hedge[4] = sfr_cost.length;
-						g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length]; hedge[5] = g_tw;
-						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; hedge[6] = u_tw;
+						hedge[3] = htgr; 
+						hedge[4] = sfr_cost.length;
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length]; 
+						hedge[5] = g_tw;
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; 
+						hedge[6] = u_tw;
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
-							hedge[7] = htgr; hedge[8] = sfr_cost.length;
-							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; hedge[9] = u_th;
+							hedge[7] = htgr; 
+							hedge[8] = sfr_cost.length;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; 
+							hedge[9] = u_th;
 							for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 							output_writer.print(hedge[9] + "\n");
 						}
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
 							for (sfr=0; sfr<sfr_cost.length; sfr++) {
-								hedge[7] = htgr; hedge[8] = sfr;
-								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; hedge[9] = u_th;
+								hedge[7] = htgr; 
+								hedge[8] = sfr;
+								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+								hedge[9] = u_th;
 								for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
 								output_writer.print(hedge[9] + "\n");
 							}
@@ -855,11 +876,15 @@ public class DecisionMaker {
 
 				if (one_info[u_o][1]==0 && one_info[u_o][2]==1) { /* SFR recyling LWR fuel; two_info can only take values of {0,0,0} and {0,1,0} */
 					for (sfr=0; sfr<sfr_cost.length; sfr++) {
-						hedge[3] = htgr_cost.length; hedge[4] = sfr;
-						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; hedge[5] = g_tw;
-						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; hedge[6] = u_tw;
+						hedge[3] = htgr_cost.length; 
+						hedge[4] = sfr;
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; 
+						hedge[5] = g_tw;
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; 
+						hedge[6] = u_tw;
 						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
-							hedge[7] = htgr_cost.length; hedge[8] = sfr;
+							hedge[7] = htgr_cost.length; 
+							hedge[8] = sfr;
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; 
 							hedge[9] = u_th;
 							for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
@@ -867,7 +892,8 @@ public class DecisionMaker {
 						}
 						if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
 							for (htgr=0; htgr<htgr_cost.length; htgr++) {
-								hedge[7] = htgr; hedge[8] = sfr;
+								hedge[7] = htgr; 
+								hedge[8] = sfr;
 								u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
 								hedge[9] = u_th;
 								for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
@@ -880,10 +906,14 @@ public class DecisionMaker {
 				if (one_info[u_o][1]==1 && one_info[u_o][2]==1) { /* SFR recycling HTGR fuel; two_info can only take values of {0,0,0} */
 					for (htgr=0; htgr<htgr_cost.length; htgr++) {
 						for (sfr=0; sfr<sfr_cost.length; sfr++) {
-							hedge[3] = htgr; hedge[4] = sfr;
-							hedge[7] = htgr; hedge[8] = sfr;
-							g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr];
+							hedge[3] = htgr; 
+							hedge[4] = sfr;
+							g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; 
+							hedge[5] = g_tw;
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
+							hedge[6] = u_tw;
+							hedge[7] = htgr; 
+							hedge[8] = sfr;
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
 							hedge[9] = u_th;
 							for (int k=0; k<9; k++) output_writer.print(hedge[k] + " ");
@@ -944,9 +974,9 @@ public class DecisionMaker {
 			output_writer.close();
 
 		} catch (IOException e) {
-			System.out.print("Error writing Perfect Information strategies");
+			System.out.print("Error writing perfect information strategies");
 		}
-		System.out.print("Finished printing Perfect Information strategies" + "\n");
+		System.out.print("Finished printing perfect information strategies" + "\n");
 	}
 	
 	public double getVal(double[] weight, double[] vals) {

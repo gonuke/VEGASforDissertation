@@ -1,36 +1,38 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) .333, (double) .333, (double) .333};
-	static double[] UCriterionWeights = {(double) 0, (double) 1, (double) 0};
+	static double[] GCriterionWeights = {(double) .33, (double) .33, (double) .33};
+	static double[] UCriterionWeights = {(double) .75, (double) .25, (double) 0.};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
 
-	static double[] ChosenReprocessingCost = {903,1120,1339};
+	//static double[] ChosenReprocessingCost = {903,1120,1339};
+	static double[] ChosenReprocessingCost = {1339, 1120, 903};
 	static double[][] DisposalCostOutcomes = {{191,1910},{265,1377},{550,5500},{801,6880}};
 	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
 	static double[][] DisposalCostProbabilities = {
-		{(double) 0, (double) 1/3, (double) 1/3, (double) 1/3},
-		{(double) 1/14, (double) 4/14, (double) 5/14, (double) 4/14},
-		{(double) 2/14, (double) 5/14, (double) 5/14, (double) 3/14}
+		{(double) 0, (double) .1, (double) .8, (double) .1},
+		{(double) .01, (double) .125, (double) .74, (double) .125},
+		{(double) .05, (double) .25, (double) .69, (double) .1}
 	};
 	
-	static double LWRCapitalCost = 2000;
+	static double LWRCapitalCost = 2800; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
-	static double[] HTGRCapitalCost = {2700, 3000, 3500};
+	static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
 	static double top = 1.;
 	static double bottom = 3.;
 	static double even = top/bottom;
 	//static double[] htgr_capcost_probability = {even, even, even};
-	static double[] htgr_capcost_probability = { (double) 1/3, (double) 1/3, (double) 1/3};
+	static double[] htgr_capcost_probability = {(double) .333, (double) .333, (double) .333};
 	//static double[] htgr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
-	static double[] SFRCapitalCost = {2700, 3000, 4000};
+	static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200
 	//static double[] sfr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
-	static double[] sfr_capcost_probability = { (double) 1/3, (double) 1/3, (double) 1/3};
+	static double[] sfr_capcost_probability = {(double) .333, (double) .333, (double) .333};
 	
 	static int[][] CapitalSubsidy = {{1,0,0},{0,1,0},{0,0,1},{0,1,1}};
+	//static int[][] CapitalSubsidy = {{0,1,0},{0,0,1},{0,1,1}};
 	static double SubsidyAmount = 200; /* $/kWe */
 	static int CapitalSubsidyYear = 2045;
 	

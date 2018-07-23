@@ -1,4 +1,4 @@
-first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost 0 3 0 1 0 1 1 1
+first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost 0 3 0 1 0 3 1 1
 year decayheat
 2018 3209.8330241186777
 2019 3274.0296846010515
