@@ -17,23 +17,18 @@ public class DMInputs {
 		{(double) .05, (double) .25, (double) .69, (double) .1}
 	};
 	
-	static double LWRCapitalCost = 2800; // foak 3500
+	static double LWRCapitalCost = 3500; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
 	static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
-	static double top = 1.;
-	static double bottom = 3.;
-	static double even = top/bottom;
-	//static double[] htgr_capcost_probability = {even, even, even};
-	static double[] htgr_capcost_probability = {(double) .333, (double) .333, (double) .333};
+	static double[] htgr_capcost_probability = {(double) .2, (double) .6, (double) .2};
 	//static double[] htgr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
-	static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200
-	//static double[] sfr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
-	static double[] sfr_capcost_probability = {(double) .333, (double) .333, (double) .333};
+	static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200};
+	static double[] sfr_capcost_probability = {(double) .2, (double) .6, (double) .2};
 	
 	static int[][] CapitalSubsidy = {{1,0,0},{0,1,0},{0,0,1},{0,1,1}};
 	//static int[][] CapitalSubsidy = {{0,1,0},{0,0,1},{0,1,1}};
-	static double SubsidyAmount = 200; /* $/kWe */
+	static double SubsidyAmount = 200; /* $/kWe for SFR */
 	static int CapitalSubsidyYear = 2045;
 	
 	static double[][] decay_heat = { // [reactor type][actinides, fission products]
