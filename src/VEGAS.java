@@ -804,13 +804,19 @@ public class VEGAS {
 		int[] totalFacilitiesAdded = new int[REACTORNAMES.length];
 		int[] facilitiesAddedAfterSubsidy = {0,0,0};
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
+		int subsidized_rx=0;
 		
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
 		double[] subsidy = {0,0,0};
-		double total_subsidy = 200*10; 
+		double total_subsidy = 200*10;
+		for (k=0; k<subsidy.length; k++) {
+			for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+				subsidized_rx +=  CapitalSubsidy[k][n_rx];
+			}
+		}
 		for (k=0; k<subsidy.length; k++) {
 			//subsidy[k] = 
-			subsidy[k] = total_subsidy*PLANT_SIZE[2]/PLANT_SIZE[k]/10;
+			subsidy[k] = (total_subsidy*PLANT_SIZE[2]/PLANT_SIZE[k]/10)/(double) subsidized_rx;
 		}
 
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {

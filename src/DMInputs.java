@@ -19,13 +19,21 @@ public class DMInputs {
 	
 	static double LWRCapitalCost = 3500; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
-	static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
-	static double[] htgr_capcost_probability = {(double) .2, (double) .6, (double) .2};
+	//static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
+	static double[] HTGRCapitalCost = {3000, 4500, 7000};
+	static double[] htgr_capcost_probability = {(double) 0., (double) 0., (double) 0.};
 	//static double[] htgr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
-	static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200};
-	static double[] sfr_capcost_probability = {(double) .2, (double) .6, (double) .2};
+	//static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200};
+	static double[] SFRCapitalCost = {2200, 3800, 7000};
+	static double[] sfr_capcost_probability = {(double) 0., (double) 0., (double) 1.};
 	
+	//static int[][][] CapitalSubsidy = {
+//		{{0,0,0}},
+//		{{0,1,0}},
+//		{{0,0,1}},
+//		{{0,1,0},{0,0,1},{0,1,1}}
+//	};
 	static int[][] CapitalSubsidy = {{1,0,0},{0,1,0},{0,0,1},{0,1,1}};
 	//static int[][] CapitalSubsidy = {{0,1,0},{0,0,1},{0,1,1}};
 	static double SubsidyAmount = 200; /* $/kWe for SFR */
@@ -53,7 +61,7 @@ public class DMInputs {
 	};
 	
 	public static boolean[] calcFrontEndNP = {true, true, true, true, false};
-	public static boolean[] calcBackEndNP = {true, false, true, true, false, false, false};
+	public static boolean[] calcBackEndNP = {true, false, true, true, false, true, false};
 	
 	public static void main(String args[]) {
 		

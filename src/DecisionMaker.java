@@ -110,6 +110,12 @@ public class DecisionMaker {
 	
 	public void dimensionArrays() {
 		
+		int i=0;
+		for (i=0; i<rep_cost.length; i++) rep_cost[i] = i;
+		for (i=0; i<disp_cost.length; i++) disp_cost[i] = i;
+		for (i=0; i<g_one.length; i++) g_one[i] = i;
+		for (i=0; i<g_two.length; i++) g_two[i] = i;
+		
 		Dat = new double [u_one.length][u_one.length][u_one.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length][3];
 		/* u_one, u_two and u_three have the same max length */
 		NormDat = new double [u_one.length][u_one.length][u_one.length][g_one.length][g_two.length][disp_cost.length][htgr_cost.length][sfr_cost.length][3];
@@ -330,6 +336,7 @@ public class DecisionMaker {
 					for (htgr=0; htgr<htgr_cost.length; htgr++) {
 						for (sfr=0; sfr<sfr_cost.length; sfr++) {
 							double[] temp_double = new double[g_two.length];
+							for (i=0; i<temp_double.length; i++) temp_double[i] = 0.;
 							val = 0.;
 							for (g_tw=0; g_tw<g_two.length; g_tw++) {
 								u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
