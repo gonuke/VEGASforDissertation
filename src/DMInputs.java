@@ -1,15 +1,15 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) .33, (double) .33, (double) .33};
-	static double[] UCriterionWeights = {(double) .75, (double) .25, (double) 0.};
+	static double[] GCriterionWeights = {(double) .333, (double) .333, (double) .333};
+	static double[] UCriterionWeights = {(double) .9, (double) .1, (double) 0.};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
 
 	//static double[] ChosenReprocessingCost = {903,1120,1339};
-	static double[] ChosenReprocessingCost = {1339, 1120, 903};
-	static double[][] DisposalCostOutcomes = {{191,1910},{265,1377},{550,5500},{801,6880}};
+	static double[] ChosenReprocessingCost = {2387, 2171, 1964};
+	static double[][] DisposalCostOutcomes = {{522,2797},{602,4133},{801,6359},{987,8795}};
 	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
 	static double[][] DisposalCostProbabilities = {
 		{(double) 0, (double) .1, (double) .8, (double) .1},
@@ -17,16 +17,16 @@ public class DMInputs {
 		{(double) .05, (double) .25, (double) .69, (double) .1}
 	};
 	
-	static double LWRCapitalCost = 3500; // foak 3500
+	static double LWRCapitalCost = 4100; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
 	//static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
-	static double[] HTGRCapitalCost = {3000, 4500, 7000};
-	static double[] htgr_capcost_probability = {(double) 0., (double) 0., (double) 0.};
+	static double[] HTGRCapitalCost = {3000, 4000, 4500};
+	static double[] htgr_capcost_probability = {(double) .25, (double) .5, (double) 1.};
 	//static double[] htgr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
 	//static double[] SFRCapitalCost = {2700, 3000, 4000}; // foak 4200};
-	static double[] SFRCapitalCost = {2200, 3800, 7000};
-	static double[] sfr_capcost_probability = {(double) 0., (double) 0., (double) 1.};
+	static double[] SFRCapitalCost = {3300, 4155, 5900};
+	static double[] sfr_capcost_probability = {(double) 0.25, (double) .5, (double) .25};
 	
 	//static int[][][] CapitalSubsidy = {
 //		{{0,0,0}},
@@ -55,9 +55,9 @@ public class DMInputs {
 	/* didn't calculate snf transport; hlw vitrification; hlw storage
 	/* snf storage; snf transport; reprocess; snf disposal; hlw vitrification; hlw storage; hlw disposal */
 	static double[][] BackEndProliferation = {
-		{0.8536,1,0.5830,0.8253,1,1,0.9189},
-		{0.8805,1,0.6171,0.8579,1,1,0.9394},
-		{0.8154,1,0.5768,0.8172,1,1,0.9167}
+		{0.8536,1,0.5830,0.8253,1,0.9139,0.9189},
+		{0.8805,1,0.6171,0.8579,1,0.9362,0.9394},
+		{0.8154,1,0.5986,0.8378,1,0.9162,0.9167}
 	};
 	
 	public static boolean[] calcFrontEndNP = {true, true, true, true, false};
