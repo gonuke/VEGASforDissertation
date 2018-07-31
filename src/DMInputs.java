@@ -9,7 +9,7 @@ public class DMInputs {
 
 	//static double[] ChosenReprocessingCost = {903,1120,1339};
 	static double[] ChosenReprocessingCost = {2387, 2171, 1964};
-	static double[][] DisposalCostOutcomes = {{522,2797},{602,4133},{801,6359},{987,8795}};
+	static double[][] DisposalCostOutcomes = {{144,933},{602,4133},{801,6359},{987,8795}};
 	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
 	static double[][] DisposalCostProbabilities = {
 		{(double) 0, (double) .1, (double) .8, (double) .1},
