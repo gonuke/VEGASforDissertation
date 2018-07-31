@@ -808,7 +808,7 @@ public class VEGAS {
 		
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
 		double[] subsidy = {0,0,0};
-		double total_subsidy = 200*10;
+		double total_subsidy = Subsidy*10;
 		for (k=0; k<subsidy.length; k++) {
 			for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 				subsidized_rx +=  CapitalSubsidy[k][n_rx];

@@ -26,11 +26,11 @@ BatchesPerCore					3			3			4
 UMiningAndMillingCost			D			D			0
 UF6ConversionCost				D			D			0
 EnrichmentCost					D			D			D
-FuelFabricationCost				D			3000		2400
+FuelFabricationCost				D			3338		2668
 TransportationToRXCost			D			D			D
 SFStorageCost					D			D			D
 SFTransportationCost			D			D			D
-ReprocessingCost				D			D			3600
+ReprocessingCost				D			D			4002
 SFDisposalCost					D			D			D
 HLWVitrificationCost			D			D			D
 HLWStorageCost					D			D			D
