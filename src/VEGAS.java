@@ -809,16 +809,14 @@ public class VEGAS {
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
 		double[] subsidy = {0,0,0};
 		double total_subsidy = Subsidy*10;
+		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+			subsidized_rx +=  capital_subsidy[n_rx];
+		}
 		for (k=0; k<subsidy.length; k++) {
-			for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-				subsidized_rx +=  CapitalSubsidy[k][n_rx];
+			if (capital_subsidy[k]==1) {
+				subsidy[k] = (total_subsidy*PLANT_SIZE[2]/PLANT_SIZE[k]/10)/(double) subsidized_rx;
 			}
 		}
-		for (k=0; k<subsidy.length; k++) {
-			//subsidy[k] = 
-			subsidy[k] = (total_subsidy*PLANT_SIZE[2]/PLANT_SIZE[k]/10)/(double) subsidized_rx;
-		}
-
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {
 
 			learn = Math.log(NOAKCapitalCost[n_rx]/CAPITALCOST[n_rx]);
@@ -839,7 +837,7 @@ public class VEGAS {
 
 				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
 					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
-					if (i>=(CapitalSubsidyYear-START_YEAR) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
+					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
 						capital_cost -= subsidy[n_rx];
 						facilitiesAddedAfterSubsidy[n_rx]++;
 					}
