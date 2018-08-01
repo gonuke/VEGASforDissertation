@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=false;
+	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,3,3,1,0,3,1,1,1}; /* TODO */
+	static int[] robustInts = {3,3,2,1,0,3,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -3449,6 +3449,7 @@ public class VEGAS {
 					System.out.print("Finished printing decay heat output data file. 'YearlyDecayHeat.txt'" + "\n");
 
 					/* Proliferation Resistance */
+					double prolif=0.;
 					File output_target_proliferationresistance = new File(user_dir+File.separatorChar+"YearlyNuclearSecurityMeasure.txt");
 					if(output_target_proliferationresistance.exists()) output_target_proliferationresistance.delete();
 					FileWriter output_filewriter_proliferationresistance = new FileWriter(output_target_proliferationresistance);
@@ -3459,7 +3460,9 @@ public class VEGAS {
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
 						output_writer_proliferationresistance.print((year+START_YEAR) + " " + LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2]);
 						output_writer_proliferationresistance.print("\n");
+						prolif+=LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][2];
 					}
+					output_writer_proliferationresistance.print("The total proliferation resistance is " + prolif + "\n");
 					output_writer_proliferationresistance.close();
 					System.out.print("Finished printing nuclear security measure output data file. 'YearlyNuclearSecurityMeasure.txt'" + "\n");
 

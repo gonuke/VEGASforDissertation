@@ -2,7 +2,7 @@
 public class DMInputs {
 
 	static double[] GCriterionWeights = {(double) .333, (double) .333, (double) .333};
-	static double[] UCriterionWeights = {(double) 1., (double) 0., (double) 0.};
+	static double[] UCriterionWeights = {(double) 0.25, (double) 0.5, (double) .25};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
