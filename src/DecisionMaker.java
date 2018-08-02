@@ -347,8 +347,8 @@ public class DecisionMaker {
 							g_two_pi[u_o][g_o][disp][htgr][sfr] = g_two[getIndexOfMax(temp_double)];
 							g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 							u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
-							if (u_tw==2 && g_tw!=2) g_two_pi[u_o][g_o][disp][htgr][sfr] = 2;
-							if (u_tw==3 && g_tw!=3) g_two_pi[u_o][g_o][disp][htgr][sfr] = 3;
+							//if (u_tw==2 && g_tw!=2) g_two_pi[u_o][g_o][disp][htgr][sfr] = 2;
+							//if (u_tw==3 && g_tw!=3) g_two_pi[u_o][g_o][disp][htgr][sfr] = 3;
 						}
 					}
 				}
@@ -505,8 +505,8 @@ public class DecisionMaker {
 						g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = g_two[getIndexOfMax(temp_double)];
 						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-						if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-						if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+						//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+						//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 					}
 
 					if (one_info[u_o][1]==1 && one_info[u_o][2]==0) {
@@ -524,11 +524,8 @@ public class DecisionMaker {
 							g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length] = g_two[getIndexOfMax(temp_double)];
 							g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-							if (u_tw==2 && g_tw!=2) {
-								System.out.print("always");
-								g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-							}
-							if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+							//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+							//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 						}
 					}
 					
@@ -547,11 +544,8 @@ public class DecisionMaker {
 							g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr] = g_two[getIndexOfMax(temp_double)]; 
 							g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-							if (u_tw==2 && g_tw!=2) {
-								System.out.print("always");
-								g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-							}
-							if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+							//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+							//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 						}
 					}
 					
@@ -561,11 +555,8 @@ public class DecisionMaker {
 								g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 								g_two_hedge[g_o][disp][u_o][htgr][sfr] = g_tw;
 								u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-								if (u_tw==2 && g_tw!=2) {
-									System.out.print("always");
-									g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-								}
-								if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+								//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
+								//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 							}
 						}
 					}
@@ -835,8 +826,8 @@ public class DecisionMaker {
 					hedge[5] = g_tw;
 					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; 
 					hedge[6] = u_tw;
-					if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-					if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
+					//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
+					//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 						hedge[7] = htgr_cost.length; 
 						hedge[8] = sfr_cost.length;
@@ -889,8 +880,8 @@ public class DecisionMaker {
 						hedge[5] = g_tw;
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; 
 						hedge[6] = u_tw;
-						if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-						if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
+						//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
+						//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							hedge[7] = htgr; 
 							hedge[8] = sfr_cost.length;
@@ -920,8 +911,8 @@ public class DecisionMaker {
 						hedge[5] = g_tw;
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; 
 						hedge[6] = u_tw;
-						if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-						if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
+						//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
+						//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							hedge[7] = htgr_cost.length; 
 							hedge[8] = sfr;
@@ -952,8 +943,8 @@ public class DecisionMaker {
 							hedge[5] = g_tw;
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
 							hedge[6] = u_tw;
-							if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-							if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
+							//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
+							//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 							hedge[7] = htgr; 
 							hedge[8] = sfr;
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 

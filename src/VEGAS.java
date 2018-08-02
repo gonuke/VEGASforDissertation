@@ -31,7 +31,7 @@ public class VEGAS {
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,0,0,1,0,3,1,1,1}; /* TODO */
+	static int[] robustInts = {0,0,0,0,0,0,0,0,0}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -804,6 +804,7 @@ public class VEGAS {
 		int[] totalFacilitiesAdded = new int[REACTORNAMES.length];
 		int[] facilitiesAddedAfterSubsidy = {0,0,0};
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
+		double saved = 0.;
 		double[] yearly_saved = {0,0,0};
 		int subsidized_rx=0;
 		
@@ -834,16 +835,18 @@ public class VEGAS {
 			}
 
 			for (i=1; i<END_YEAR-START_YEAR+1; i++) {
-
+				boolean subsidized_this_year = false;
 				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
 					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
 					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
 						facilitiesAddedAfterSubsidy[n_rx]++;
 					}
 						for (j=i; j<i+NewReactorLifetime; j++) {
+							saved = yearly_saved[n_rx]/(double) subsidized_rx;
 							yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
-							if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
-								yearly_reactor[j] -= yearly_saved[n_rx];
+							if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1 && subsidized_this_year==false) {
+								subsidized_this_year = true;
+								yearly_reactor[j] -= saved;
 							}
 							if (j==END_YEAR-START_YEAR) break;
 						}
@@ -3077,11 +3080,11 @@ public class VEGAS {
 
 								LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision] = yearlyAnnualReports();
 
-								for (int m=0; m<3; m++) {
-									for (int year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-										metrics[m] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][m];
-									}
-								}
+//								for (int m=0; m<3; m++) {
+//									for (int year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+//										metrics[m] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][final_reactor_build_decision][year][m];
+//									}
+//								}
 
 								for (int i = 0; i < ActinideWasteStream.length; i++) System.arraycopy(ma_waste_stream[i], 0, ActinideWasteStream[i], 0, ma_waste_stream[i].length);
 
@@ -3898,7 +3901,7 @@ public class VEGAS {
 
 			if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) {
 				if (total_energy > EPS) {
-					coe[i] = (yearly_fe+yearly_reactor+yearly_om)/(total_energy*100);///total_energy*100;
+					coe[i] = (yearly_fe+yearly_be+yearly_reactor+yearly_om)/(total_energy*100);///total_energy*100;
 				} else {
 					coe[i] = 0;
 				}
