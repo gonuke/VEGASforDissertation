@@ -31,7 +31,7 @@ DisposalCostGrowthCoefficient=0.0		# need to document TODO
 
 ##### EXOGENOUS DEMAND FOR NUCLEAR ENERGY #####
 InitialGenerationCapacity=100.		# GW(e): existing at StartYear
-YearInitialFleetBeginsRetiring=2020
+YearInitialFleetBeginsRetiring=2018
 YearInitialFleetFinishesRetiring=2040	# initial fleet retires at constant rate during this interval
 InitialCapacityData[0]={
 	Type=0
@@ -65,19 +65,19 @@ ReprocessingCapacity[0]={		# tier 0 reprocessing capacity
 		Capacity=800.0
 		}
 	AddCapacity[5]={
-		Year=2084
+		Year=2079
 		Capacity=950.0
 		}
 	AddCapacity[6]={
-		Year=2085
+		Year=2080
 		Capacity=1250.0
 		}
 	AddCapacity[7]={
-		Year=2086
+		Year=2081
 		Capacity=1700.0
 		}
 	AddCapacity[8]={
-		Year=2087
+		Year=2082
 		Capacity=2300.0
 		}
 	AddCapacity[9]={

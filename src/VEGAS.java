@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=true;
+	static boolean only_one=false;
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,3,2,1,0,3,1,1,1}; /* TODO */
+	static int[] robustInts = {0,0,0,1,0,3,1,1,1}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -804,18 +804,18 @@ public class VEGAS {
 		int[] totalFacilitiesAdded = new int[REACTORNAMES.length];
 		int[] facilitiesAddedAfterSubsidy = {0,0,0};
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
+		double[] yearly_saved = {0,0,0};
 		int subsidized_rx=0;
 		
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
 		double[] subsidy = {0,0,0};
-		double total_subsidy = Subsidy*10;
 		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 			subsidized_rx +=  capital_subsidy[n_rx];
 		}
-		for (k=0; k<subsidy.length; k++) {
-			if (capital_subsidy[k]==1) {
-				subsidy[k] = (total_subsidy*PLANT_SIZE[2]/PLANT_SIZE[k]/10)/(double) subsidized_rx;
-			}
+		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+			subsidy[n_rx] = (Subsidy*PLANT_SIZE[2]/PLANT_SIZE[n_rx])/(double) subsidized_rx;
+			yearly_saved[n_rx] = PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*CAPITALCOST[n_rx]*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+			yearly_saved[n_rx] -=PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*(CAPITALCOST[n_rx]-subsidy[n_rx])*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
 		}
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {
 
@@ -838,16 +838,18 @@ public class VEGAS {
 				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
 					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
 					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
-						capital_cost -= subsidy[n_rx];
 						facilitiesAddedAfterSubsidy[n_rx]++;
 					}
-					for (j=i; j<i+NewReactorLifetime; j++) {
-						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
-						if (j==END_YEAR-START_YEAR) break;
+						for (j=i; j<i+NewReactorLifetime; j++) {
+							yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+							if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
+								yearly_reactor[j] -= yearly_saved[n_rx];
+							}
+							if (j==END_YEAR-START_YEAR) break;
+						}
+						totalFacilitiesAdded[n_rx]++;
 					}
-					totalFacilitiesAdded[n_rx]++;
 				}
-			}
 
 		}
 		return(yearly_reactor);
@@ -3679,7 +3681,7 @@ public class VEGAS {
 		/* COE metric for G and U */
 		double[] coe=new double[END_YEAR-START_YEAR+1];
 		/* Waste disposal metric for G */
-		double[] decay_heat=new double[END_YEAR-START_YEAR+1];
+		double[] heat_load=new double[END_YEAR-START_YEAR+1];
 		/* To pass objective function values to main */
 		double[][] yearlyLeafValues = new double[(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)][4];
 
@@ -3851,8 +3853,8 @@ public class VEGAS {
 					if(sf_dd > EPS) proliferation_resistance[i]+=getBackEndDDProliferationResistance(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
 					if(sf_dd > EPS) mass_throughput[i]+=getBackEndDDMass(j,sf_dd/SFGenerated[j][i]*genCap[j][i]);
 
-					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS_DD[3]*(sf_dd/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
-					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) decay_heat[i]+=BACKENDMASS[j][6]*(SFReprocessed[j][i]/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
+					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) heat_load[i]+=decay_heat[j][0]*BACKENDMASS_DD[3]*(sf_dd/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
+					if (i<=END_YEAR-START_YEAR+1-NewReactorLifetime) heat_load[i]+=decay_heat[j][1]*BACKENDMASS[j][6]*(SFReprocessed[j][i]/SFGenerated[j][i])*genCap[j][i]*capacityToMass(j);
 
 					if(SFReprocessed[j][i] > EPS) yearly_be+=augmentBackEndRepCharges(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i],i+START_YEAR,yearSFReprocessed[j][i]);
 					if(SFReprocessed[j][i] > EPS) proliferation_resistance[i]+=getBackEndRepProliferationResistance(j,SFReprocessed[j][i]/SFGenerated[j][i]*genCap[j][i]);
@@ -3910,7 +3912,7 @@ public class VEGAS {
 		 */
 		for (i=0; i<END_YEAR-START_YEAR+1-NewReactorLifetime; i++) {
 			yearlyLeafValues[i][0] = coe[i];
-			yearlyLeafValues[i][1] = decay_heat[i];
+			yearlyLeafValues[i][1] = heat_load[i];
 			yearlyLeafValues[i][2] = proliferation_resistance[i]/mass_throughput[i];
 		}
 
