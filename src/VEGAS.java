@@ -31,7 +31,7 @@ public class VEGAS {
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {0,0,0,0,0,0,0,0,0}; /* TODO */
+	static int[] robustInts = {3,2,0,0,1,0,0,0,0}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -804,20 +804,48 @@ public class VEGAS {
 		int[] totalFacilitiesAdded = new int[REACTORNAMES.length];
 		int[] facilitiesAddedAfterSubsidy = {0,0,0};
 		double[] yearly_reactor = new double[END_YEAR-START_YEAR+1];
-		double saved = 0.;
-		double[] yearly_saved = {0,0,0};
+		double saved[] = {0.,0.,0.};
+		double yearly_saved = 0.;
 		int subsidized_rx=0;
 		
 		// if it's capital subsidy year = 2045 - 2055, then apply the capital subsidy to HTGRs or SFRs accordingly - else apply the remaining capital subsidy to LWRs
-		double[] subsidy = {0,0,0};
+		double subsidy = 0.;
 		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
 			subsidized_rx +=  capital_subsidy[n_rx];
 		}
-		for (n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-			subsidy[n_rx] = (Subsidy*PLANT_SIZE[2]/PLANT_SIZE[n_rx])/(double) subsidized_rx;
-			yearly_saved[n_rx] = PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*CAPITALCOST[n_rx]*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
-			yearly_saved[n_rx] -=PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*(CAPITALCOST[n_rx]-subsidy[n_rx])*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+		
+		boolean delay_sub=false; 
+		if (capital_subsidy[0]==1) delay_sub=true;
+		
+		int[] num_sub={0,0,0};
+		boolean[][] sub_this_one = new boolean[REACTORNAMES.length][END_YEAR-START_YEAR+1];
+		if (!delay_sub) {
+			for (n_rx=1; n_rx<REACTORNAMES.length; n_rx++) {
+				for (i=CapitalSubsidyYear-START_YEAR; i<CapitalSubsidyYear-START_YEAR+10; i++) {
+					if (facilitiesAdded[n_rx][i]>0) {
+						if (capital_subsidy[n_rx]==1 && num_sub[0]<10) {
+							sub_this_one[n_rx][i]=true;
+						}
+						num_sub[n_rx]++;
+					}
+				}
+			}
+		} else {
+			for (i=CapitalSubsidyYear-START_YEAR+10; i<CapitalSubsidyYear-START_YEAR+20; i++) {
+				if (facilitiesAdded[0][i]>0) {
+					if (capital_subsidy[0]==1 && num_sub[0]<10) sub_this_one[0][i]=true;
+					num_sub[0]++;
+				}
+			}
 		}
+
+		// want the subsidy to be proportional to SFR
+		subsidy = (Subsidy)/(double) subsidized_rx;
+		yearly_saved = PLANT_SIZE[2]*Math.pow((1+effective_dr),ConstructionTime)*CAPITALCOST[2]*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+		yearly_saved -=PLANT_SIZE[2]*Math.pow((1+effective_dr),ConstructionTime)*(CAPITALCOST[2]-subsidy)*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+
+		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) saved[n_rx] = yearly_saved*((double) 10 / num_sub[n_rx]);
+		
 		for (n_rx=0; n_rx<CAPITALCOST.length; n_rx++) {
 
 			learn = Math.log(NOAKCapitalCost[n_rx]/CAPITALCOST[n_rx]);
@@ -835,24 +863,27 @@ public class VEGAS {
 			}
 
 			for (i=1; i<END_YEAR-START_YEAR+1; i++) {
-				boolean subsidized_this_year = false;
-				for (k=0; k<facilitiesAdded[n_rx][i]; k++) {
+
+				for (k=0; k<facilitiesAdded[n_rx][i]; k++) { // if k==0, then it's the first reactor of this time in this year
+
 					capital_cost = (totalFacilitiesAdded[n_rx]>=8) ? NOAKCapitalCost[n_rx] : CAPITALCOST[n_rx]*Math.pow(totalFacilitiesAdded[n_rx]+1,learn);
-					if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1) {
-						facilitiesAddedAfterSubsidy[n_rx]++;
-					}
-						for (j=i; j<i+NewReactorLifetime; j++) {
-							saved = yearly_saved[n_rx]/(double) subsidized_rx;
-							yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
-							if (i>=(CapitalSubsidyYear-START_YEAR) && i<=(CapitalSubsidyYear-START_YEAR+10) && facilitiesAddedAfterSubsidy[n_rx]<10 && capital_subsidy[n_rx]==1 && subsidized_this_year==false) {
-								subsidized_this_year = true;
-								yearly_reactor[j] -= saved;
-							}
-							if (j==END_YEAR-START_YEAR) break;
+
+					for (j=i; j<i+NewReactorLifetime; j++) {
+						
+						yearly_reactor[j] += PLANT_SIZE[n_rx]*Math.pow((1+effective_dr),ConstructionTime)*capital_cost*(effective_dr)*Math.pow((1+effective_dr),NewReactorLifetime)/(Math.pow((1+effective_dr),NewReactorLifetime)-1.)*1.1;
+						if (sub_this_one[n_rx][i]) {
+							yearly_reactor[j] -= saved[n_rx];
+							sub_this_one[n_rx][i] = false;
+							System.out.print("we're subbing reactor " + n_rx + " in year " + (i+START_YEAR) + " by " + saved[n_rx] + ".\n");
+							//System.out.print("the val of k is " + k + ".\n");
 						}
-						totalFacilitiesAdded[n_rx]++;
+						
+						if (j==END_YEAR-START_YEAR) break;
+						
 					}
+
 				}
+			}
 
 		}
 		return(yearly_reactor);
