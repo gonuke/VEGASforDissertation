@@ -1,8 +1,8 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) 0.333, (double) 0.333, (double) .333};
-	static double[] UCriterionWeights = {(double) 1., (double) 0., (double) 0.};
+	static double[] GCriterionWeights = {(double) 0., (double) 0., (double) 1.};
+	static double[] UCriterionWeights = {(double) 1., (double) 0., (double) 0.0};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
@@ -12,9 +12,9 @@ public class DMInputs {
 	static double[][] DisposalCostOutcomes = {{144,933},{602,4133},{801,6359},{987,8795}};
 	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
 	static double[][] DisposalCostProbabilities = {
-		{(double) 0, (double) .25, (double) .5, (double) .25},
+		{(double) .1, (double) .5, (double) .4, (double) 0.},
 		{(double) .05, (double) .3, (double) .65, (double) .1},
-		{(double) .1, (double) .5, (double) .4, (double) 0.}
+		{(double) 0, (double) .25, (double) .5, (double) .25}
 	};
 //	static double[][] DisposalCostProbabilities = {
 //		{(double) 0, (double) .25, (double) .5, (double) .25},
@@ -67,7 +67,7 @@ public class DMInputs {
 	};
 	
 	public static boolean[] calcFrontEndNP = {true, true, true, true, false};
-	public static boolean[] calcBackEndNP = {true, false, true, true, false, true, false};
+	public static boolean[] calcBackEndNP = {true, false, true, true, false, true, true};
 	
 	public static void main(String args[]) {
 		
