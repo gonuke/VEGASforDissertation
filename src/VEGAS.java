@@ -874,7 +874,7 @@ public class VEGAS {
 						if (sub_this_one[n_rx][i]) {
 							yearly_reactor[j] -= saved[n_rx];
 							sub_this_one[n_rx][i] = false;
-							System.out.print("we're subbing reactor " + n_rx + " in year " + (i+START_YEAR) + " by " + saved[n_rx] + ".\n");
+							//System.out.print("we're subbing reactor " + n_rx + " in year " + (i+START_YEAR) + " by " + saved[n_rx] + ".\n");
 							//System.out.print("the val of k is " + k + ".\n");
 						}
 						

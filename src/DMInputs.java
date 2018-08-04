@@ -2,7 +2,7 @@
 public class DMInputs {
 
 	static double[] GCriterionWeights = {(double) 0.333, (double) 0.333, (double) .333};
-	static double[] UCriterionWeights = {(double) .9, (double) 0.1, (double) 0.};
+	static double[] UCriterionWeights = {(double) 1., (double) 0., (double) 0.};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
@@ -22,11 +22,11 @@ public class DMInputs {
 //		{(double) 0, (double) .25, (double) .5, (double) .25}
 //	};
 	
-	static double LWRCapitalCost = 4100; // foak 3500
+	static double LWRCapitalCost = 4177; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};
 	//static double[] HTGRCapitalCost = {2700, 3000, 3500}; //foak 4500
-	//static double[] HTGRCapitalCost = {3000, 4000, 4500};
-	static double[] HTGRCapitalCost = {3580, 5370, 8950};
+	static double[] HTGRCapitalCost = {3000, 4000, 4500};
+	//static double[] HTGRCapitalCost = {3580, 5370, 8950};
 	static double[] htgr_capcost_probability = {(double) .25, (double) .5, (double) .25};
 	//static double[] htgr_capcost_probability = {(double) (1/3), (double) (1/3), (double) (1/3)};
 	//static double[] SFRCapitalCost = {1500, 1750, 2700};
