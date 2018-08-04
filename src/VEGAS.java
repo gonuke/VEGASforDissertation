@@ -881,7 +881,7 @@ public class VEGAS {
 						if (j==END_YEAR-START_YEAR) break;
 						
 					}
-
+					totalFacilitiesAdded[n_rx]++;
 				}
 			}
 
