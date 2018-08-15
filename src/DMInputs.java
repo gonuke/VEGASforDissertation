@@ -1,8 +1,9 @@
 
 public class DMInputs {
 
-	static double[] GCriterionWeights = {(double) 0., (double) 0., (double) 1.};
-	static double[] UCriterionWeights = {(double) 1., (double) 0., (double) 0.0};
+	// Cost of Electricity; Decay Heat; Proliferation Resistance
+	static double[] GCriterionWeights = {(double) 0.333, (double) 0.333, (double) 0.333};
+	static double[] UCriterionWeights = {(double) .9, (double) 0.1, (double) 0};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
 //	static double[][] DisposalCostOutcomes = {{600,3000},{800,4000},{1000,5000}};
@@ -11,16 +12,16 @@ public class DMInputs {
 	static double[] ChosenReprocessingCost = {2387, 2171, 1964};
 	static double[][] DisposalCostOutcomes = {{144,933},{602,4133},{801,6359},{987,8795}};
 	/* disposal cost needs to be anti-correlated with reprocessing costs -- inverse in amount allowed for R&D */
-	static double[][] DisposalCostProbabilities = {
-		{(double) .1, (double) .5, (double) .4, (double) 0.},
-		{(double) .05, (double) .3, (double) .65, (double) .1},
-		{(double) 0, (double) .25, (double) .5, (double) .25}
-	};
 //	static double[][] DisposalCostProbabilities = {
-//		{(double) 0, (double) .25, (double) .5, (double) .25},
-//		{(double) 0, (double) .25, (double) .5, (double) .25},
+//		{(double) .1, (double) .5, (double) .4, (double) 0.},
+//		{(double) .05, (double) .3, (double) .65, (double) .1},
 //		{(double) 0, (double) .25, (double) .5, (double) .25}
 //	};
+	static double[][] DisposalCostProbabilities = {
+		{(double) .1, (double) .35, (double) .4, (double) .15},
+		{(double) .05, (double) .3, (double) .45, (double) .2},
+		{(double) 0, (double) .25, (double) .5, (double) .25}
+	};
 	
 	static double LWRCapitalCost = 4177; // foak 3500
 	//static double[] HTGRCapitalCost = {1800, 2400, 3000};

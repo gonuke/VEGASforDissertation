@@ -27,11 +27,11 @@ public class VEGAS {
 	static boolean[] RecyclingThisYear; // when this is true, use the available capacity as necessary -- otherwise, don't recycle when the try to build doesn't include a reactor requiring separated actinides!
 	static boolean boar=true;
 
-	static boolean only_one=false;
+	static boolean only_one=true;
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,2,0,0,1,0,0,0,0}; /* TODO */
+	static int[] robustInts = {3,3,2,0,1,0,0,0,0}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -3502,6 +3502,7 @@ public class VEGAS {
 					output_writer_proliferationresistance.close();
 					System.out.print("Finished printing nuclear security measure output data file. 'YearlyNuclearSecurityMeasure.txt'" + "\n");
 
+					double HTGRReprocessed = 0.;
 					/* characterizing the waste generated and waste reprocessed */
 					File output_target_wastequantities = new File(user_dir+File.separatorChar+"WasteQuantities.txt");
 					if (output_target_wastequantities.exists()) output_target_wastequantities.delete();
@@ -3511,15 +3512,23 @@ public class VEGAS {
 					output_writer_wastequantities.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + final_reactor_build_decision + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + "\n");
 					output_writer_wastequantities.print("year lwr_wastegenerated lwr_wastereprocessed_byyear lwr_wastereprocessed htgr_wastegenerated htgr_wastereprocessed_byyear htgr_wastereprocessed sfr_wastegenerated sfr_wastereprocessed_byyear sfr_wastereprocessed" + "\n");
 					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
-						output_writer_wastequantities.print((year+START_YEAR) + " ");
-						for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-							output_writer_wastequantities.print((SFGenerated[n_rx][year]/1000) + " " + (SFReprocessedByReactor[n_rx][year]/1000) + " " + (SFReprocessed[n_rx][year]/1000) + " ");
-						}
-						//output_writer_wastequantities.print((SFReprocessedByTier[0][year]/1000));
-						output_writer_wastequantities.print("\n");
+						HTGRReprocessed += (SFReprocessedByReactor[1][year]/1000);
 					}
+					output_writer_wastequantities.print(HTGRReprocessed + "\n");
+					
+
+					/* uncomment when done */
+//					for (year=0; year<END_YEAR-START_YEAR+1-NewReactorLifetime; year++) {
+//						output_writer_wastequantities.print((year+START_YEAR) + " ");
+//						for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+//							output_writer_wastequantities.print((SFGenerated[n_rx][year]/1000) + " " + (SFReprocessedByReactor[n_rx][year]/1000) + " " + (SFReprocessed[n_rx][year]/1000) + " ");
+//						}
+//						//output_writer_wastequantities.print((SFReprocessedByTier[0][year]/1000));
+//						output_writer_wastequantities.print("\n");
+//					}
 					output_writer_wastequantities.close();
 					System.out.print("Finished printing waste quantities output data file. 'WasteQuantities.txt'" + "\n");
+					
 
 					File output_target_generationcapacity = new File(user_dir+File.separatorChar+"GeneratingCapacity.txt");
 					if (output_target_generationcapacity.exists()) output_target_generationcapacity.delete();

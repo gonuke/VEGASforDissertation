@@ -15,8 +15,6 @@ import java.util.StringTokenizer;
 
 public class DecisionMaker {
 
-	static boolean fuck=false;
-	
 	/* decision criteria weighting */
 	static double[] u_weight = DMInputs.getUWeighting();
 	static double[] g_weight = DMInputs.getGWeighting();
@@ -87,26 +85,98 @@ public class DecisionMaker {
 	static int[][] u_one_hedge;
 	static int g_one_hedge;
 	
+	static boolean heat_map = true;
 	
 	public DecisionMaker() {
-		
+
 	}
 	
 	public static void main(String args[]) {
-		DecisionMaker decide = new DecisionMaker();
-		decide.dimensionArrays();
-		/* get the data, then normalize it */
-		decide.loadData();
-		decide.normalizeData();
-		/* get the perfect info strategies based on that info */
-		decide.getPerfectInformationStrategies();
-		/* get the hedging strategies */
-		decide.getHedgingStrategies();
-		/* print the hedging strategy results */
-		decide.printHedgingStrategies();
-		/* print the perfect information strategies */
-		decide.printPerfectInformationStrategies();
+
+		if (!heat_map) {
+			DecisionMaker decide = new DecisionMaker();
+			decide.makeDecisions();	
+		}
+		
+		if (heat_map) {
+			double tot = 1.;
+			double quan = (double) 1 / (double) 10;
+			int quantiles = 10;
+			int sims=0, sim_no=1;
+			
+			for (int i=0; i<quantiles; i++) for (int j=i; j<quantiles; j++) sims++;
+
+			try {
+
+				String user_dir = System.getProperty("user.dir");
+				File output_target = new File(user_dir+File.separatorChar+"HeatMapResults.txt");
+
+				if(output_target.exists()) output_target.delete();
+				FileWriter output_filewriter = new FileWriter(output_target);
+				PrintWriter output_writer = new PrintWriter(output_filewriter);
+				
+				//output_writer.print("disp_cost htgr_cost sfr_cost u_first u_second u_last g_one g_two_sub");
+				output_writer.print("w_coe w_dh w_pr g_one thermal");
+				output_writer.print("\n");
+				
+				/* scoping over the range of U's weightings */
+				for (int i=0; i<quantiles; i++) {
+					for (int j=i; j<quantiles; j++) {
+						
+						System.out.print("Scoping heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+						
+						g_weight[0] = quan*i;
+						g_weight[1] = quan*(j-i);
+						g_weight[2] = tot - g_weight[0] - g_weight[1];
+						
+						for (int k=0; k<3; k++) output_writer.print(g_weight[k] + " ");
+						
+						DecisionMaker decide = new DecisionMaker();
+						decide.rangeOfDecisions();	
+						
+						output_writer.print(g_one_hedge + " ");
+						output_writer.print(decide.getHeatMap());
+						output_writer.print("\n");
+					}
+				}
+			
+				output_writer.close();
+				
+			} catch (IOException e) {
+				System.out.print("Error writing heat map results");
+			}
+			System.out.print("Finishing printing heat map results");
+			
+		}
+
+		
 	}	
+	
+	public void rangeOfDecisions() {
+		dimensionArrays();
+		/* get the data, then normalize it */
+		loadData();
+		normalizeData();
+		/* get the perfect info strategies based on that info */
+		getPerfectInformationStrategies();
+		/* get the hedging strategies */
+		getHedgingStrategies();
+	}
+	
+	public void makeDecisions() {
+		dimensionArrays();
+		/* get the data, then normalize it */
+		loadData();
+		normalizeData();
+		/* get the perfect info strategies based on that info */
+		getPerfectInformationStrategies();
+		/* get the hedging strategies */
+		getHedgingStrategies();
+		/* print the hedging strategy results */
+		printHedgingStrategies();
+		/* print the perfect information strategies */
+		printPerfectInformationStrategies();
+	}
 	
 	public void dimensionArrays() {
 		
@@ -272,7 +342,7 @@ public class DecisionMaker {
 		} catch (IOException e) {
 			System.out.print("Error writing normalized data values");
 		}
-		System.out.print("Finished printing normalized data" + "\n");
+		if (!heat_map) System.out.print("Finished printing normalized data" + "\n");
 	}	
 	
 	public void getPerfectInformationStrategies() {
@@ -370,6 +440,7 @@ public class DecisionMaker {
 							temp_double[u_o] = val;
 						}
 						u_one_pi[g_o][disp][htgr][sfr] = u_one[getIndexOfMax(temp_double)];
+						//if (u_one_pi[g_o][disp][htgr][sfr] == 
 					}
 				}
 			}
@@ -505,8 +576,6 @@ public class DecisionMaker {
 						g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = g_two[getIndexOfMax(temp_double)];
 						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-						//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-						//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 					}
 
 					if (one_info[u_o][1]==1 && one_info[u_o][2]==0) {
@@ -524,8 +593,6 @@ public class DecisionMaker {
 							g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length] = g_two[getIndexOfMax(temp_double)];
 							g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-							//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-							//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 						}
 					}
 					
@@ -544,8 +611,6 @@ public class DecisionMaker {
 							g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr] = g_two[getIndexOfMax(temp_double)]; 
 							g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length];
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-							//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-							//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 						}
 					}
 					
@@ -555,8 +620,6 @@ public class DecisionMaker {
 								g_tw = g_two_pi[u_o][g_o][disp][htgr][sfr];
 								g_two_hedge[g_o][disp][u_o][htgr][sfr] = g_tw;
 								u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw];
-								//if (u_tw==2 && g_tw!=2) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
-								//if (u_tw==3 && g_tw!=3) g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length] = u_tw;
 							}
 						}
 					}
@@ -767,9 +830,8 @@ public class DecisionMaker {
 				}
 			
 			}
-			g_one_hedge = g_one[getIndexOfMax(temp_double)];
-
 		}
+		g_one_hedge = g_one[getIndexOfMax(temp_double)];
 
 	}
 	
@@ -826,8 +888,6 @@ public class DecisionMaker {
 					hedge[5] = g_tw;
 					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; 
 					hedge[6] = u_tw;
-					//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-					//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 						hedge[7] = htgr_cost.length; 
 						hedge[8] = sfr_cost.length;
@@ -880,8 +940,6 @@ public class DecisionMaker {
 						hedge[5] = g_tw;
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; 
 						hedge[6] = u_tw;
-						//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-						//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 						if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							hedge[7] = htgr; 
 							hedge[8] = sfr_cost.length;
@@ -911,8 +969,6 @@ public class DecisionMaker {
 						hedge[5] = g_tw;
 						u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; 
 						hedge[6] = u_tw;
-						//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-						//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 						if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
 							hedge[7] = htgr_cost.length; 
 							hedge[8] = sfr;
@@ -943,8 +999,6 @@ public class DecisionMaker {
 							hedge[5] = g_tw;
 							u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
 							hedge[6] = u_tw;
-							//if (u_tw==2 && g_tw!=u_tw) hedge[5] = u_tw;
-							//if (u_tw==3 && g_tw!=u_tw) hedge[5] = u_tw;
 							hedge[7] = htgr; 
 							hedge[8] = sfr;
 							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
@@ -1030,6 +1084,152 @@ public class DecisionMaker {
 			}
 		}
 		return(best);
+	}
+	
+	public double getHeatMap() {
+
+		int[] hedge = new int[10];
+		/* 0: g_one; 1: disp; 2: u_one; 3: htgr_one; 4: sfr_one; 5: g_two; 6: u_two; 7: htgr_two; 8: sfr_two; 9: u_three */
+		int g_o;
+		int disp;
+		int u_o, u_tw, u_th, htgr, sfr;
+		int g_tw;
+		double prob = 0.;
+		double t_prob = 0.;
+		
+		int[][] one_info = {
+				{0,0,0}, {0,1,0}, {0,0,1}, {0,1,1}
+		};
+
+		int[][][] two_info = {
+				// u_stage_one = 0 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,1,0},{0,0,1},{0,1,1}},
+				// u_stage_one = 1 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,0,0},{0,0,1},{0,0,1}},
+				// u_stage_one = 2 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,1,0},{0,0,0},{0,1,0}},
+				// u_stage_one = 3 {u_stage_two = 0, 1, 2, 3}
+				{{0,0,0},{0,0,0},{0,0,0},{0,0,0}}
+		};
+		
+		g_o = g_one_hedge; 
+		hedge[0] = g_one_hedge;
+		
+		for (disp=0; disp<disp_cost.length; disp++) {
+			
+			u_o = u_one_hedge[g_o][disp]; 
+			
+			if (one_info[u_o][1]==0 && one_info[u_o][2]==0) { /* LWR; two_info can take values of {0,0,0}, {0,1,0}, {0,0,1}, {0,1,1} */
+				
+				g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length]; 
+				u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr_cost.length][g_tw]; 
+				if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+					u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][0]; 
+					if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]; 
+					t_prob += disp_prob[g_o][disp];
+				}
+				
+				if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						hedge[7] = htgr; 
+						hedge[8] = sfr_cost.length;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; 
+						if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]; 
+						t_prob += disp_prob[g_o][disp]*htgr_prob[htgr];
+					}
+				}
+				
+				if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+					for (sfr=0; sfr<sfr_cost.length; sfr++) {
+						hedge[7] = htgr_cost.length; 
+						hedge[8] = sfr;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; 
+						if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*sfr_prob[sfr]; 
+						t_prob += disp_prob[g_o][disp]*htgr_prob[sfr];
+					}
+				}
+				if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==1) { /* two_info {0,1,1} */
+					for (htgr=0; htgr<htgr_cost.length; htgr++) {
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							hedge[7] = htgr; 
+							hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+							if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr]; 
+							t_prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+						}
+					}
+				}
+			}
+
+			if (one_info[u_o][1]==1 && one_info[u_o][2]==0) { /* HTGR; two_info can only take values of {0,0,0} and {0,0,1} */
+				for (htgr=0; htgr<htgr_cost.length; htgr++) {
+					hedge[3] = htgr; 
+					hedge[4] = sfr_cost.length;
+					g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length]; 
+					u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr_cost.length][g_tw]; 
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+						hedge[7] = htgr; 
+						hedge[8] = sfr_cost.length;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][0]; 
+						if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]; 
+						t_prob += disp_prob[g_o][disp]*htgr_prob[htgr];
+					}
+					if (two_info[u_o][u_tw][1]==0 && two_info[u_o][u_tw][2]==1) { /* two_info {0,0,1} */
+						for (sfr=0; sfr<sfr_cost.length; sfr++) {
+							hedge[7] = htgr; 
+							hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+							if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr]; 
+							t_prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+						}
+					}
+				}
+			}
+
+			if (one_info[u_o][1]==0 && one_info[u_o][2]==1) { /* SFR recyling LWR fuel; two_info can only take values of {0,0,0} and {0,1,0} */
+				for (sfr=0; sfr<sfr_cost.length; sfr++) {
+					hedge[3] = htgr_cost.length; 
+					hedge[4] = sfr;
+					g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; 
+					u_tw = u_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr][g_tw]; 
+					if (two_info[u_o][u_tw][1] == 0 && two_info[u_o][u_tw][2]==0) { /* two_info {0,0,0} */
+						hedge[7] = htgr_cost.length; 
+						hedge[8] = sfr;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][0][sfr]; 
+						if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*sfr_prob[sfr]; 
+						t_prob += disp_prob[g_o][disp]*sfr_prob[sfr];
+					}
+					if (two_info[u_o][u_tw][1]==1 && two_info[u_o][u_tw][2]==0) { /* two_info {0,1,0} */
+						for (htgr=0; htgr<htgr_cost.length; htgr++) {
+							hedge[7] = htgr; 
+							hedge[8] = sfr;
+							u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+							if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]; 
+							t_prob += disp_prob[g_o][disp]*htgr_prob[htgr];
+						}
+					}
+				}
+			}
+
+			if (one_info[u_o][1]==1 && one_info[u_o][2]==1) { /* SFR recycling HTGR fuel; two_info can only take values of {0,0,0} */
+				for (htgr=0; htgr<htgr_cost.length; htgr++) {
+					for (sfr=0; sfr<sfr_cost.length; sfr++) {
+						hedge[3] = htgr; 
+						hedge[4] = sfr;
+						g_tw = g_two_hedge[g_o][disp][u_o][htgr_cost.length][sfr]; 
+						hedge[5] = g_tw;
+						u_tw = u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw];
+						hedge[6] = u_tw;
+						hedge[7] = htgr; 
+						hedge[8] = sfr;
+						u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr]; 
+						if (u_th==0 || u_th==1) prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr]; 
+						t_prob += disp_prob[g_o][disp]*htgr_prob[htgr]*sfr_prob[sfr];
+					}
+				}
+			}
+		}
+		return(prob);
 	}
 	
 } // DecisionMaker class
