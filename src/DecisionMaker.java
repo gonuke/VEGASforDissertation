@@ -16,8 +16,8 @@ import java.util.StringTokenizer;
 public class DecisionMaker {
 
 	/* decision criteria weighting */
-	static double[] u_weight = DMInputs.getUWeighting();
-	static double[] g_weight = DMInputs.getGWeighting();
+	static double[] u_weight = DMInputs.getUWeighting(); // coe; decay heat; proliferation resistance
+	static double[] g_weight = DMInputs.getGWeighting(); // coe; decay heat; proliferation resistance
 	
 	/* U's strategies */
 	static int[] u_one = {0,1,2,3};
@@ -108,39 +108,69 @@ public class DecisionMaker {
 
 			try {
 
+				double[][] gmap = new double[quantiles][quantiles];
+				double[][] therm = new double[quantiles][quantiles];
+				
+				/* scoping over the range of U's weightings */
+				for (int i=0; i<quantiles; i++) {
+					for (int j=0; j<quantiles-1-i; j++) {
+						
+						System.out.print("Scoping heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+
+						g_weight[1] = i*quan;
+						g_weight[2] = j*quan;
+						g_weight[0] = tot - g_weight[1] - g_weight[2];
+						DecisionMaker decide = new DecisionMaker();
+						decide.rangeOfDecisions();	
+						
+						gmap[i][j] = g_one_hedge;
+						therm[i][j] = decide.getHeatMap();
+						
+					}
+				}
+				
 				String user_dir = System.getProperty("user.dir");
 				File output_target = new File(user_dir+File.separatorChar+"HeatMapResults.txt");
+				File therm_target = new File(user_dir+File.separatorChar+"ThermalProbability.txt");
 
 				if(output_target.exists()) output_target.delete();
 				FileWriter output_filewriter = new FileWriter(output_target);
 				PrintWriter output_writer = new PrintWriter(output_filewriter);
 				
-				//output_writer.print("disp_cost htgr_cost sfr_cost u_first u_second u_last g_one g_two_sub");
-				output_writer.print("w_coe w_dh w_pr g_one thermal");
-				output_writer.print("\n");
+				if(therm_target.exists()) therm_target.delete();
+				FileWriter therm_filewriter = new FileWriter(therm_target);
+				PrintWriter therm_writer = new PrintWriter(therm_filewriter);
+				
+				for (int i=0; i<quantiles; i++) {
+					for (int j=0; j<quantiles; j++) output_writer.print(gmap[i][j] + " "); //gmap[i=decay heat][j=proliferation resistance]
+					for (int j=0; j<quantiles; j++) therm_writer.print(therm[i][j] + " "); //gmap[i=decay heat][j=proliferation resistance]
+					output_writer.print("\n");
+					therm_writer.print("\n");
+				}
 				
 				/* scoping over the range of U's weightings */
-				for (int i=0; i<quantiles; i++) {
-					for (int j=i; j<quantiles; j++) {
-						
-						System.out.print("Scoping heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
-						
-						g_weight[0] = quan*i;
-						g_weight[1] = quan*(j-i);
-						g_weight[2] = tot - g_weight[0] - g_weight[1];
-						
-						for (int k=0; k<3; k++) output_writer.print(g_weight[k] + " ");
-						
-						DecisionMaker decide = new DecisionMaker();
-						decide.rangeOfDecisions();	
-						
-						output_writer.print(g_one_hedge + " ");
-						output_writer.print(decide.getHeatMap());
-						output_writer.print("\n");
-					}
-				}
+//				for (int i=0; i<quantiles; i++) {
+//					for (int j=i; j<quantiles; j++) {
+//						
+//						System.out.print("Scoping heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+//						
+//						g_weight[0] = quan*i;
+//						g_weight[1] = quan*(j-i);
+//						g_weight[2] = tot - g_weight[0] - g_weight[1];
+//						
+//						for (int k=0; k<3; k++) output_writer.print(g_weight[k] + " ");
+//						
+//						DecisionMaker decide = new DecisionMaker();
+//						decide.rangeOfDecisions();	
+//						
+//						output_writer.print(g_one_hedge + " ");
+//						output_writer.print(decide.getHeatMap());
+//						output_writer.print("\n");
+//					}
+//				}
 			
 				output_writer.close();
+				therm_writer.close();
 				
 			} catch (IOException e) {
 				System.out.print("Error writing heat map results");
@@ -1229,7 +1259,7 @@ public class DecisionMaker {
 				}
 			}
 		}
-		return(prob);
+		return(prob); // prob is the probability that U's last decision will be a thermal reactor
 	}
 	
 } // DecisionMaker class
