@@ -2,7 +2,7 @@
 public class DMInputs {
 
 	// Cost of Electricity; Decay Heat; Proliferation Resistance
-	static double[] GCriterionWeights = {(double) 0.2, (double) 0.6, (double) 0.2};
+	static double[] GCriterionWeights = {(double) 0.333, (double) 0.333, (double) 0.333};
 	static double[] UCriterionWeights = {(double) 1., (double) 0, (double) 0};
 	
 //	static double[] ReprocessingCostOutcomes = {950,1050,1300};
