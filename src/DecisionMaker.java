@@ -18,6 +18,9 @@ public class DecisionMaker {
 	/* decision criteria weighting */
 	static double[] u_weight = DMInputs.getUWeighting(); // coe; decay heat; proliferation resistance
 	static double[] g_weight = DMInputs.getGWeighting(); // coe; decay heat; proliferation resistance
+	static double[] uw = DMInputs.getOUWeight(); // coe; decay heat; proliferation resistance
+	static double[] gw = DMInputs.getOGWeight(); // coe; decay heat; proliferation resistance
+	
 	
 	/* U's strategies */
 	static int[] u_one = {0,1,2,3};
@@ -85,7 +88,7 @@ public class DecisionMaker {
 	static int[][] u_one_hedge;
 	static int g_one_hedge;
 	
-	static double[][][][][][] u_two_exp;
+	static double[][][][][][][] u_two_exp;
 	static double[][][][][] g_two_exp;
 	static double[][][][] u_one_exp;
 	static double[][] g_one_exp;
@@ -93,7 +96,7 @@ public class DecisionMaker {
 	static double[][][][][] u_two_sfrexp;
 	static double[][][] u_one_sfrexp;
 	
-	static boolean heat_map = true;
+	static boolean heat_map = false;
 	
 	public DecisionMaker() {
 
@@ -115,71 +118,148 @@ public class DecisionMaker {
 			for (int i=0; i<quantiles; i++) for (int j=i; j<quantiles; j++) sims++;
 
 			try {
-
-				double[][] gmap = new double[quantiles][quantiles];
+				
 				double[][] gtwomap = new double[quantiles][quantiles];
 				double[][] utwomap = new double[quantiles][quantiles];
-				double[][] umap = new double[quantiles][quantiles];
 				double[][] therm = new double[quantiles][quantiles];
 				
 				String user_dir = System.getProperty("user.dir");
+
+				/* G's stage one hedging strategies */
+				double[][] gmap = new double[quantiles][quantiles]; int g_o = 0;
 				
-				/* scoping over the range of G's weightings */
-//				for (int i=0; i<quantiles; i++) {
-//					for (int j=0; j<quantiles-i; j++) {
-//						
-//						System.out.print("Scoping heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
-//
-//						g_weight[1] = i*quan;
-//						g_weight[2] = j*quan;
-//						g_weight[0] = tot - g_weight[1] - g_weight[2];
-//						DecisionMaker decide = new DecisionMaker();
-//						decide.rangeOfDecisions();	
-//						
-//						gmap[i][j] = g_one_hedge;
-//						therm[i][j] = decide.getHeatMap();
-//						
-//					}
-//				}
+				File gone_target = new File(user_dir+File.separatorChar+"GOneDMHedge.txt");
+				if(gone_target.exists()) gone_target.delete();
+				FileWriter gone_filewriter = new FileWriter(gone_target);
+				PrintWriter gone_writer = new PrintWriter(gone_filewriter);
+				u_weight = uw;
 				
-				/* write umap
-				 * U's first stage hedging strategy
-				 * given the most likely disposal cost outcome and g's optimal stage one hedge
-				 */
 				for (int i=0; i<quantiles; i++) {
 					for (int j=0; j<quantiles-i; j++) {
 						
-						System.out.print("Scoping Stage One heat map range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+						System.out.print("Scoping G's Stage One hedging strategies over G's criteria range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
 
-						int disp=2;
+						g_weight[1] = i*quan;
+						g_weight[2] = j*quan;
+						g_weight[0] = tot - g_weight[1] - g_weight[2];
+						DecisionMaker decide = new DecisionMaker();
+						decide.rangeOfDecisions();	
 						
+						g_o = g_one_hedge;
+						gmap[i][j] = g_o;
+						
+					}
+				}
+				
+				for (int i=quantiles-1; i>-1; i--) {
+					for (int j=0; j<quantiles; j++) {
+						gone_writer.print(gmap[j][i] + " ");
+					}
+					gone_writer.print("\n");
+				}
+				gone_writer.close();
+				
+				/* G's expected metric values for each hedge */
+				File goneexp_target = new File(user_dir+File.separatorChar+"GOneExp.txt");
+				if(goneexp_target.exists()) goneexp_target.delete();
+				FileWriter goneexp_filewriter = new FileWriter(goneexp_target);
+				PrintWriter goneexp_writer = new PrintWriter(goneexp_filewriter);
+				
+				goneexp_writer.print("g_one coe heat pr" + "\n");
+				for (int i=0; i<g_one.length; i++) {
+					goneexp_writer.print(i);
+					for (int j=0; j<g_weight.length; j++) {
+						// g one; disp; u one; metric
+						goneexp_writer.print(" " + g_one_exp[i][j]);
+					}
+					goneexp_writer.print("\n");
+				}
+				goneexp_writer.close();
+				
+				/* If altering U's criteria */
+				File gone_u_target = new File(user_dir+File.separatorChar+"GOneDMHedgeUWeight.txt");
+				if(gone_u_target.exists()) gone_u_target.delete();
+				FileWriter gone_u_filewriter = new FileWriter(gone_u_target);
+				PrintWriter gone_u_writer = new PrintWriter(gone_u_filewriter);
+				g_weight = gw;
+				
+				sim_no=1; 
+				for (int i=0; i<quantiles; i++) {
+					for (int j=0; j<quantiles-i; j++) {
+						
+						System.out.print("Scoping G's Stage One hedging strategy over U's criteria range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+
 						u_weight[1] = i*quan;
 						u_weight[2] = j*quan;
 						u_weight[0] = tot - u_weight[1] - u_weight[2];
 						DecisionMaker decide = new DecisionMaker();
 						decide.rangeOfDecisions();	
 						
-						int g_o = g_one_hedge;
+						g_o = g_one_hedge;
 						gmap[i][j] = g_o;
 						
+					}
+				}
+				
+				for (int i=quantiles-1; i>-1; i--) {
+					for (int j=0; j<quantiles; j++) {
+						gone_u_writer.print(gmap[j][i] + " ");
+					}
+					gone_u_writer.print("\n");
+				}
+				gone_u_writer.close();
+				
+				/* U's stage one hedging strategies */
+				
+				double[][] umap = new double[quantiles][quantiles];
+				int disp = 2; /* Take a moderate waste disposal cost */
+				g_o = 1; /* Take G's most common stage one hedge */
+				g_weight = gw;
+				
+				sim_no=1;
+				for (int i=0; i<quantiles; i++) {
+					for (int j=0; j<quantiles-i; j++) {
+						
+						System.out.print("Scoping U's Stage One hedging strategy over U's criteria range .. simulation " + sim_no + " of " + sims + ".\n"); sim_no++;
+						
+						u_weight[1] = i*quan;
+						u_weight[2] = j*quan;
+						u_weight[0] = tot - u_weight[1] - u_weight[2];
+						DecisionMaker decide = new DecisionMaker();
+						decide.rangeOfDecisions();	
+
 						int u_o = u_one_hedge[g_o][disp];
 						umap[i][j] = u_o;
 						
 					}
 				}
 				
-				File output_target = new File(user_dir+File.separatorChar+"HeatMapResults.txt");
-				if(output_target.exists()) output_target.delete();
-				FileWriter output_filewriter = new FileWriter(output_target);
-				PrintWriter output_writer = new PrintWriter(output_filewriter);
+				File uone_target = new File(user_dir+File.separatorChar+"UOneDMHedge.txt");
+				if(uone_target.exists()) uone_target.delete();
+				FileWriter uone_filewriter = new FileWriter(uone_target);
+				PrintWriter uone_writer = new PrintWriter(uone_filewriter);
 				
 				for (int i=quantiles-1; i>-1; i--) {
 					for (int j=0; j<quantiles; j++) {
-						output_writer.print(umap[j][i] + " ");
+						uone_writer.print(umap[j][i] + " ");
 					}
-					output_writer.print("\n");
+					uone_writer.print("\n");
 				}
-				output_writer.close();
+				uone_writer.close();
+				
+//				File output_target = new File(user_dir+File.separatorChar+"HeatMapResults.txt");
+//				if(output_target.exists()) output_target.delete();
+//				FileWriter output_filewriter = new FileWriter(output_target);
+//				PrintWriter output_writer = new PrintWriter(output_filewriter);
+//				
+//				for (int i=quantiles-1; i>-1; i--) {
+//					for (int j=0; j<quantiles; j++) {
+//						output_writer.print(umap[j][i] + " ");
+//					}
+//					output_writer.print("\n");
+//				}
+//				output_writer.close();
+				
 				
 				sim_no=1;
 				/* write gtwo and utwo maps
@@ -198,8 +278,8 @@ public class DecisionMaker {
 						DecisionMaker decide = new DecisionMaker();
 						decide.rangeOfDecisions();	
 
-						int g_o = g_one_hedge;
-						int disp=2;
+						g_o = g_one_hedge;
+						disp=2;
 						int u_o=1;
 						/* change the htgr capital cost only since U's stage one hedge fixed with HTGR */
 						int htgr=0;
@@ -259,8 +339,8 @@ public class DecisionMaker {
 				
 				// u_two_exp = new double[disp_cost.length][htgr_cost.length+1][sfr_cost.length+1][g_two.length][u_two.length][u_weight.length];
 				
-				int disp = 2;
-				int htgr = 3;
+				disp = 2;
+				int htgr = 1;
 				int sfr = 3;
 				int u_o = 1; // assume the first stage hedge is HTGR
 				
@@ -272,9 +352,9 @@ public class DecisionMaker {
 					for (int j=0; j<u_weight.length; j++) {
 						// g one; disp; u one; metric
 						exp_writer.print(" " + u_one_exp[disp][htgr][i][j]);
-						int g_o = g_one_hedge;
+						g_o = g_one_hedge;
 						int g_tw = g_two_hedge[g_o][disp][u_o][htgr][sfr];
-						twoexp_writer.print(" " + u_two_exp[disp][htgr][sfr][g_tw][i][j]);
+						twoexp_writer.print(" " + u_two_exp[disp][htgr][sfr][g_o][g_tw][i][j]);
 					}
 					exp_writer.print("\n");
 					twoexp_writer.print("\n");
@@ -345,7 +425,7 @@ public class DecisionMaker {
 		g_two_hedge = new int[g_one.length][disp_cost.length][u_one.length][htgr_cost.length+1][sfr_cost.length+1];
 		u_one_hedge = new int[g_one.length][disp_cost.length];
 		
-		u_two_exp = new double[disp_cost.length][htgr_cost.length+1][sfr_cost.length+1][g_two.length][u_two.length][u_weight.length];
+		u_two_exp = new double[disp_cost.length][htgr_cost.length+1][sfr_cost.length+1][g_one.length][g_two.length][u_two.length][u_weight.length];
 		g_two_exp = new double[disp_cost.length][htgr_cost.length+1][sfr_cost.length+1][g_two.length][g_weight.length];
 		u_one_exp = new double[g_one.length][disp_cost.length][u_one.length][u_weight.length];
 		g_one_exp = new double[g_one.length][g_weight.length];
@@ -692,7 +772,7 @@ public class DecisionMaker {
 										chance = htgr_prob[htgr]*sfr_prob[sfr];
 										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
-										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr+1][sfr+1][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
+										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr+1][sfr+1][g_o][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
 										u_two_sfrexp[disp][htgr+1][sfr+1][g_tw][u_tw] += chance*SFRDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr];
 									}
 								}
@@ -709,7 +789,7 @@ public class DecisionMaker {
 										chance = sfr_prob[sfr];
 										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
-										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr][sfr+1][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
+										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr][sfr+1][g_o][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
 										u_two_sfrexp[disp][htgr][sfr+1][g_tw][u_tw] += chance*SFRDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr];
 									}
 								}
@@ -726,7 +806,7 @@ public class DecisionMaker {
 										chance = htgr_prob[htgr];
 										val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
 										temp_double[u_tw] += chance*val;
-										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr+1][sfr][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
+										for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr+1][sfr][g_o][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
 										u_two_sfrexp[disp][htgr+1][sfr][g_tw][u_tw] += chance*SFRDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr];
 									}
 								}
@@ -735,14 +815,15 @@ public class DecisionMaker {
 						}
 						
 						if (one_info[u_o][1]==1 && one_info[u_o][2]==1) {
+							chance = 1;
 							for (htgr=0; htgr<htgr_cost.length; htgr++) {
 								for (sfr=0; sfr<sfr_cost.length; sfr++) {
 									u_two_hedge[g_o][disp][u_o][htgr][sfr][g_tw] = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr]; // no hedge if information already known
 									u_tw = u_two_pi[u_o][g_o][g_tw][disp][htgr][sfr];
 									u_th = u_three_pi[u_o][u_tw][g_o][g_tw][disp][htgr][sfr];
 									val = getVal(u_weight,NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr]);
-									for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr][sfr][g_tw][u_tw][i] += chance*NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
-									u_two_sfrexp[disp][htgr][sfr][g_tw][u_tw] += chance*SFRDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr];
+									for (int i=0; i<u_weight.length; i++) u_two_exp[disp][htgr][sfr][g_o][g_tw][u_tw][i] = NormDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr][i];
+									u_two_sfrexp[disp][htgr][sfr][g_tw][u_tw] = SFRDat[u_o][u_tw][u_th][g_o][g_tw][disp][htgr][sfr];
 								}
 							}
 						}
