@@ -1,4 +1,4 @@
 first_reactor_decision second_reactor_decision final_reactor_decision chosen_reprocessing_cost chosen_capital_subsidy disposal_cost htgr_capital_cost sfr_capital_cost 
-3 3 2 0 1 0 0 0
+2 2 2 0 1 0 0 0
 year lwr_wastegenerated lwr_wastereprocessed_byyear lwr_wastereprocessed htgr_wastegenerated htgr_wastereprocessed_byyear htgr_wastereprocessed sfr_wastegenerated sfr_wastereprocessed_byyear sfr_wastereprocessed
-6107.558035714286
+0.0

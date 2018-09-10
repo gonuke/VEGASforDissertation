@@ -31,7 +31,7 @@ public class VEGAS {
 	static boolean scope_reprocessing_capacity=false;
 	static boolean limit_prototypes=true;
 	//static boolean underutilized=false;
-	static int[] robustInts = {3,3,2,0,1,0,0,0,0}; /* TODO */
+	static int[] robustInts = {2,2,2,0,1,0,0,0,0}; /* TODO */
 	/* robustInts{0,1,2,3,4,5,6,7}
 	 * 0 = U's first reactor build decision
 	 * 1 = U's second reactor build decision
@@ -3593,7 +3593,8 @@ public class VEGAS {
 
 							int[] capacity_deployment_schedule = getCapacityDeploymentSchedule(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
-							printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
+							//printNFCParamComboFile(first_reactor_build_decision,second_reactor_build_decision,final_reactor_build_decision, capacity_deployment_schedule);
+							printNFCParamComboFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision], capacity_deployment_schedule);
 							printReactorParamFile(FirstReactorBuildDecision[first_reactor_build_decision],SecondReactorBuildDecision[second_reactor_build_decision],FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
 							System.out.print("Running simulation " + sim_counter + " of " + simulations + ". Building " + strategies[FirstReactorBuildDecision[first_reactor_build_decision]] + " in 2035, " + strategies[SecondReactorBuildDecision[second_reactor_build_decision]] + " in 2045, and then " + strategies[FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]] + " in 2055 till 2100." + "\n");
@@ -3601,6 +3602,13 @@ public class VEGAS {
 							VEGAS mySim = new VEGAS();
 							mySim.runTheSim(first_reactor_build_decision,second_reactor_build_decision,FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]);
 
+							tot_gen=0.; fr_gen=0.;
+							for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
+								tot_gen+=genCap[n_rx][(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)]/1e6;
+								if (ALLOWED_TO_USE_SEP_ACTINIDES[n_rx]) fr_gen+=genCap[n_rx][(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)]/1e6;
+							}
+							sfr_penetration = fr_gen/tot_gen;
+							
 							for (reprocessing_cost=0; reprocessing_cost<ChosenReprocessingCost.length; reprocessing_cost++) {
 								for (waste_disposal_cost=0; waste_disposal_cost<DisposalCost.length; waste_disposal_cost++) {
 									for (chosen_capital_subsidy=0; chosen_capital_subsidy<CapitalSubsidy.length; chosen_capital_subsidy++) {
@@ -3617,12 +3625,6 @@ public class VEGAS {
 														metrics[metric_no] += LeafValues[reprocessing_cost][waste_disposal_cost][first_reactor_build_decision][chosen_capital_subsidy][second_reactor_build_decision][htgr_capital_cost][sfr_capital_cost][FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision]][year][metric_no];		
 													}
 												}
-												tot_gen=0.; fr_gen=0.;
-												for (int n_rx=0; n_rx<REACTORNAMES.length; n_rx++) {
-													tot_gen+=genCap[n_rx][(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)]/1e6;
-													if (ALLOWED_TO_USE_SEP_ACTINIDES[n_rx]) fr_gen+=genCap[n_rx][(int) (END_YEAR-START_YEAR+1-NewReactorLifetime)]/1e6;
-												}
-												sfr_penetration = fr_gen/tot_gen;
 												output_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + metrics[0] + " " + metrics[1] + " " + metrics[2] + "\n");
 												gen_writer.print(first_reactor_build_decision + " " + second_reactor_build_decision + " " + FinalReactorBuildDecision[first_reactor_build_decision][second_reactor_build_decision][final_reactor_build_decision] + " " + reprocessing_cost + " " + chosen_capital_subsidy + " "+ waste_disposal_cost + " " + htgr_capital_cost + " " + sfr_capital_cost + " " + sfr_penetration + "\n");
 											}
